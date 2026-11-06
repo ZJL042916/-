@@ -81,36 +81,20 @@
                             <label class="block text-xs font-semibold text-stone-600 mb-1.5">牌局日期</label>
                             <input type="date" id="gameDate" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-stone-800 focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-600/20 transition-all shadow-inner" required>
                         </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-stone-600 mb-1.5">地點</label>
-                            <input type="text" id="location" value="新北市板橋區" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-stone-800 focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-600/20 transition-all shadow-inner" required>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-semibold text-stone-600 mb-1.5">地點</label>
+                                <input type="text" id="location" value="新北市板橋區" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-stone-800 focus:outline-none focus:border-amber-600 shadow-inner" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-stone-600 mb-1.5">台費 (元)</label>
+                                <input type="number" id="tableFee" value="0" min="0" placeholder="例如: 200" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-amber-800 font-bold focus:outline-none focus:border-amber-600 shadow-inner" required>
+                            </div>
                         </div>
                         
-                        <div class="space-y-3 pt-1">
-                            <div class="grid grid-cols-2 gap-2.5">
-                                <div class="space-y-1">
-                                    <label class="block text-[11px] font-semibold text-stone-600">玩家 1 (東)</label>
-                                    <select id="p1Name" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-xs text-stone-800 focus:outline-none focus:border-amber-600" required></select>
-                                    <input type="number" id="p1Score" placeholder="得分" value="500" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-xs text-emerald-700 font-bold focus:outline-none focus:border-emerald-600 shadow-inner" required>
-                                </div>
-                                <div class="space-y-1">
-                                    <label class="block text-[11px] font-semibold text-stone-600">玩家 2 (南)</label>
-                                    <select id="p2Name" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-xs text-stone-800 focus:outline-none focus:border-amber-600" required></select>
-                                    <input type="number" id="p2Score" placeholder="得分" value="-100" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-xs text-rose-700 font-bold focus:outline-none focus:border-rose-600 shadow-inner" required>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2.5">
-                                <div class="space-y-1">
-                                    <label class="block text-[11px] font-semibold text-stone-600">玩家 3 (西)</label>
-                                    <select id="p3Name" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-xs text-stone-800 focus:outline-none focus:border-amber-600" required></select>
-                                    <input type="number" id="p3Score" placeholder="得分" value="-200" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-xs text-rose-700 font-bold focus:outline-none focus:border-rose-600 shadow-inner" required>
-                                </div>
-                                <div class="space-y-1">
-                                    <label class="block text-[11px] font-semibold text-stone-600">玩家 4 (北)</label>
-                                    <select id="p4Name" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-xs text-stone-800 focus:outline-none focus:border-amber-600" required></select>
-                                    <input type="number" id="p4Score" placeholder="得分" value="-200" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-xs text-rose-700 font-bold focus:outline-none focus:border-rose-600 shadow-inner" required>
-                                </div>
-                            </div>
+                        <!-- 四位玩家記分區 (帶有 贏/輸 切換按鈕) -->
+                        <div class="space-y-3 pt-1" id="playersInputContainer">
+                            <!-- 動態生成玩家 1~4 -->
                         </div>
 
                         <button type="submit" id="submitBtn" class="w-full mt-2 bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-800 hover:to-amber-700 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-amber-900/20 text-sm active:scale-[0.98]">
@@ -153,7 +137,6 @@
 
         <!-- ==================== 分頁二：月排行榜與歷史月冠軍 ==================== -->
         <div id="pageMonthly" class="space-y-6 hidden">
-            <!-- 當月查詢控制列 -->
             <div class="bg-white/80 border border-stone-200/80 rounded-3xl p-5 md:p-6 shadow-xl backdrop-blur-md flex flex-col md:flex-row justify-between items-center gap-4">
                 <div class="flex items-center gap-3.5">
                     <div class="w-11 h-11 rounded-2xl bg-amber-100 border border-amber-200 flex items-center justify-center text-xl">
@@ -169,7 +152,6 @@
                 </div>
             </div>
 
-            <!-- 當月 MVP 與排行榜 -->
             <div class="bg-white/80 border border-stone-200/80 rounded-3xl shadow-xl backdrop-blur-md overflow-hidden">
                 <div id="monthMvpBanner" class="bg-gradient-to-r from-amber-50/80 via-white to-orange-50/80 border-b border-stone-200 p-5 md:p-6 flex items-center justify-between hidden">
                     <div class="flex items-center space-x-3.5">
@@ -214,9 +196,7 @@
                         <p class="text-xs text-stone-500">歷年各月份勝率最高的常勝將軍總覽</p>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="historicalChampionsGrid">
-                    <!-- 動態載入歷史冠軍卡片 -->
-                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="historicalChampionsGrid"></div>
             </div>
         </div>
 
@@ -228,14 +208,14 @@
                         <h2 class="text-base font-bold text-amber-800 flex items-center gap-2">
                             <span class="p-1.5 bg-amber-100 rounded-xl border border-amber-200">📜</span> 歷史牌局明細與管理
                         </h2>
-                        <p class="text-xs text-stone-500 mt-0.5">檢視所有打牌紀錄，可進行修改或刪除</p>
+                        <p class="text-xs text-stone-500 mt-0.5">檢視所有打牌紀錄，包含台費與得分明細</p>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse text-sm">
                         <thead>
                             <tr class="border-b border-stone-200 text-stone-500 text-xs uppercase tracking-wider">
-                                <th class="py-3 px-4 font-bold">日期 / 地點</th>
+                                <th class="py-3 px-4 font-bold">日期 / 地點 / 台費</th>
                                 <th class="py-3 px-4 font-bold">四人得分明細</th>
                                 <th class="py-3 px-4 font-bold text-right">操作</th>
                             </tr>
@@ -336,6 +316,66 @@
         }
         setDefaultDates();
 
+        // 渲染 4 位玩家的動態輸入區塊（帶有 贏/輸 切換按鈕）
+        function renderPlayerInputs() {
+            const container = document.getElementById('playersInputContainer');
+            if (!container) return;
+            
+            const defaults = [
+                { defaultSign: 'win', defaultVal: '500' },
+                { defaultSign: 'lose', defaultVal: '100' },
+                { defaultSign: 'lose', defaultVal: '200' },
+                { defaultSign: 'lose', defaultVal: '200' }
+            ];
+
+            let html = '';
+            for (let i = 1; i <= 4; i++) {
+                const pos = ['東', '南', '西', '北'][i-1];
+                html += `
+                    <div class="bg-stone-50/80 border border-stone-200/80 rounded-2xl p-3 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-[11px] font-bold text-stone-600">玩家 ${i} (${pos})</label>
+                            <!-- 輸贏切換按鈕 -->
+                            <div class="flex bg-stone-200/80 p-0.5 rounded-lg text-[10px] font-bold">
+                                <button type="button" id="p${i}WinBtn" onclick="setPlayerSign(${i}, 'win')" class="px-2 py-0.5 rounded-md transition-all bg-emerald-700 text-white shadow-sm">📈 贏</button>
+                                <button type="button" id="p${i}LoseBtn" onclick="setPlayerSign(${i}, 'lose')" class="px-2 py-0.5 rounded-md transition-all text-stone-600 hover:text-stone-900">📉 輸</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="col-span-2">
+                                <select id="p${i}Name" class="w-full bg-white border border-stone-300 rounded-xl px-2.5 py-2 text-xs text-stone-800 focus:outline-none focus:border-amber-600 shadow-inner" required></select>
+                            </div>
+                            <div>
+                                <input type="number" id="p${i}Score" placeholder="分數" min="0" value="${defaults[i-1].defaultVal}" class="w-full bg-white border border-stone-300 rounded-xl px-2.5 py-2 text-xs font-black shadow-inner text-center text-emerald-700" required>
+                                <input type="hidden" id="p${i}Sign" value="${defaults[i-1].defaultSign}">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+            updatePlayerSelects();
+        }
+
+        // 切換玩家是贏還是輸
+        function setPlayerSign(playerIndex, sign) {
+            const winBtn = document.getElementById(`p${playerIndex}WinBtn`);
+            const loseBtn = document.getElementById(`p${playerIndex}LoseBtn`);
+            const signInput = document.getElementById(`p${playerIndex}Sign`);
+            const scoreInput = document.getElementById(`p${playerIndex}Score`);
+
+            signInput.value = sign;
+            if (sign === 'win') {
+                winBtn.className = "px-2 py-0.5 rounded-md transition-all bg-emerald-700 text-white shadow-sm";
+                loseBtn.className = "px-2 py-0.5 rounded-md transition-all text-stone-600 hover:text-stone-900";
+                scoreInput.className = "w-full bg-white border border-stone-300 rounded-xl px-2.5 py-2 text-xs font-black shadow-inner text-center text-emerald-700";
+            } else {
+                winBtn.className = "px-2 py-0.5 rounded-md transition-all text-stone-600 hover:text-stone-900";
+                loseBtn.className = "px-2 py-0.5 rounded-md transition-all bg-rose-700 text-white shadow-sm";
+                scoreInput.className = "w-full bg-white border border-stone-300 rounded-xl px-2.5 py-2 text-xs font-black shadow-inner text-center text-rose-700";
+            }
+        }
+
         function updatePlayerSelects() {
             const selects = ['p1Name', 'p2Name', 'p3Name', 'p4Name'];
             selects.forEach((id) => {
@@ -347,7 +387,7 @@
                 if (friendsData.length === 0) {
                     const opt = document.createElement('option');
                     opt.value = "";
-                    opt.innerText = "請先至「牌友管理」新增牌友";
+                    opt.innerText = "請先至「牌友管理」新增";
                     select.appendChild(opt);
                     return;
                 }
@@ -417,18 +457,13 @@
             table.classList.add('hidden');
 
             try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 8000);
-
-                const response = await fetch(WEB_APP_URL, { signal: controller.signal });
-                clearTimeout(timeoutId);
-
+                const response = await fetch(WEB_APP_URL);
                 const data = await response.json();
                 games = data.games || [];
                 friendsData = data.friends || [];
                 historicalChampions = data.historicalChampions || [];
 
-                updatePlayerSelects();
+                renderPlayerInputs();
                 renderLeaderboard();
                 renderMonthlyLeaderboard();
                 renderHistoricalChampions();
@@ -441,7 +476,6 @@
                 console.error('讀取雲端資料失敗:', error);
                 loading.innerHTML = `
                     <div class="text-rose-600 font-semibold mb-2">⚠️ 無法順利連接至 Google 雲端</div>
-                    <div class="text-xs text-stone-500 mb-4">請確認網路狀態或 Apps Script 部署</div>
                     <button onclick="loadData()" class="px-4 py-2 bg-amber-700 text-white text-xs font-bold rounded-xl shadow">重新嘗試載入</button>
                 `;
             }
@@ -646,7 +680,6 @@
             });
         }
 
-        // 渲染歷史月冠軍名人堂
         function renderHistoricalChampions() {
             const grid = document.getElementById('historicalChampionsGrid');
             if (!grid) return;
@@ -695,11 +728,13 @@
                         scoresHtml += `<span class="inline-block bg-stone-100 border border-stone-200 px-2 py-1 rounded-lg mr-2 mb-1 text-xs"><strong class="text-stone-800">${pName}:</strong> <span class="${sClass} font-bold">${sText}</span></span>`;
                     });
                 }
+                const feeText = g.tableFee ? `<div class="text-[11px] text-amber-800 font-semibold mt-0.5">台費: $${g.tableFee}</div>` : '';
                 hTable.innerHTML += `
                     <tr class="hover:bg-stone-50/80 transition-colors">
                         <td class="py-3.5 px-4">
                             <div class="font-bold text-stone-900">${g.timestamp}</div>
                             <div class="text-xs text-stone-500">${g.location}</div>
+                            ${feeText}
                         </td>
                         <td class="py-3.5 px-4">${scoresHtml}</td>
                         <td class="py-3.5 px-4 text-right">
@@ -838,6 +873,7 @@
             }
         }
 
+        // 提交表單：自動將「贏/輸」轉換為正負號，並帶入台費
         document.getElementById('gameForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -846,17 +882,28 @@
                 return;
             }
 
-            const p1 = document.getElementById('p1Name').value;
-            const p2 = document.getElementById('p2Name').value;
-            const p3 = document.getElementById('p3Name').value;
-            const p4 = document.getElementById('p4Name').value;
+            const p1Name = document.getElementById('p1Name').value;
+            const p2Name = document.getElementById('p2Name').value;
+            const p3Name = document.getElementById('p3Name').value;
+            const p4Name = document.getElementById('p4Name').value;
 
-            const players = [p1, p2, p3, p4];
-            const uniquePlayers = new Set(players);
-            if (uniquePlayers.size !== players.length) {
+            const players = [p1Name, p2Name, p3Name, p4Name];
+            if (new Set(players).size !== players.length) {
                 alert('⚠️ 記分防呆：四位玩家不能有重複的人選，請重新選擇！');
                 return;
             }
+
+            // 讀取分數與正負號
+            const getScoreWithSign = (i) => {
+                const val = Number(document.getElementById(`p${i}Score`).value) || 0;
+                const sign = document.getElementById(`p${i}Sign`).value;
+                return sign === 'win' ? val : -val;
+            };
+
+            const p1Score = getScoreWithSign(1);
+            const p2Score = getScoreWithSign(2);
+            const p3Score = getScoreWithSign(3);
+            const p4Score = getScoreWithSign(4);
 
             const btn = document.getElementById('submitBtn');
             btn.innerText = '正在上傳至雲端...';
@@ -865,14 +912,11 @@
             const newGame = {
                 timestamp: document.getElementById('gameDate').value,
                 location: document.getElementById('location').value,
-                p1Name: p1,
-                p1Score: document.getElementById('p1Score').value,
-                p2Name: p2,
-                p2Score: document.getElementById('p2Score').value,
-                p3Name: p3,
-                p3Score: document.getElementById('p3Score').value,
-                p4Name: p4,
-                p4Score: document.getElementById('p4Score').value,
+                tableFee: document.getElementById('tableFee').value || "0",
+                p1Name: p1Name, p1Score: p1Score,
+                p2Name: p2Name, p2Score: p2Score,
+                p3Name: p3Name, p3Score: p3Score,
+                p4Name: p4Name, p4Score: p4Score,
             };
 
             try {
@@ -883,10 +927,10 @@
                     body: JSON.stringify(newGame)
                 });
 
-                alert('戰績已成功同步至 Google 雲端！');
+                alert('戰績與台費已成功同步至 Google 雲端！');
                 document.getElementById('gameForm').reset();
                 setDefaultDates();
-                updatePlayerSelects();
+                renderPlayerInputs();
                 setTimeout(loadData, 1500);
             } catch (error) {
                 console.error('上傳失敗:', error);
