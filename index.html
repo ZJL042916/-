@@ -3,380 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>麻將戰神榜</title>
-    <!-- Tailwind CSS -->
+    <title>🀄 麻將即時戰績排行榜</title>
+    <!-- 引入 Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; }
-    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen" x-data="mahjongApp()">
+<body class="bg-slate-950 text-slate-100 min-h-screen p-6 font-sans">
+    <div class="max-w-4xl mx-auto">
+        <!-- 標題區 -->
+        <header class="mb-8 border-b border-slate-800 pb-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-sky-200 bg-clip-text text-transparent">
+                🀄 麻將即時戰績排行榜
+            </h1>
+            <span class="text-xs px-3 py-1 bg-blue-900/50 text-blue-300 rounded-full border border-blue-700/50">
+                ☁️ Google 雲端同步中
+            </span>
+        </header>
 
-    <!-- 頂部導覽列 -->
-    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-md">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center space-x-3">
-                <span class="text-3xl">🀄</span>
-                <div>
-                    <h1 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">麻將戰神榜</h1>
-                    <p class="text-xs text-slate-400">專屬記分與數據統計系統</p>
+        <!-- 主體內容 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <!-- 左側：新增對局表單 -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-md md:col-span-1">
+                <h2 class="text-lg font-semibold text-blue-400 mb-4">📝 記錄新牌局</h2>
+                <form id="gameForm" class="space-y-4">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">地點</label>
+                        <input type="text" id="location" value="新北市板橋區" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">玩家 1 (東)</label>
+                            <input type="text" id="p1Name" value="張嘉恩" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200" required>
+                            <input type="number" id="p1Score" placeholder="得分" value="500" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-emerald-400 font-bold" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">玩家 2 (南)</label>
+                            <input type="text" id="p2Name" value="小頭" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200" required>
+                            <input type="number" id="p2Score" placeholder="得分" value="-100" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-rose-400 font-bold" required>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">玩家 3 (西)</label>
+                            <input type="text" id="p3Name" value="牌友A" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200" required>
+                            <input type="number" id="p3Score" placeholder="得分" value="-200" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-rose-400 font-bold" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">玩家 4 (北)</label>
+                            <input type="text" id="p4Name" value="牌友B" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200" required>
+                            <input type="number" id="p4Score" placeholder="得分" value="-200" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-rose-400 font-bold" required>
+                        </div>
+                    </div>
+                    <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm shadow-lg shadow-blue-600/20">
+                        新增戰績並存入雲端
+                    </button>
+                </form>
+            </div>
+
+            <!-- 右側：排行榜表格 -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl shadow-xl overflow-hidden backdrop-blur-md md:col-span-2 flex flex-col">
+                <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+                    <h2 class="text-lg font-semibold text-blue-400">🏆 雲端累積戰績排行榜</h2>
+                    <button onclick="loadGames()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700">
+                        🔄 重新整理戰績
+                    </button>
                 </div>
-            </div>
-
-            <!-- 分頁切換按鈕 -->
-            <nav class="flex space-x-1 bg-slate-900 p-1 rounded-xl border border-slate-700">
-                <button @click="currentTab = 'ranking'" :class="currentTab === 'ranking' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg font-medium text-sm transition">🏆 排行榜</button>
-                <button @click="currentTab = 'matches'" :class="currentTab === 'matches' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg font-medium text-sm transition">📜 對局記錄</button>
-                <button @click="currentTab = 'players'" :class="currentTab === 'players' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg font-medium text-sm transition">👥 玩家管理</button>
-                <button @click="currentTab = 'stats'" :class="currentTab === 'stats' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg font-medium text-sm transition">📊 數據統計</button>
-            </nav>
-        </div>
-    </header>
-
-    <!-- 主要內容區 -->
-    <main class="max-w-7xl mx-auto px-4 py-6">
-
-        <!-- 1. 排行榜頁面 -->
-        <div x-show="currentTab === 'ranking'" class="space-y-6">
-            <div class="flex justify-between items-center">
-                <h2 class="text-xl font-bold flex items-center gap-2"><span>👑</span> 戰神積分總榜</h2>
-                <span class="text-xs text-slate-400">系統依據總積分自動排名</span>
-            </div>
-
-            <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-xl">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
+                <div class="overflow-x-auto flex-1 p-6">
+                    <div id="loading" class="text-center text-slate-400 py-8">正在從 Google 雲端載入戰績...</div>
+                    <table class="w-full text-left border-collapse hidden" id="rankTable">
                         <thead>
-                            <tr class="bg-slate-700/50 text-slate-400 text-sm border-b border-slate-700">
-                                <th class="p-4 text-center w-16">名次</th>
-                                <th class="p-4">牌友名稱</th>
-                                <th class="p-4 text-center">總勝場 / 總局數</th>
-                                <th class="p-4 text-center">勝率</th>
-                                <th class="p-4 text-right">總得分</th>
+                            <tr class="bg-slate-800/60 text-slate-400 text-xs uppercase tracking-wider">
+                                <th class="py-3 px-4">排名</th>
+                                <th class="py-3 px-4">牌友</th>
+                                <th class="py-3 px-4 text-center">總場次</th>
+                                <th class="py-3 px-4 text-center">勝率</th>
+                                <th class="py-3 px-4 text-right">累積得分</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-700">
-                            <template x-for="(player, index) in rankings" :key="player.id">
-                                <tr class="hover:bg-slate-700/30 transition">
-                                    <td class="p-4 text-center font-bold">
-                                        <span :class="{
-                                            'text-yellow-400 text-lg': index === 0,
-                                            'text-slate-300 text-lg': index === 1,
-                                            'text-amber-600 text-lg': index === 2,
-                                            'text-slate-500': index > 2
-                                        }" x-text="index === 0 ? '🥇' : (index === 1 ? '🥈' : (index === 2 ? '🥉' : index + 1))"></span>
-                                    </td>
-                                    <td class="p-4 font-semibold text-white flex items-center gap-2">
-                                        <div class="w-8 h-8 rounded-full bg-blue-600/30 border border-blue-500 flex items-center justify-center text-blue-300 font-bold" x-text="player.name.charAt(0)"></div>
-                                        <span x-text="player.name"></span>
-                                    </td>
-                                    <td class="p-4 text-center text-slate-300">
-                                        <span class="text-emerald-400 font-medium" x-text="player.wins"></span> / <span x-text="player.totalGames"></span>
-                                    </td>
-                                    <td class="p-4 text-center">
-                                        <span class="px-2 py-1 rounded text-xs font-medium" :class="player.winRate >= 50 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-slate-700 text-slate-400'" x-text="player.winRate + '%'"></span>
-                                    </td>
-                                    <td class="p-4 text-right font-mono font-bold text-lg" :class="player.totalScore > 0 ? 'text-emerald-400' : (player.totalScore < 0 ? 'text-rose-400' : 'text-slate-300')">
-                                        <span x-text="(player.totalScore > 0 ? '+' : '') + player.totalScore"></span>
-                                    </td>
-                                </tr>
-                            </template>
-                            <template x-if="rankings.length === 0">
-                                <tr>
-                                    <td colspan="5" class="p-8 text-center text-slate-400">目前尚無玩家資料，請先至「玩家管理」新增牌友！</td>
-                                </tr>
-                            </template>
+                        <tbody id="leaderboardBody" class="divide-y divide-slate-800/60 text-sm">
+                            <!-- 動態載入 -->
                         </tbody>
                     </table>
                 </div>
             </div>
-        </div>
 
-        <!-- 2. 對局記錄頁面 -->
-        <div x-show="currentTab === 'matches'" class="space-y-6">
-            <div class="flex justify-between items-center">
-                <h2 class="text-xl font-bold flex items-center gap-2"><span>📜</span> 歷史對局明細</h2>
-                <button @click="openAddMatchModal" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl font-medium shadow-lg transition flex items-center gap-2">
-                    <span>➕</span> 記錄新對局
-                </button>
-            </div>
-
-            <div class="space-y-4">
-                <template x-for="match in matches" :key="match.id">
-                    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div class="space-y-1">
-                            <div class="flex items-center gap-3">
-                                <span class="text-xs bg-slate-700 text-slate-300 px-2.5 py-1 rounded-md font-mono" x-text="match.date"></span>
-                                <span class="text-sm font-semibold text-blue-400" x-text="match.location || '麻將局'"></span>
-                            </div>
-                            <div class="flex flex-wrap gap-2 pt-2">
-                                <template x-for="(score, playerId) in match.scores" :key="playerId">
-                                    <div class="bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-700 text-sm flex items-center gap-2">
-                                        <span class="text-slate-300" x-text="getPlayerName(playerId)"></span>
-                                        <span class="font-mono font-bold" :class="score > 0 ? 'text-emerald-400' : (score < 0 ? 'text-rose-400' : 'text-slate-400')" x-text="(score > 0 ? '+' : '') + score"></span>
-                                    </div>
-                                </template>
-                            </div>
-                            <p class="text-xs text-slate-400 pt-1" x-show="match.note" x-text="'備註: ' + match.note"></p>
-                        </div>
-                        <button @click="deleteMatch(match.id)" class="text-slate-500 hover:text-rose-400 text-sm px-3 py-1 rounded-lg transition">刪除記錄</button>
-                    </div>
-                </template>
-                <template x-if="matches.length === 0">
-                    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-12 text-center text-slate-400">
-                        目前還沒有對局記錄，點擊右上角「記錄新對局」開始記帳吧！
-                    </div>
-                </template>
-            </div>
-        </div>
-
-        <!-- 3. 玩家管理頁面 -->
-        <div x-show="currentTab === 'players'" class="space-y-6">
-            <h2 class="text-xl font-bold flex items-center gap-2"><span>👥</span> 牌咖陣容管理</h2>
-
-            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl max-w-xl">
-                <form @submit.prevent="addPlayer" class="flex gap-3">
-                    <input type="text" x-model="newPlayerName" placeholder="輸入牌友姓名或暱稱..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-blue-500">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-xl font-medium transition">新增玩家</button>
-                </form>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <template x-for="player in players" :key="player.id">
-                    <div class="bg-slate-800 border border-slate-700 p-5 rounded-2xl shadow-lg flex justify-between items-center">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-blue-600/30 border border-blue-500 flex items-center justify-center text-blue-300 font-bold text-lg" x-text="player.name.charAt(0)"></div>
-                            <div>
-                                <h3 class="font-bold text-white" x-text="player.name"></h3>
-                                <p class="text-xs text-slate-400">已參與對局</p>
-                            </div>
-                        </div>
-                        <button @click="deletePlayer(player.id)" class="text-slate-500 hover:text-rose-400 p-2 transition">🗑️</button>
-                    </div>
-                </template>
-            </div>
-        </div>
-
-        <!-- 4. 數據統計頁面 -->
-        <div x-show="currentTab === 'stats'" class="space-y-6">
-            <h2 class="text-xl font-bold flex items-center gap-2"><span>📊</span> 戰績走勢與分析</h2>
-            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
-                <canvas id="scoreChart" height="120"></canvas>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- 新增對局 Modal -->
-    <div x-show="showModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50" style="display: none;">
-        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5">
-            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-                <h3 class="text-lg font-bold text-white">📝 記錄新對局</h3>
-                <button @click="showModal = false" class="text-slate-400 hover:text-white">✕</button>
-            </div>
-
-            <div class="space-y-4">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">對局日期</label>
-                        <input type="date" x-model="matchForm.date" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">地點 / 備註</label>
-                        <input type="text" x-model="matchForm.location" placeholder="例如: 家裡、包廂" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs text-slate-400 mb-2">輸入各玩家輸贏分數 (總和必須為 0)</label>
-                    <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
-                        <template x-for="player in players" :key="player.id">
-                            <div class="flex items-center justify-between bg-slate-900/60 p-2.5 rounded-xl border border-slate-700/50">
-                                <span class="font-medium text-slate-200" x-text="player.name"></span>
-                                <input type="number" x-model.number="matchForm.scores[player.id]" placeholder="0" class="w-32 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1 text-right text-white font-mono focus:outline-none focus:border-blue-500">
-                            </div>
-                        </template>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex justify-end gap-3 pt-3 border-t border-slate-700">
-                <button @click="showModal = false" class="px-4 py-2 rounded-xl text-slate-300 hover:bg-slate-700 text-sm transition">取消</button>
-                <button @click="saveMatch" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-xl font-medium text-sm shadow transition">儲存對局</button>
-            </div>
         </div>
     </div>
 
-    <!-- 本機儲存前端邏輯 -->
+    <!-- 串接 Google Apps Script 的 JavaScript 邏輯 -->
     <script>
-        function mahjongApp() {
-            return {
-                currentTab: 'ranking',
-                players: [],
-                matches: [],
-                newPlayerName: '',
-                showModal: false,
-                matchForm: {
-                    date: new Date().toISOString().split('T')[0],
-                    location: '',
-                    scores: {}
-                },
-                chartInstance: null,
+        // 👉 請把下面這行引號內的網址，換成你剛剛部署拿到取得的「網頁應用程式網址」
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz3c7X_Amn2wfe02Esonpr6YSDHnrldCdnh2fjq_AZyIgteFi--nO5XUYHwHCjVt4B9/exec";
 
-                init() {
-                    const savedData = localStorage.getItem('mahjong_local_data');
-                    if (savedData) {
-                        const parsed = JSON.parse(savedData);
-                        this.players = parsed.players || [];
-                        this.matches = parsed.matches || [];
-                    }
-                    this.initChart();
-                },
+        let games = [];
 
-                saveData() {
-                    localStorage.setItem('mahjong_local_data', JSON.stringify({
-                        players: this.players,
-                        matches: this.matches
-                    }));
-                    this.initChart();
-                },
+        // 1. 從 Google 試算表讀取資料
+        async function loadGames() {
+            const loading = document.getElementById('loading');
+            const table = document.getElementById('rankTable');
+            loading.style.display = 'block';
+            table.classList.add('hidden');
 
-                addPlayer() {
-                    if (!this.newPlayerName.trim()) return;
-                    this.players.push({
-                        id: 'p_' + Date.now() + Math.random().toString(36).substring(2, 5),
-                        name: this.newPlayerName.trim()
-                    });
-                    this.newPlayerName = '';
-                    this.saveData();
-                },
-
-                deletePlayer(id) {
-                    if (confirm('確定要刪除這位玩家嗎？')) {
-                        this.players = this.players.filter(p => p.id !== id);
-                        this.saveData();
-                    }
-                },
-
-                openAddMatchModal() {
-                    if (this.players.length === 0) {
-                        alert('請先至「玩家管理」新增至少一位牌友！');
-                        this.currentTab = 'players';
-                        return;
-                    }
-                    this.matchForm.date = new Date().toISOString().split('T')[0];
-                    this.matchForm.location = '';
-                    this.matchForm.scores = {};
-                    this.players.forEach(p => this.matchForm.scores[p.id] = '');
-                    this.showModal = true;
-                },
-
-                saveMatch() {
-                    const scores = {};
-                    let total = 0;
-                    for (let id in this.matchForm.scores) {
-                        const val = parseInt(this.matchForm.scores[id]) || 0;
-                        scores[id] = val;
-                        total += val;
-                    }
-
-                    if (total !== 0) {
-                        alert(`輸贏分數總和必須為 0！目前總和為：${total}`);
-                        return;
-                    }
-
-                    this.matches.unshift({
-                        id: 'm_' + Date.now(),
-                        date: this.matchForm.date,
-                        location: this.matchForm.location,
-                        scores: scores
-                    });
-
-                    this.showModal = false;
-                    this.saveData();
-                },
-
-                deleteMatch(id) {
-                    if (confirm('確定要刪除這筆對局記錄嗎？')) {
-                        this.matches = this.matches.filter(m => m.id !== id);
-                        this.saveData();
-                    }
-                },
-
-                getPlayerName(id) {
-                    const player = this.players.find(p => p.id === id);
-                    return player ? player.name : '未知';
-                },
-
-                get rankings() {
-                    const stats = {};
-                    this.players.forEach(p => {
-                        stats[p.id] = { id: p.id, name: p.name, totalScore: 0, wins: 0, totalGames: 0, winRate: 0 };
-                    });
-
-                    this.matches.forEach(m => {
-                        for (let id in m.scores) {
-                            if (stats[id]) {
-                                const score = m.scores[id];
-                                stats[id].totalScore += score;
-                                stats[id].totalGames += 1;
-                                if (score > 0) stats[id].wins += 1;
-                            }
-                        }
-                    });
-
-                    return Object.values(stats).map(p => {
-                        p.winRate = p.totalGames > 0 ? Math.round((p.wins / p.totalGames) * 100) : 0;
-                        return p;
-                    }).sort((a, b) => b.totalScore - a.totalScore);
-                },
-
-                initChart() {
-                    setTimeout(() => {
-                        const ctx = document.getElementById('scoreChart');
-                        if (!ctx) return;
-                        if (this.chartInstance) this.chartInstance.destroy();
-
-                        const sortedMatches = [...this.matches].sort((a, b) => new Date(a.date) - new Date(b.date));
-                        const labels = sortedMatches.map(m => m.date);
-                        
-                        const datasets = this.players.map((p, idx) => {
-                            let cumulative = 0;
-                            const data = sortedMatches.map(m => {
-                                cumulative += (m.scores[p.id] || 0);
-                                return cumulative;
-                            });
-                            const colors = ['#60a5fa', '#34d399', '#f472b6', '#fbbf24', '#a78bfa', '#fb923c'];
-                            return {
-                                label: p.name,
-                                data: data,
-                                borderColor: colors[idx % colors.length],
-                                backgroundColor: colors[idx % colors.length],
-                                tension: 0.2
-                            };
-                        });
-
-                        this.chartInstance = new Chart(ctx, {
-                            type: 'line',
-                            data: { labels, datasets },
-                            options: {
-                                responsive: true,
-                                plugins: { legend: { labels: { color: '#cbd5e1' } } },
-                                scales: {
-                                    x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
-                                    y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
-                                }
-                            }
-                        });
-                    }, 200);
-                }
+            try {
+                const response = await fetch(WEB_APP_URL);
+                games = await response.json();
+                renderLeaderboard();
+                loading.style.display = 'none';
+                table.classList.remove('hidden');
+            } catch (error) {
+                console.error('讀取失敗:', error);
+                loading.innerText = '載入失敗，請檢查網路或 API 網址是否正確。';
             }
         }
+
+        // 2. 渲染排行榜畫面
+        function renderLeaderboard() {
+            const stats = {};
+            games.forEach(g => {
+                if (!g.scores) return;
+                Object.entries(g.scores).forEach(([name, score]) => {
+                    if (!stats[name]) stats[name] = { totalScore: 0, totalGames: 0, wins: 0 };
+                    stats[name].totalScore += Number(score);
+                    stats[name].totalGames += 1;
+                    if (Number(score) > 0) stats[name].wins += 1;
+                });
+            });
+
+            const sorted = Object.entries(stats).sort(([,a], [,b]) => b.totalScore - a.totalScore);
+            const tbody = document.getElementById('leaderboardBody');
+            tbody.innerHTML = '';
+
+            if (sorted.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-500">目前尚無戰績資料，快在左側新增一局吧！</td></tr>`;
+                return;
+            }
+
+            sorted.forEach(([name, data], idx) => {
+                const winRate = data.totalGames ? Math.round((data.wins / data.totalGames) * 100) : 0;
+                const scoreClass = data.totalScore >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
+                const scoreText = data.totalScore > 0 ? `+${data.totalScore}` : data.totalScore;
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-800/30 transition-colors">
+                        <td class="py-3 px-4 font-semibold text-sky-400">#${idx + 1}</td>
+                        <td class="py-3 px-4 font-medium text-white">${name}</td>
+                        <td class="py-3 px-4 text-center text-slate-300">${data.totalGames}</td>
+                        <td class="py-3 px-4 text-center text-slate-300">${winRate}%</td>
+                        <td class="py-3 px-4 text-right ${scoreClass}">${scoreText}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // 3. 提交新戰績到 Google 試算表
+        document.getElementById('gameForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.innerText = '正在上傳至雲端...';
+            btn.disabled = true;
+
+            const newGame = {
+                location: document.getElementById('location').value,
+                p1Name: document.getElementById('p1Name').value,
+                p1Score: document.getElementById('p1Score').value,
+                p2Name: document.getElementById('p2Name').value,
+                p2Score: document.getElementById('p2Score').value,
+                p3Name: document.getElementById('p3Name').value,
+                p3Score: document.getElementById('p3Score').value,
+                p4Name: document.getElementById('p4Name').value,
+                p4Score: document.getElementById('p4Score').value,
+            };
+
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // 避免跨域阻擋
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newGame)
+                });
+
+                alert('戰績已成功同步至 Google 雲端！');
+                document.getElementById('gameForm').reset();
+                // 稍微延遲後重新載入最新資料
+                setTimeout(loadGames, 1500);
+            } catch (error) {
+                console.error('上傳失敗:', error);
+                alert('上傳失敗，請稍後再試。');
+            } finally {
+                btn.innerText = '新增戰績並存入雲端';
+                btn.disabled = false;
+            }
+        });
+
+        // 網頁開啟時自動載入
+        loadGames();
     </script>
 </body>
 </html>
