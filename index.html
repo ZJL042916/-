@@ -244,14 +244,8 @@
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz3c7X_Amn2wfe02Esonpr6YSDHnrldCdnh2fjq_AZyIgteFi--nO5XUYHwHCjVt4B9/exec";
 
         let games = [];
-        let friendsData = [
-            { name: "張嘉恩", nickname: "二頭肌" },
-            { name: "小頭", nickname: "神乎其技" },
-            { name: "牌友A", nickname: "摸牌手" },
-            { name: "牌友B", nickname: "大老千" }
-        ];
+        let friendsData = [];
 
-        // 初始化日期與月份選擇器
         function setDefaultDates() {
             const today = new Date().toISOString().split('T')[0];
             const dateInput = document.getElementById('gameDate');
@@ -264,32 +258,33 @@
         }
         setDefaultDates();
 
-        // 更新玩家下拉選單選項
         function updatePlayerSelects() {
             const selects = ['p1Name', 'p2Name', 'p3Name', 'p4Name'];
-            selects.forEach((id, index) => {
+            selects.forEach((id) => {
                 const select = document.getElementById(id);
                 if (!select) return;
                 const currentVal = select.value;
                 select.innerHTML = '';
                 
-                friendsData.forEach((f, i) => {
+                if (friendsData.length === 0) {
+                    const opt = document.createElement('option');
+                    opt.value = "";
+                    opt.innerText = "請先至「牌友管理」新增牌友";
+                    select.appendChild(opt);
+                    return;
+                }
+
+                friendsData.forEach((f) => {
                     const display = `${f.name} (${f.nickname})`;
                     const opt = document.createElement('option');
                     opt.value = display;
                     opt.innerText = display;
                     select.appendChild(opt);
-                    
-                    if (!currentVal && i === index % friendsData.length) {
-                        select.value = display;
-                    }
                 });
                 if (currentVal) select.value = currentVal;
             });
         }
-        updatePlayerSelects();
 
-        // 分頁切換功能（確保不受載入狀態影響，隨時可切換）
         function switchTab(tab) {
             const pageRank = document.getElementById('pageRank');
             const pageMonthly = document.getElementById('pageMonthly');
@@ -325,7 +320,6 @@
             }
         }
 
-        // 從 Google 試算表同步讀取資料（含逾時與錯誤防護）
         async function loadData() {
             const loading = document.getElementById('loading');
             const table = document.getElementById('rankTable');
@@ -334,7 +328,6 @@
             table.classList.add('hidden');
 
             try {
-                // 設定 8 秒逾時機制，避免網路卡住時整個網頁死當
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 8000);
 
@@ -343,9 +336,7 @@
 
                 const data = await response.json();
                 games = data.games || [];
-                if (data.friends && data.friends.length > 0) {
-                    friendsData = data.friends;
-                }
+                friendsData = data.friends || [];
 
                 updatePlayerSelects();
                 renderLeaderboard();
@@ -358,13 +349,12 @@
                 console.error('讀取雲端資料失敗:', error);
                 loading.innerHTML = `
                     <div class="text-rose-600 font-semibold mb-2">⚠️ 無法順利連接至 Google 雲端</div>
-                    <div class="text-xs text-stone-500 mb-4">請確認 Google Apps Script 是否已正確部署最新版本</div>
+                    <div class="text-xs text-stone-500 mb-4">請確認網路狀態或 Apps Script 部署</div>
                     <button onclick="loadData()" class="px-4 py-2 bg-amber-700 text-white text-xs font-bold rounded-xl shadow">重新嘗試載入</button>
                 `;
             }
         }
 
-        // 渲染總排行榜與常勝軍 (MVP)
         function renderLeaderboard() {
             const stats = {};
             games.forEach(g => {
@@ -410,7 +400,7 @@
             tbody.innerHTML = '';
 
             if (sorted.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-stone-400 font-medium">目前尚無戰績資料，快在左側新增一局吧！</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-stone-400 font-medium">目前尚無戰績資料，快去新增一局吧！</td></tr>`;
                 return;
             }
 
@@ -432,7 +422,6 @@
             });
         }
 
-        // 渲染月排行榜
         function renderMonthlyLeaderboard() {
             const monthInput = document.getElementById('selectMonth');
             if (!monthInput) return;
@@ -507,29 +496,31 @@
             });
         }
 
-        // 渲染牌友與綽號表格
+        // 渲染牌友表格（將刪除按鈕改為修改，並顯示修改時間）
         function renderFriendsTable() {
             const fTable = document.getElementById('friendTableBody');
             if (!fTable) return;
             fTable.innerHTML = '';
             if (friendsData.length === 0) {
-                fTable.innerHTML = `<tr><td colspan="3" class="text-center py-8 text-stone-400 font-medium">目前尚無牌友資料</td></tr>`;
+                fTable.innerHTML = `<tr><td colspan="3" class="text-center py-8 text-stone-400 font-medium">目前尚無牌友資料，請在上方新增</td></tr>`;
                 return;
             }
             friendsData.forEach((f, idx) => {
                 fTable.innerHTML += `
                     <tr class="hover:bg-stone-100/80 transition-colors">
-                        <td class="py-3.5 px-4 font-semibold text-stone-900">${f.name}</td>
+                        <td class="py-3.5 px-4 font-semibold text-stone-900">
+                            ${f.name}
+                            <div class="text-[10px] text-stone-400 font-normal">更新: ${f.updatedAt || '初次建立'}</div>
+                        </td>
                         <td class="py-3.5 px-4 text-amber-700 font-semibold">${f.nickname}</td>
                         <td class="py-3.5 px-4 text-right">
-                            <button onclick="removeFriend(${idx})" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-1.5 rounded-xl border border-rose-200 transition-all font-semibold">刪除</button>
+                            <button onclick="editFriend(${idx})" class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 px-3 py-1.5 rounded-xl border border-amber-200 transition-all font-semibold">修改</button>
                         </td>
                     </tr>
                 `;
             });
         }
 
-        // 同步牌友名單至雲端
         async function syncFriendsToCloud() {
             try {
                 await fetch(WEB_APP_URL, {
@@ -543,7 +534,7 @@
             }
         }
 
-        // 新增牌友與綽號
+        // 新增牌友（含防呆與時間戳）
         document.getElementById('friendForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const nameInput = document.getElementById('friendName');
@@ -553,12 +544,19 @@
             const name = nameInput.value.trim();
             const nickname = nicknameInput.value.trim();
             
+            const exists = friendsData.some(f => f.name === name);
+            if (exists) {
+                alert(`⚠️ 牌友新增失敗：名字「${name}」已經存在清單中了！若要更改請點擊右側「修改」。`);
+                return;
+            }
+
             if (name && nickname) {
                 const btn = document.getElementById('friendSubmitBtn');
                 btn.innerText = '正在同步至雲端...';
                 btn.disabled = true;
 
-                friendsData.push({ name, nickname });
+                const nowStr = new Date().toLocaleString('zh-TW', { hour12: false });
+                friendsData.push({ name, nickname, updatedAt: nowStr });
                 await syncFriendsToCloud();
 
                 nameInput.value = '';
@@ -572,18 +570,33 @@
             }
         });
 
-        // 刪除牌友
-        async function removeFriend(index) {
-            friendsData.splice(index, 1);
-            await syncFriendsToCloud();
-            renderFriendsTable();
-            updatePlayerSelects();
-            alert('已成功從雲端刪除該牌友！');
+        // 修改牌友綽號功能
+        async function editFriend(index) {
+            const f = friendsData[index];
+            const newNickname = prompt(`請輸入「${f.name}」的新綽號：`, f.nickname);
+            if (newNickname !== null) {
+                const trimmed = newNickname.trim();
+                if (trimmed) {
+                    f.nickname = trimmed;
+                    f.updatedAt = new Date().toLocaleString('zh-TW', { hour12: false });
+                    await syncFriendsToCloud();
+                    renderFriendsTable();
+                    updatePlayerSelects();
+                    alert(`已成功更新「${f.name}」的綽號與修改時間！`);
+                } else {
+                    alert('綽號不能為空！');
+                }
+            }
         }
 
-        // 提交新戰績到 Google 試算表
+        // 提交新戰績
         document.getElementById('gameForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            if (friendsData.length < 4) {
+                alert('⚠️ 系統提示：牌友名單至少需要有 4 位才能記錄牌局，請先至「牌友管理」新增！');
+                return;
+            }
 
             const p1 = document.getElementById('p1Name').value;
             const p2 = document.getElementById('p2Name').value;
@@ -593,7 +606,7 @@
             const players = [p1, p2, p3, p4];
             const uniquePlayers = new Set(players);
             if (uniquePlayers.size !== players.length) {
-                alert('⚠️ 記分錯誤：四位玩家不能有重複的人選，請重新選擇！');
+                alert('⚠️ 記分防呆：四位玩家不能有重複的人選，請重新選擇！');
                 return;
             }
 
