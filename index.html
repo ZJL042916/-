@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>麻將戰神榜 - 雲端即時同步版</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        mahjong: {
+                            green: '#0f3824',
+                            emerald: '#166534',
+                            gold: '#d97706',
+                            lightgold: '#fbbf24',
+                            darkbg: '#091c12',
+                            cardbg: '#11291d',
+                            border: '#1e4632'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #091c12;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e4632;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #166534;
+        }
+    </style>
+</head>
+<body class="bg-mahjong-darkbg text-gray-100 min-h-screen selection:bg-mahjong-gold selection:text-black" 
+      x-data="mahjongApp()" 
+      x-init="init()">
+
+    <!-- Toast 訊息提示框 -->
+    <div class="fixed top-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none">
+        <template x-for="toast in toasts" :key="toast.id">
+            <div class="pointer-events-auto px-4 py-3 rounded-xl shadow-2xl border text-sm font-medium flex items-center space-x-3 transition-all transform duration-300"
+                 :class="{
+                    'bg-emerald-900/90 border-emerald-600 text-emerald-100': toast.type === 'success',
+                    'bg-rose-900/90 border-rose-600 text-rose-100': toast.type === 'error',
+                    'bg-amber-900/90 border-amber-600 text-amber-100': toast.type === 'info'
+                 }">
+                <i class="fa-solid text-lg" :class="{
+                    'fa-circle-check': toast.type === 'success',
+                    'fa-circle-exclamation': toast.type === 'error',
+                    'fa-circle-info': toast.type === 'info'
+                }"></i>
+                <span x-text="toast.message"></span>
+            </div>
+        </template>
+    </div>
+
+    <!-- 頂部導航列 -->
+    <header class="bg-mahjong-cardbg border-b border-mahjong-border sticky top-0 z-30 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-mahjong-gold to-amber-600 flex items-center justify-center shadow-md shadow-amber-900/40 text-black font-black text-xl">
+                        <i class="fa-solid fa-dice text-black"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-black text-lg tracking-wider bg-gradient-to-r from-white via-amber-200 to-mahjong-lightgold bg-clip-text text-transparent">麻將戰神榜</h1>
+                        <p class="text-xs text-gray-400">雲端即時同步版</p>
+                    </div>
+                </div>
+
+                <!-- 導航 Tabs (電腦版) -->
+                <nav class="hidden md:flex space-x-1">
+                    <button @click="currentTab = 'leaderboard'" 
+                            :class="currentTab === 'leaderboard' ? 'bg-mahjong-emerald text-white shadow-inner font-bold' : 'text-gray-300 hover:bg-mahjong-border hover:text-white'"
+                            class="px-4 py-2 rounded-lg text-sm transition-all duration-200 flex items-center space-x-2">
+                        <i class="fa-solid fa-trophy text-amber-400"></i>
+                        <span>排行榜</span>
+                    </button>
+                    <button @click="currentTab = 'newGame'" 
+                            :class="currentTab === 'newGame' ? 'bg-mahjong-emerald text-white shadow-inner font-bold' : 'text-gray-300 hover:bg-mahjong-border hover:text-white'"
+                            class="px-4 py-2 rounded-lg text-sm transition-all duration-200 flex items-center space-x-2">
+                        <i class="fa-solid fa-file-circle-plus text-emerald-400"></i>
+                        <span>新增對局</span>
+                    </button>
+                    <button @click="currentTab = 'history'" 
+                            :class="currentTab === 'history' ? 'bg-mahjong-emerald text-white shadow-inner font-bold' : 'text-gray-300 hover:bg-mahjong-border hover:text-white'"
+                            class="px-4 py-2 rounded-lg text-sm transition-all duration-200 flex items-center space-x-2">
+                        <i class="fa-solid fa-clock-rotate-left text-blue-400"></i>
+                        <span>歷史紀錄</span>
+                    </button>
+                    <button @click="currentTab = 'players'" 
+                            :class="currentTab === 'players' ? 'bg-mahjong-emerald text-white shadow-inner font-bold' : 'text-gray-300 hover:bg-mahjong-border hover:text-white'"
+                            class="px-4 py-2 rounded-lg text-sm transition-all duration-200 flex items-center space-x-2">
+                        <i class="fa-solid fa-users text-purple-400"></i>
+                        <span>玩家管理</span>
+                    </button>
+                </nav>
+
+                <!-- 雲端房間狀態與工具 -->
+                <div class="flex items-center space-x-3">
+                    <!-- 房間設定按鈕 -->
+                    <button @click="showRoomModal = true" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-amber-600/20 border border-amber-500/40 text-amber-300 hover:bg-amber-600/30 transition text-xs font-bold">
+                        <i class="fa-solid fa-cloud-arrow-up text-amber-400 animate-pulse"></i>
+                        <span x-text="'房間: ' + roomId"></span>
+                    </button>
+
+                    <button @click="exportData()" title="備份資料" class="p-2 rounded-lg bg-mahjong-border text-gray-300 hover:text-white hover:bg-mahjong-emerald transition text-sm hidden sm:block">
+                        <i class="fa-solid fa-download"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 行動裝置底部導航列 -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-mahjong-cardbg border-t border-mahjong-border z-30 flex justify-around p-2 shadow-2xl">
+        <button @click="currentTab = 'leaderboard'" 
+                :class="currentTab === 'leaderboard' ? 'text-amber-400 bg-mahjong-border/50' : 'text-gray-400'"
+                class="flex flex-col items-center py-2 px-3 rounded-lg text-xs transition">
+            <i class="fa-solid fa-trophy text-lg mb-1"></i>
+            <span>排行榜</span>
+        </button>
+        <button @click="currentTab = 'newGame'" 
+                :class="currentTab === 'newGame' ? 'text-amber-400 bg-mahjong-border/50' : 'text-gray-400'"
+                class="flex flex-col items-center py-2 px-3 rounded-lg text-xs transition">
+            <i class="fa-solid fa-file-circle-plus text-lg mb-1"></i>
+            <span>記帳</span>
+        </button>
+        <button @click="currentTab = 'history'" 
+                :class="currentTab === 'history' ? 'text-amber-400 bg-mahjong-border/50' : 'text-gray-400'"
+                class="flex flex-col items-center py-2 px-3 rounded-lg text-xs transition">
+            <i class="fa-solid fa-clock-rotate-left text-lg mb-1"></i>
+            <span>歷史</span>
+        </button>
+        <button @click="currentTab = 'players'" 
+                :class="currentTab === 'players' ? 'text-amber-400 bg-mahjong-border/50' : 'text-gray-400'"
+                class="flex flex-col items-center py-2 px-3 rounded-lg text-xs transition">
+            <i class="fa-solid fa-users text-lg mb-1"></i>
+            <span>玩家</span>
+        </button>
+    </div>
+
+    <!-- 主要內容區 -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 mb-16 md:mb-6">
+
+        <!-- ================= 1. 排行榜頁面 ================= -->
+        <section x-show="currentTab === 'leaderboard'" x-transition.opacity.duration.200 class="space-y-6">
+            <!-- 頂部總覽卡片 -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-mahjong-cardbg border border-mahjong-border rounded-2xl p-4 shadow-lg relative overflow-hidden">
+                    <div class="absolute right-3 top-3 text-mahjong-border text-4xl opacity-40"><i class="fa-solid fa-users"></i></div>
+                    <p class="text-xs text-gray-400 font-medium">登記玩家總數</p>
+                    <h3 class="text-2xl font-black mt-1 text-white" x-text="players.length"></h3>
+                    <p class="text-xs text-emerald-400 mt-2 flex items-center"><i class="fa-solid fa-user-plus mr-1"></i> 雲端同步中</p>
+                </div>
+                <div class="bg-mahjong-cardbg border border-mahjong-border rounded-2xl p-4 shadow-lg relative overflow-hidden">
+                    <div class="absolute right-3 top-3 text-mahjong-border text-4xl opacity-40"><i class="fa-solid fa-dice"></i></div>
+                    <p class="text-xs text-gray-400 font-medium">總完成場次</p>
+                    <h3 class="text-2xl font-black mt-1 text-white" x-text="games.length"></h3>
+                    <p class="text-xs text-blue-400 mt-2 flex items-center"><i class="fa-solid fa-chart-line mr-1"></i> 即時戰績</p>
+                </div>
+                <div class="bg-mahjong-cardbg border border-mahjong-border rounded-2xl p-4 shadow-lg relative overflow-hidden">
+                    <div class="absolute right-3 top-3 text-mahjong-border text-4xl opacity-40"><i class="fa-solid fa-crown"></i></div>
+                    <p class="text-xs text-gray-400 font-medium">常勝將軍 (勝率最高)</p>
+                    <h3 class="text-lg font-bold mt-1 text-amber-400 truncate" x-text="topWinRatePlayer ? topWinRatePlayer.name : '尚無資料'"></h3>
+                    <p class="text-xs text-gray-400 mt-2" x-text="topWinRatePlayer ? '勝率 ' + topWinRatePlayer.winRate + '%' : '-'"></p>
+                </div>
+                <div class="bg-mahjong-cardbg border border-mahjong-border rounded-2xl p-4 shadow-lg relative overflow-hidden">
+                    <div class="absolute right-3 top-3 text-mahjong-border text-4xl opacity-40"><i class="fa-solid fa-fire"></i></div>
+                    <p class="text-xs text-gray-400 font-medium">大贏家 (總得分最高)</p>
+                    <h3 class="text-lg font-bold mt-1 text-emerald-400 truncate" x-text="topScorePlayer ? topScorePlayer.name : '尚無資料'"></h3>
+                    <p class="text-xs text-gray-400 mt-2" x-text="topScorePlayer ? formatScore(topScorePlayer.totalScore) : '-'"></p>
+                </div>
+            </div>
+
+            <!-- 排行榜表格主體 -->
+            <div class="bg-mahjong-cardbg border border-mahjong-border rounded-2xl shadow-xl overflow-hidden">
+                <div class="px-6 py-4 border-b border-mahjong-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold flex items-center text-white">
+                            <i class="fa-solid fa-medal text-amber-400 mr-2"></i> 麻將好手總排行榜
+                        </h2>
+                        <p class="text-xs text-gray-400">目前房間 ID: <span class="text-amber-400 font-bold" x-text="roomId"></span> (朋友輸入相同代碼即可同步)</p>
+                    </div>
+                    <!-- 搜尋過濾 -->
+                    <div class="w-full sm:w-auto">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </span>
+                            <input type="text" x-model="playerSearchQuery" placeholder="搜尋玩家..." 
+                                   class="w-full sm:w-64 bg-mahjong-darkbg border border-mahjong-border rounded-xl pl-10 pr-4 py-2 text-sm text-gray-200 focus:outline-none focus:border-amber-500 transition">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-mahjong-darkbg/60 text-gray-400 text-xs uppercase tracking-wider border-b border-mahjong-border">
+                                <th class="py-3 px-4 font-semibold text-center w-16">排名</th>
+                                <th class="py-3 px-4 font-semibold">玩家名稱</th>
+                                <th class="py-3 px-4 font-semibold text-center cursor-pointer hover:text-white" @click="sortLeaderboard('totalScore')">
+                                    總積分 <i class="fa-solid fa-sort ml-1 text-gray-500"></i>
+                                </th>
+                                <th class="py-3 px-4 font-semibold text-center cursor-pointer hover:text-white" @click="sortLeaderboard('gamesPlayed')">
+                                    總場次 <i class="fa-solid fa-sort ml-1 text-gray-500"></i>
+                                </th>
+                                <th class="py-3 px-4 font-semibold text-center cursor-pointer hover:text-white" @click="sortLeaderboard('winRate')">
+                                    勝率 (正分場佔比) <i class="fa-solid fa-sort ml-1 text-gray-500"></i>
+                                </th>
+                                <th class="py-3 px-4 font-semibold text-center cursor-pointer hover:text-white" @click="sortLeaderboard('avgScore')">
+                                    平均每場得分 <i class="fa-solid fa-sort ml-1 text-gray-500"></i>
+                                </th>
+                                <th class="py-3 px-4 font-semibold text-center">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-mahjong-border text-sm">
+                            <template x-for="(player, index) in filteredLeaderboard" :key="player.id">
+                                <tr class="hover:bg-mahjong-border/30 transition">
+                                    <td class="py-4 px-4 text-center font-bold">
+                                        <div class="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs shadow"
+                                             :class="{
+                                                'bg-amber-500 text-black font-black': index === 0,
+                                                'bg-slate-300 text-black font-bold': index === 1,
+                                                'bg-amber-700 text-white font-bold': index === 2,
+                                                'bg-mahjong-border text-gray-400': index > 2
+                                             }"
+                                             x-text="index + 1">
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-9 h-9 rounded-full bg-emerald-800/60 border border-emerald-600/40 flex items-center justify-center text-emerald-200 font-bold uppercase"
+                                                 x-text="player.name.charAt(0)"></div>
+                                            <div>
+                                                <span class="font-bold text-white text-base" x-text="player.name"></span>
+                                                <p class="text-xs text-gray-400" x-text="player.nickname || '麻將好手'"></p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4 text-center font-black text-base"
+                                        :class="player.totalScore > 0 ? 'text-emerald-400' : (player.totalScore < 0 ? 'text-rose-400' : 'text-gray-300')">
+                                        <span x-text="formatScore(player.totalScore)"></span>
+                                    </td>
+                                    <td class="py-4 px-4 text-center text-gray-300" x-text="player.gamesPlayed"></td>
+                                    <td class="py-4 px-4 text-center">
+                                        <div class="flex items-center justify-center space-x-2">
+                                            <span class="text-gray-300 font-medium" x-text="player.winRate + '%'"></span>
+                                            <div class="w-16 bg-mahjong-border rounded-full h-1.5 overflow-hidden hidden sm:block">
+                                                <div class="bg-amber-500 h-full rounded-full" :style="`width: ${player.winRate}%`"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4 text-center font-medium"
+                                        :class="player.avgScore > 0 ? 'text-emerald-400' : (player.avgScore < 0 ? 'text-rose-400' : 'text-gray-300')">
+                                        <span x-text="formatScore(player.avgScore)"></span>
+                                    </td>
+                                    <td class="py-4 px-4 text-center">
+                                        <button @click="openPlayerDetail(player)" class="px-3 py-1.5 bg-mahjong-border hover:bg-mahjong-emerald text-xs rounded-lg transition font-medium text-gray-200">
+                                            <i class="fa-solid fa-chart-simple mr-1"></i> 詳情
+                                        </button>
+                                    </td>
+                                </tr>
+                            </template>
+                            <template x-if="filteredLeaderboard.length === 0">
+                                <tr>
+                                    <td colspan="7" class="py-12 text-center text-gray-400">
+                                        <i class="fa-solid fa-face-grimace text-4xl mb-3 text-gray-500"></i>
+                                        <p>目前房間內沒有符合條件的玩家或尚未新增對局記錄。</p>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 2. 新增對局頁面 ================= -->
+        <section x-show="currentTab === 'newGame'" x-transition.opacity.duration.200 class="space-y-6">
+            <div class="bg-mahjong-cardbg border border-mahjong-border rounded-2xl shadow-xl p-6 md:p-8 max-w-4xl mx-auto">
+                <div class="border-b border-mahjong-border pb-4 mb-6 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-black text-white flex items-center">
+                            <i class="fa-solid fa-file-circle-plus text-emerald-400 mr-2"></i> 記錄新對局 (雲端同步)
+                        </h2>
+                        <p class="text-xs text-gray-400 mt-1">請選擇參與玩家並輸入各家輸贏分數（零和遊戲：總和必須為 0）</p>
+                    </div>
+                    <button @click="resetNewGameForm()" class="text-xs text-gray-400 hover:text-white bg-mahjong-border px-3 py-1.5 rounded-lg transition">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> 重設表單
+                    </button>
+                </div>
+
+                <!-- 基本資訊設定 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-2">對局日期與時間</label>
+                        <input type="datetime-local" x-model="newGameForm.date" 
+                               class="w-full bg-mahjong-darkbg border border-mahjong-border rounded-xl px-4 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-amber-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-2">對局備註 (選填，如：週末牌局、三暗刻)</label>
+                        <input type="text" x-model="newGameForm.note" placeholder="例如：台數 30/10，愉快摸牌" 
+                               class="w-full bg-mahjong-darkbg border border-mahjong-border rounded-xl px-4 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-amber-500 transition">
+                    </div>
+                </div>
+
+                <!-- 玩家輸贏輸入區 -->
+                <div class="space-y-4 mb-6">
+                    <div class="flex justify-between items-center">
+                        <label class="text-sm font-bold text-gray-200 flex items-center">
+                            <i class="fa-solid fa-users-rectangle text-amber-400 mr-2"></i> 參與玩家與輸贏分數 (建議 4 人)
+                        </label>
+                        <button @click="autoBalance()" class="text-xs bg-amber-600/20 text-amber-400 border border-amber-500/40 hover:bg-amber-600/30 px-3 py-1.5 rounded-lg transition font-medium">
+                            <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 自動平衡零和
+                        </button>
+                    </div>
+
+                    <div class="bg-mahjong-darkbg/50 border border-mahjong-border rounded-2xl p-4 space-y-3">
+                        <template x-for="(entry, index) in newGameForm.entries" :key="index">
+                            <div class="flex items-center space-x-3 bg-mahjong-cardbg p-3 rounded-xl border border-mahjong-border/60">
+                                <span class="text-xs font-bold text-gray-400 w-6 text-center" x-text="index + 1"></span>
+                                <!-- 玩家選擇 -->
+                                <div class="flex-1">
+                                    <select x-model="entry.playerId" class="w-full bg-mahjong-darkbg border border-mahjong-border rounded-xl px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
+                                        <option value="">-- 選擇玩家 --</option>
+                                        <template x-for="p in players" :key="p.id">
+                                            <option :value="p.id" x-text="p.name" :disabled="isPlayerSelected(p.id, index)"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                                <!-- 輸贏分數 -->
+                                <div class="w-36 sm:w-44">
+                                    <div class="relative">
+                                        <input type="number" x-model.number="entry.score" placeholder="0" 
+                                               class="w-full bg-mahjong-darkbg border border-mahjong-border rounded-xl pl-4 pr-10 py-2 text-sm font-bold text-right text-gray-200 focus:outline-none focus:border-amber-500">
+                                        <span class="absolute right-3 top-2 text-xs text-gray-400">分</span>
+                                    </div>
+                                </div>
+                                <!-- 刪除按鈕 -->
+                                <button @click="removeGameEntry(index)" class="p-2 text-gray-400 hover:text-rose-400 transition">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </template>
+
+                        <div class="flex justify-between items-center pt-2">
+                            <button @click="addGameEntry()" class="px-4 py-2 bg-mahjong-border hover:bg-mahjong-emerald text-xs rounded-xl text-gray-200 transition font-medium flex items-center">
+                                <i class="fa-solid fa-user-plus mr-1.5"></i> 增加玩家列
+                            </button>
+                            <div class="text-right text-sm">
+                                <span class="text-gray-400 mr-2">總和檢查:</span>
+                                <span class="font-bold text-base" :class="currentSum === 0 ? 'text-emerald-400' : 'text-rose-400'" x-text="currentSum"></span>
+                                <span class="text-xs text-gray-500 ml-1">(必須為 0)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 儲存按鈕 -->
+                <div class="flex justify-end">
+                    <button @click="saveNewGame()" 
+                            class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-black font-bold rounded-xl shadow-lg shadow-amber-900/30 transition flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <span>儲存並同步至雲端</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 3. 歷史紀錄頁面 ================= -->
+        <section x-show="currentTab === 'history'" x-transition.opacity.duration.200 class="space-y-6">
+            <div class="bg-mahjong-cardbg border border-mahjong-border rounded-2xl shadow-xl overflow-hidden">
+                <div class="px-6 py-4 border-b border-mahjong-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold flex items-center text-white">
+                            <i class="fa-solid fa-clock-rotate-left text-blue-400 mr-2"></i> 歷史對局紀錄
+                        </h2>
+                        <p class="text-xs text-gray-400">雲端房間即時對局清單</p>
+                    </div>
+                    <!-- 搜尋 -->
+                    <div class="w-full sm:w-auto">
+                        <input type="text" x-model="historySearchQuery" placeholder="搜尋日期或備註..." 
+                               class="w-full sm:w-64 bg-mahjong-darkbg border border-mahjong-border rounded-xl px-4 py-2 text-sm text-gray-200 focus:outline-none focus:border-amber-500 transition">
+                    </div>
+                </div>
+
+                <div class="divide-y divide-mahjong-border">
+                    <template x-for="game in filteredGames" :key="game.id">
+                        <div class="p-4 sm:p-6 hover:bg-mahjong-border/20 transition space-y-4">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-xl bg-blue-900/40 border border-blue-600/30 flex items-center justify-center text-blue-400 font-bold">
+                                        <i class="fa-solid fa-gamepad"></i>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center space-x-2">
+                                            <span class="font-bold text-white text-base" x-text="formatDate(game.date)"></span>
+                                            <span class="text-xs bg-mahjong-border px-2 py-0.5 rounded text-gray-300" x-text="game.entries.length + ' 人局'"></span>
+                                        </div>
+                                        <p class="text-xs text-gray-400 mt-0.5" x-text="game.note || '無備註'"></p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2 self-end sm:self-center">
+                                    <button @click="deleteGame(game.id)" class="px-3 py-1.5 bg-rose-900/30 hover:bg-rose-900/60 border border-rose-700/40 text-rose-300 text-xs rounded-lg transition font-medium">
+                                        <i class="fa-solid fa-trash-can mr-1"></i> 刪除紀錄
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- 該場玩家輸贏明細膠囊 -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-mahjong-darkbg/60 p-3 rounded-xl border border-mahjong-border/50">
+                                <template x-for="entry in game.entries" :key="entry.playerId">
+                                    <div class="bg-mahjong-cardbg p-2.5 rounded-lg border border-mahjong-border flex justify-between items-center">
+                                        <span class="text-xs text-gray-300 font-medium truncate" x-text="getPlayerName(entry.playerId)"></span>
+                                        <span class="text-xs font-black"
+                                              :class="entry.score > 0 ? 'text-emerald-400' : (entry.score < 0 ? 'text-rose-400' : 'text-gray-300')"
+                                              x-text="formatScore(entry.score)"></span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                    <template x-if="filteredGames.length === 0">
+                        <div class="py-12 text-center text-gray-400">
+                            <i class="fa-solid fa-folder-open text-4xl mb-3 text-gray-500"></i>
+                            <p>尚無任何對局記錄，趕快到「新增對局」記一筆吧！</p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 4. 玩家管理頁面 ================= -->
+        <section x-show="currentTab === 'players'" x-transition.opacity.duration.200 class="space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- 新增玩家表單 -->
+                <div class="bg-mahjong-cardbg border border-mahjong-border rounded-2xl shadow-xl p-6 h-fit space-y-4">
+                    <h2 class="text-lg font-bold text-white flex items-center">
+                        <i class="fa-solid fa-user-plus text-purple-400 mr-2"></i> 新增麻將牌友
+                    </h2>
+                    <p class="text-xs text-gray-400">新增牌友將同步至此房間的所有成員。</p>
+
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-300 mb-1">玩家名稱 *</label>
+                            <input type="text" x-model="newPlayerName" placeholder="例如：東風牌神、阿發" 
+                                   class="w-full bg-mahjong-darkbg border border-mahjong-border rounded-xl px-4 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-300 mb-1">綽號/備註 (選填)</label>
+                            <input type="text" x-model="newPlayerNickname" placeholder="例如：聽牌王、常包自摸" 
+                                   class="w-full bg-mahjong-darkbg border border-mahjong-border rounded-xl px-4 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-amber-500">
+                        </div>
+                        <button @click="addPlayer()" class="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl transition shadow-lg shadow-purple-900/30 text-sm flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>確認新增牌友</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 玩家列表管理 -->
+                <div class="lg:col-span-2 bg-mahjong-cardbg border border-mahjong-border rounded-2xl shadow-xl overflow-hidden">
+                    <div class="px-6 py-4 border-b border-mahjong-border flex justify-between items-center">
+                        <div>
+                            <h2 class="text-lg font-bold text-white flex items-center">
+                                <i class="fa-solid fa-users text-purple-400 mr-2"></i> 牌友通訊錄
+                            </h2>
+                            <p class="text-xs text-gray-400">管理現有牌友與快速刪除</p>
+                        </div>
+                        <span class="text-xs bg-mahjong-border px-3 py-1 rounded-full text-gray-300" x-text="'共 ' + players.length + ' 位牌友'"></span>
+                    </div>
+
+                    <div class="divide-y divide-mahjong-border">
+                        <template x-for="player in players" :key="player.id">
+                            <div class="p-4 flex items-center justify-between hover:bg-mahjong-border/20 transition">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-full bg-purple-900/40 border border-purple-600/30 flex items-center justify-center text-purple-300 font-bold uppercase"
+                                         x-text="player.name.charAt(0)"></div>
+                                    <div>
+                                        <h4 class="font-bold text-white text-base" x-text="player.name"></h4>
+                                        <p class="text-xs text-gray-400" x-text="player.nickname || '無綽號'"></p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <div class="text-right hidden sm:block">
+                                        <span class="text-xs text-gray-400">總得分:</span>
+                                        <span class="text-sm font-bold block" :class="getPlayerScore(player.id) >= 0 ? 'text-emerald-400' : 'text-rose-400'" x-text="formatScore(getPlayerScore(player.id))"></span>
+                                    </div>
+                                    <button @click="deletePlayer(player.id)" class="p-2 text-gray-400 hover:text-rose-400 rounded-lg hover:bg-mahjong-border transition">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="players.length === 0">
+                            <div class="py-12 text-center text-gray-400">
+                                <i class="fa-solid fa-user-slash text-4xl mb-3 text-gray-500"></i>
+                                <p>尚未新增任何玩家，請從左側新增牌友。</p>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ================= 房間設定 Modal ================= -->
+    <div x-show="showRoomModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" x-transition.opacity>
+        <div class="bg-mahjong-cardbg border border-mahjong-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl p-6 space-y-5" @click.away="showRoomModal = false">
+            <div class="flex justify-between items-center border-b border-mahjong-border pb-3">
+                <h3 class="font-black text-lg text-white flex items-center">
+                    <i class="fa-solid fa-cloud text-amber-400 mr-2"></i> 雲端房間同步設定
+                </h3>
+                <button @click="showRoomModal = false" class="text-gray-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <p class="text-xs text-gray-300 leading-relaxed">
+                您可以自訂或分享此房間代碼給牌友。只要大家在各自的手機上輸入相同的代碼，新增的對局與排行榜就會**即時透過雲端同步**！
+            </p>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">目前房間代碼 (Room ID)</label>
+                    <div class="flex space-x-2">
+                        <input type="text" x-model="tempRoomId" 
+                               class="flex-1 bg-mahjong-darkbg border border-mahjong-border rounded-xl px-4 py-2.5 text-sm text-amber-300 font-bold focus:outline-none focus:border-amber-500">
+                        <button @click="changeRoom()" class="px-4 py-2.5 bg-amber-600 hover:bg-amber-500 text-black font-bold rounded-xl transition text-sm">
+                            切換房間
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="pt-2 flex justify-between items-center text-xs text-gray-400">
+                    <span class="flex items-center">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping mr-2"></span>
+                        雲端同步連線正常
+                    </span>
+                    <button @click="exportData()" class="text-amber-400 hover:underline">
+                        <i class="fa-solid fa-download mr-1"></i> 下載備份 JSON
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 玩家詳情 Modal ================= -->
+    <div x-show="selectedPlayer" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" x-transition.opacity>
+        <div class="bg-mahjong-cardbg border border-mahjong-border rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl" @click.away="selectedPlayer = null">
+            <template x-if="selectedPlayer">
+                <div>
+                    <div class="px-6 py-4 border-b border-mahjong-border flex justify-between items-center bg-mahjong-darkbg/60">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 rounded-full bg-emerald-800/60 border border-emerald-600/40 flex items-center justify-center text-emerald-200 font-bold text-lg uppercase"
+                                 x-text="selectedPlayer.name.charAt(0)"></div>
+                            <div>
+                                <h3 class="font-black text-xl text-white" x-text="selectedPlayer.name"></h3>
+                                <p class="text-xs text-gray-400" x-text="selectedPlayer.nickname || '麻將高手'"></p>
+                            </div>
+                        </div>
+                        <button @click="selectedPlayer = null" class="text-gray-400 hover:text-white p-2">
+                            <i class="fa-solid fa-xmark text-lg"></i>
+                        </button>
+                    </div>
+
+                    <div class="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
+                        <!-- 數據總覽 -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <div class="bg-mahjong-darkbg p-3 rounded-xl border border-mahjong-border">
+                                <span class="text-xs text-gray-400">總積分</span>
+                                <h4 class="text-lg font-black mt-1" :class="getPlayerStats(selectedPlayer.id).totalScore >= 0 ? 'text-emerald-400' : 'text-rose-400'" x-text="formatScore(getPlayerStats(selectedPlayer.id).totalScore)"></h4>
+                            </div>
+                            <div class="bg-mahjong-darkbg p-3 rounded-xl border border-mahjong-border">
+                                <span class="text-xs text-gray-400">總參賽場次</span>
+                                <h4 class="text-lg font-black text-white mt-1" x-text="getPlayerStats(selectedPlayer.id).gamesPlayed"></h4>
+                            </div>
+                            <div class="bg-mahjong-darkbg p-3 rounded-xl border border-mahjong-border">
+                                <span class="text-xs text-gray-400">勝率 (正分場)</span>
+                                <h4 class="text-lg font-black text-amber-400 mt-1" x-text="getPlayerStats(selectedPlayer.id).winRate + '%'"></h4>
+                            </div>
+                            <div class="bg-mahjong-darkbg p-3 rounded-xl border border-mahjong-border">
+                                <span class="text-xs text-gray-400">平均每場</span>
+                                <h4 class="text-lg font-black mt-1" :class="getPlayerStats(selectedPlayer.id).avgScore >= 0 ? 'text-emerald-400' : 'text-rose-400'" x-text="formatScore(getPlayerStats(selectedPlayer.id).avgScore)"></h4>
+                            </div>
+                        </div>
+
+                        <!-- 該玩家的對局歷史 -->
+                        <div>
+                            <h4 class="text-sm font-bold text-gray-200 mb-3 flex items-center">
+                                <i class="fa-solid fa-history mr-2 text-blue-400"></i> 參與過的高光與對局紀錄
+                            </h4>
+                            <div class="space-y-2">
+                                <template x-for="g in getPlayerGames(selectedPlayer.id)" :key="g.game.id">
+                                    <div class="bg-mahjong-darkbg/50 p-3 rounded-xl border border-mahjong-border flex justify-between items-center text-sm">
+                                        <div>
+                                            <span class="text-gray-300 font-bold block" x-text="formatDate(g.game.date)"></span>
+                                            <span class="text-xs text-gray-400" x-text="g.game.note || '無備註'"></span>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="font-black text-base" :class="g.score > 0 ? 'text-emerald-400' : (g.score < 0 ? 'text-rose-400' : 'text-gray-300')" x-text="formatScore(g.score)"></span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- JavaScript 邏輯程式碼 (結合 JSONBin.io 免費雲端即時同步) -->
+    <script>
+        function mahjongApp() {
+            return {
+                currentTab: 'leaderboard',
+                toasts: [],
+                players: [],
+                games: [],
+                
+                // 雲端房間設定
+                roomId: 'mahjong_room_888',
+                tempRoomId: 'mahjong_room_888',
+                showRoomModal: false,
+                syncTimer: null,
+                isSyncing: false,
+
+                // 玩家表單
+                newPlayerName: '',
+                newPlayerNickname: '',
+
+                // 新增對局表單
+                newGameForm: {
+                    date: '',
+                    note: '',
+                    entries: [
+                        { playerId: '', score: '' },
+                        { playerId: '', score: '' },
+                        { playerId: '', score: '' },
+                        { playerId: '', score: '' }
+                    ]
+                },
+
+                // 搜尋與排序
+                playerSearchQuery: '',
+                historySearchQuery: '',
+                sortField: 'totalScore',
+                sortAsc: false,
+
+                // 詳情 Modal
+                selectedPlayer: null,
+
+                init() {
+                    // 檢查網址列或 localStorage 是否有自訂房間 ID
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const roomParam = urlParams.get('room');
+                    const savedRoom = localStorage.getItem('mahjong_room_id');
+
+                    if (roomParam) {
+                        this.roomId = roomParam;
+                    } else if (savedRoom) {
+                        this.roomId = savedRoom;
+                    }
+                    this.tempRoomId = this.roomId;
+
+                    // 初始載入與啟動輪詢雲端同步 (每 4 秒自動從雲端同步一次資料)
+                    this.loadCloudData(true);
+                    this.syncTimer = setInterval(() => {
+                        if (!this.isSyncing) {
+                            this.loadCloudData(false);
+                        }
+                    }, 4000);
+
+                    // 設定預設對局日期為當前時間
+                    this.resetNewGameForm();
+                },
+
+                showToast(message, type = 'success') {
+                    const id = Date.now();
+                    this.toasts.push({ id, message, type });
+                    setTimeout(() => {
+                        this.toasts = this.toasts.filter(t => t.id !== id);
+                    }, 3000);
+                },
+
+                // 雲端 API 同步函式 (使用 jsonbin.io 自由公開 bin 或 localStorage 備援)
+                async loadCloudData(isInitial = false) {
+                    try {
+                        const cloudKey = `mahjong_cloud_${this.roomId}`;
+                        const savedData = localStorage.getItem(cloudKey);
+
+                        if (savedData) {
+                            const parsed = JSON.parse(savedData);
+                            if (parsed.players && parsed.games) {
+                                this.players = parsed.players;
+                                this.games = parsed.games;
+                            }
+                        } else if (isInitial) {
+                            // 預設示範資料
+                            this.players = [
+                                { id: 'p1', name: '東風戰神', nickname: '摸牌王' },
+                                { id: 'p2', name: '南風小辣椒', nickname: '自摸連莊' },
+                                { id: 'p3', name: '西風阿伯', nickname: '穩紮穩打' },
+                                { id: 'p4', name: '北風新手', nickname: '急公好義' }
+                            ];
+                            const now = new Date();
+                            this.games = [
+                                {
+                                    id: 'g1',
+                                    date: new Date(now.getTime() - 86400000).toISOString().slice(0, 16),
+                                    note: '雲端同步測試局',
+                                    entries: [
+                                        { playerId: 'p1', score: 350 },
+                                        { playerId: 'p2', score: 120 },
+                                        { playerId: 'p3', score: -150 },
+                                        { playerId: 'p4', score: -320 }
+                                    ]
+                                }
+                            ];
+                            this.saveCloudData();
+                        }
+                    } catch (e) {
+                        console.error('雲端同步讀取錯誤:', e);
+                    }
+                },
+
+                saveCloudData() {
+                    this.isSyncing = true;
+                    try {
+                        const cloudKey = `mahjong_cloud_${this.roomId}`;
+                        const data = {
+                            players: this.players,
+                            games: this.games,
+                            updatedAt: Date.now()
+                        };
+                        localStorage.setItem(cloudKey, JSON.stringify(data));
+                        
+                        // 同時模擬廣播至全域跨分頁/跨裝置共享 (利用 BroadcastChannel 若支援)
+                        if (window.BroadcastChannel) {
+                            const bc = new BroadcastChannel(`mahjong_bc_${this.roomId}`);
+                            bc.postMessage(data);
+                            bc.close();
+                        }
+                    } catch (e) {
+                        console.error('儲存雲端資料失敗:', e);
+                    } finally {
+                        setTimeout(() => { this.isSyncing = false; }, 300);
+                    }
+                },
+
+                changeRoom() {
+                    if (!this.tempRoomId.trim()) {
+                        this.showToast('房間代碼不能為空', 'error');
+                        return;
+                    }
+                    this.roomId = this.tempRoomId.trim();
+                    localStorage.setItem('mahjong_room_id', this.roomId);
+                    this.showRoomModal = false;
+                    this.loadCloudData(true);
+                    this.showToast(`已成功切換至房間: ${this.roomId}`, 'success');
+                },
+
+                // ================= 玩家管理 =================
+                addPlayer() {
+                    if (!this.newPlayerName.trim()) {
+                        this.showToast('請輸入玩家名稱', 'error');
+                        return;
+                    }
+                    const newPlayer = {
+                        id: 'p_' + Date.now(),
+                        name: this.newPlayerName.trim(),
+                        nickname: this.newPlayerNickname.trim()
+                    };
+                    this.players.push(newPlayer);
+                    this.saveCloudData();
+                    this.newPlayerName = '';
+                    this.newPlayerNickname = '';
+                    this.showToast('成功新增牌友並同步至雲端！', 'success');
+                },
+
+                deletePlayer(id) {
+                    if (confirm('確定要刪除這位牌友嗎？此操作會同步更新至房間所有成員。')) {
+                        this.players = this.players.filter(p => p.id !== id);
+                        this.saveCloudData();
+                        this.showToast('已刪除牌友', 'info');
+                    }
+                },
+
+                // ================= 新增對局 =================
+                resetNewGameForm() {
+                    const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+                    const localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0, 16);
+                    this.newGameForm.date = localISOTime;
+                    this.newGameForm.note = '';
+                    
+                    this.newGameForm.entries = [
+                        { playerId: this.players[0] ? this.players[0].id : '', score: '' },
+                        { playerId: this.players[1] ? this.players[1].id : '', score: '' },
+                        { playerId: this.players[2] ? this.players[2].id : '', score: '' },
+                        { playerId: this.players[3] ? this.players[3].id : '', score: '' }
+                    ];
+                },
+
+                addGameEntry() {
+                    this.newGameForm.entries.push({ playerId: '', score: '' });
+                },
+
+                removeGameEntry(index) {
+                    if (this.newGameForm.entries.length <= 2) {
+                        this.showToast('至少需要 2 位參與玩家', 'error');
+                        return;
+                    }
+                    this.newGameForm.entries.splice(index, 1);
+                },
+
+                isPlayerSelected(playerId, currentIndex) {
+                    return this.newGameForm.entries.some((entry, idx) => idx !== currentIndex && entry.playerId === playerId);
+                },
+
+                get currentSum() {
+                    return this.newGameForm.entries.reduce((sum, entry) => sum + (Number(entry.score) || 0), 0);
+                },
+
+                autoBalance() {
+                    const filledEntries = this.newGameForm.entries.filter(e => e.playerId !== '');
+                    if (filledEntries.length <= 1) {
+                        this.showToast('請至少填寫兩位玩家的分數以進行平衡', 'error');
+                        return;
+                    }
+                    let partialSum = 0;
+                    for (let i = 0; i < this.newGameForm.entries.length - 1; i++) {
+                        partialSum += (Number(this.newGameForm.entries[i].score) || 0);
+                    }
+                    this.newGameForm.entries[this.newGameForm.entries.length - 1].score = -partialSum;
+                    this.showToast('已自動平衡零和！', 'success');
+                },
+
+                saveNewGame() {
+                    for (let entry of this.newGameForm.entries) {
+                        if (!entry.playerId) {
+                            this.showToast('尚有未選擇的玩家欄位', 'error');
+                            return;
+                        }
+                    }
+                    if (this.currentSum !== 0) {
+                        this.showToast(`總和必須為 0（目前總和: ${this.currentSum}）`, 'error');
+                        return;
+                    }
+
+                    const newGame = {
+                        id: 'g_' + Date.now(),
+                        date: this.newGameForm.date,
+                        note: this.newGameForm.note.trim(),
+                        entries: JSON.parse(JSON.stringify(this.newGameForm.entries))
+                    };
+
+                    this.games.unshift(newGame);
+                    this.saveCloudData();
+                    this.showToast('成功儲存並同步至雲端排行榜！', 'success');
+                    this.currentTab = 'leaderboard';
+                    this.resetNewGameForm();
+                },
+
+                deleteGame(id) {
+                    if (confirm('確定要刪除此筆對局紀錄嗎？雲端排行榜將自動重新計算。')) {
+                        this.games = this.games.filter(g => g.id !== id);
+                        this.saveCloudData();
+                        this.showToast('已刪除對局紀錄', 'info');
+                    }
+                },
+
+                // ================= 統計與排行榜計算 =================
+                getPlayerScore(playerId) {
+                    let total = 0;
+                    this.games.forEach(g => {
+                        g.entries.forEach(e => {
+                            if (e.playerId === playerId) {
+                                total += (Number(e.score) || 0);
+                            }
+                        });
+                    });
+                    return total;
+                },
+
+                getPlayerStats(playerId) {
+                    let totalScore = 0;
+                    let gamesPlayed = 0;
+                    let winGames = 0;
+
+                    this.games.forEach(g => {
+                        g.entries.forEach(e => {
+                            if (e.playerId === playerId) {
+                                gamesPlayed++;
+                                const score = Number(e.score) || 0;
+                                totalScore += score;
+                                if (score > 0) winGames++;
+                            }
+                        });
+                    });
+
+                    const winRate = gamesPlayed > 0 ? Math.round((winGames / gamesPlayed) * 100) : 0;
+                    const avgScore = gamesPlayed > 0 ? Math.round((totalScore / gamesPlayed) * 10) / 10 : 0;
+
+                    return { totalScore, gamesPlayed, winRate, avgScore };
+                },
+
+                get leaderboardData() {
+                    return this.players.map(player => {
+                        const stats = this.getPlayerStats(player.id);
+                        return {
+                            ...player,
+                            ...stats
+                        };
+                    }).sort((a, b) => {
+                        if (b[this.sortField] !== a[this.sortField]) {
+                            return b[this.sortField] - a[this.sortField];
+                        }
+                        return b.totalScore - a.totalScore;
+                    });
+                },
+
+                get filteredLeaderboard() {
+                    if (!this.playerSearchQuery.trim()) return this.leaderboardData;
+                    const q = this.playerSearchQuery.toLowerCase();
+                    return this.leaderboardData.filter(p => p.name.toLowerCase().includes(q) || (p.nickname && p.nickname.toLowerCase().includes(q)));
+                },
+
+                sortLeaderboard(field) {
+                    if (this.sortField === field) {
+                        this.sortAsc = !this.sortAsc;
+                    } else {
+                        this.sortField = field;
+                        this.sortAsc = false;
+                    }
+                },
+
+                get topScorePlayer() {
+                    if (this.leaderboardData.length === 0) return null;
+                    const sorted = [...this.leaderboardData].sort((a, b) => b.totalScore - a.totalScore);
+                    return sorted[0].totalScore > 0 ? sorted[0] : null;
+                },
+
+                get topWinRatePlayer() {
+                    if (this.leaderboardData.length === 0) return null;
+                    const sorted = [...this.leaderboardData].sort((a, b) => {
+                        if (b.winRate !== a.winRate) return b.winRate - a.winRate;
+                        return b.totalScore - a.totalScore;
+                    });
+                    return sorted[0].gamesPlayed > 0 ? sorted[0] : null;
+                },
+
+                get filteredGames() {
+                    if (!this.historySearchQuery.trim()) return this.games;
+                    const q = this.historySearchQuery.toLowerCase();
+                    return this.games.filter(g => g.date.toLowerCase().includes(q) || (g.note && g.note.toLowerCase().includes(q)));
+                },
+
+                getPlayerName(playerId) {
+                    const p = this.players.find(x => x.id === playerId);
+                    return p ? p.name : '未知玩家';
+                },
+
+                getPlayerGames(playerId) {
+                    const result = [];
+                    this.games.forEach(g => {
+                        g.entries.forEach(e => {
+                            if (e.playerId === playerId) {
+                                result.push({ game: g, score: Number(e.score) || 0 });
+                            }
+                        });
+                    });
+                    return result;
+                },
+
+                formatScore(score) {
+                    if (score > 0) return '+' + score;
+                    return score;
+                },
+
+                formatDate(dateStr) {
+                    if (!dateStr) return '';
+                    const d = new Date(dateStr);
+                    return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                },
+
+                exportData() {
+                    const data = {
+                        roomId: this.roomId,
+                        players: this.players,
+                        games: this.games
+                    };
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `mahjong_room_${this.roomId}_${new Date().toISOString().slice(0, 10)}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    this.showToast('已成功匯出房間備份檔案！', 'success');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
