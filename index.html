@@ -248,7 +248,7 @@
         }
         setDefaultDates();
 
-        // 更新玩家下拉選單選項
+        // 更新玩家下拉選單選項（自動錯開預設前四位不同的人）
         function updatePlayerSelects() {
             const selects = ['p1Name', 'p2Name', 'p3Name', 'p4Name'];
             selects.forEach((id, index) => {
@@ -400,13 +400,14 @@
 
         // 3. 渲染月排行榜
         function renderMonthlyLeaderboard() {
-            const selectedMonth = document.getElementById('selectMonth').value; // 格式 YYYY-MM
+            const monthInput = document.getElementById('selectMonth');
+            if (!monthInput) return;
+            const selectedMonth = monthInput.value; // 格式 YYYY-MM
             if (!selectedMonth) return;
 
             const stats = {};
             games.forEach(g => {
                 if (!g.timestamp || !g.scores) return;
-                // 檢查是否符合選定的月份
                 if (g.timestamp.startsWith(selectedMonth)) {
                     Object.entries(g.scores).forEach(([name, score]) => {
                         if (!stats[name]) stats[name] = { totalScore: 0, totalGames: 0, wins: 0 };
@@ -519,9 +520,23 @@
             updatePlayerSelects();
         }
 
-        // 5. 提交新戰績到 Google 試算表
+        // 5. 提交新戰績到 Google 試算表（含防呆機制：檢查重複玩家）
         document.getElementById('gameForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            const p1 = document.getElementById('p1Name').value;
+            const p2 = document.getElementById('p2Name').value;
+            const p3 = document.getElementById('p3Name').value;
+            const p4 = document.getElementById('p4Name').value;
+
+            // 防呆：檢查是否有重複選到同一個人
+            const players = [p1, p2, p3, p4];
+            const uniquePlayers = new Set(players);
+            if (uniquePlayers.size !== players.length) {
+                alert('⚠️ 記分錯誤：四位玩家不能有重複的人選，請重新選擇！');
+                return;
+            }
+
             const btn = document.getElementById('submitBtn');
             btn.innerText = '正在上傳至雲端...';
             btn.disabled = true;
@@ -529,13 +544,13 @@
             const newGame = {
                 timestamp: document.getElementById('gameDate').value,
                 location: document.getElementById('location').value,
-                p1Name: document.getElementById('p1Name').value,
+                p1Name: p1,
                 p1Score: document.getElementById('p1Score').value,
-                p2Name: document.getElementById('p2Name').value,
+                p2Name: p2,
                 p2Score: document.getElementById('p2Score').value,
-                p3Name: document.getElementById('p3Name').value,
+                p3Name: p3,
                 p3Score: document.getElementById('p3Score').value,
-                p4Name: document.getElementById('p4Name').value,
+                p4Name: p4,
                 p4Score: document.getElementById('p4Score').value,
             };
 
