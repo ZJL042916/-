@@ -93,9 +93,7 @@
                         </div>
                         
                         <!-- 四位玩家記分區 (帶有 贏/輸 切換按鈕) -->
-                        <div class="space-y-3 pt-1" id="playersInputContainer">
-                            <!-- 動態生成玩家 1~4 -->
-                        </div>
+                        <div class="space-y-3 pt-1" id="playersInputContainer"></div>
 
                         <button type="submit" id="submitBtn" class="w-full mt-2 bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-800 hover:to-amber-700 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-amber-900/20 text-sm active:scale-[0.98]">
                             新增戰績並存入雲端
@@ -316,7 +314,6 @@
         }
         setDefaultDates();
 
-        // 渲染 4 位玩家的動態輸入區塊（帶有 贏/輸 切換按鈕）
         function renderPlayerInputs() {
             const container = document.getElementById('playersInputContainer');
             if (!container) return;
@@ -335,7 +332,6 @@
                     <div class="bg-stone-50/80 border border-stone-200/80 rounded-2xl p-3 space-y-2">
                         <div class="flex justify-between items-center">
                             <label class="text-[11px] font-bold text-stone-600">玩家 ${i} (${pos})</label>
-                            <!-- 輸贏切換按鈕 -->
                             <div class="flex bg-stone-200/80 p-0.5 rounded-lg text-[10px] font-bold">
                                 <button type="button" id="p${i}WinBtn" onclick="setPlayerSign(${i}, 'win')" class="px-2 py-0.5 rounded-md transition-all bg-emerald-700 text-white shadow-sm">📈 贏</button>
                                 <button type="button" id="p${i}LoseBtn" onclick="setPlayerSign(${i}, 'lose')" class="px-2 py-0.5 rounded-md transition-all text-stone-600 hover:text-stone-900">📉 輸</button>
@@ -357,7 +353,6 @@
             updatePlayerSelects();
         }
 
-        // 切換玩家是贏還是輸
         function setPlayerSign(playerIndex, sign) {
             const winBtn = document.getElementById(`p${playerIndex}WinBtn`);
             const loseBtn = document.getElementById(`p${playerIndex}LoseBtn`);
@@ -873,7 +868,7 @@
             }
         }
 
-        // 提交表單：自動將「贏/輸」轉換為正負號，並帶入台費
+        // 表單提交與防呆驗證
         document.getElementById('gameForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -893,7 +888,6 @@
                 return;
             }
 
-            // 讀取分數與正負號
             const getScoreWithSign = (i) => {
                 const val = Number(document.getElementById(`p${i}Score`).value) || 0;
                 const sign = document.getElementById(`p${i}Sign`).value;
@@ -904,6 +898,12 @@
             const p2Score = getScoreWithSign(2);
             const p3Score = getScoreWithSign(3);
             const p4Score = getScoreWithSign(4);
+
+            const totalScoreSum = p1Score + p2Score + p3Score + p4Score;
+            if (totalScoreSum !== 0) {
+                alert(`⚠️ 記分防呆警告：四位玩家的總得分相加必須為 0（目前總和為 ${totalScoreSum > 0 ? '+' + totalScoreSum : totalScoreSum}）！\n請檢查贏家與輸家的分數和切換是否正確。`);
+                return;
+            }
 
             const btn = document.getElementById('submitBtn');
             btn.innerText = '正在上傳至雲端...';
