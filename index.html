@@ -689,7 +689,6 @@
                 const scoreClass = c.totalScore >= 0 ? 'text-emerald-700' : 'text-rose-700';
                 const scoreText = c.totalScore > 0 ? `+${c.totalScore}` : c.totalScore;
                 
-                // 將 YYYY-MM 轉化為乾淨的顯示格式 (例如 2026年10月)
                 let monthDisplay = c.month;
                 if (c.month && c.month.includes('-')) {
                     const parts = c.month.split('-');
