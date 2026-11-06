@@ -19,7 +19,7 @@
 
     <!-- 頂部導覽列 -->
     <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-md">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
             <div class="flex items-center space-x-3">
                 <span class="text-3xl">🀄</span>
                 <div>
@@ -28,8 +28,55 @@
                 </div>
             </div>
 
-            <!-- 雲端房間與同步狀態 (已加入明確的切換確認按鈕) -->
+            <!-- 雲端房間與同步狀態 -->
             <div class="flex items-center gap-2 bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-700 text-sm">
                 <span class="text-slate-400">房間代碼:</span>
-                <input type="text" x-model="tempRoomId" class="bg-slate-800 text-blue-300 font-mono px-2.5 py-1 rounded border border-slate-600 w-32 text-center focus:outline-none focus:border-blue-500">
-                <button @click="changeRoom" class="bg-emerald-600 hover:bg-emerald-500 text-white
+                <input type="text" x-model="roomId" class="bg-slate-800 text-blue-300 font-mono px-2.5 py-1 rounded border border-slate-600 w-36 text-center focus:outline-none focus:border-blue-500">
+                <button @click="changeRoom" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1 rounded text-xs font-medium transition">
+                    切換
+                </button>
+                <button @click="syncData" :disabled="isSyncing" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded text-xs font-medium transition flex items-center gap-1 disabled:opacity-50">
+                    <span x-show="!isSyncing">🔄 同步</span>
+                    <span x-show="isSyncing">⏳...</span>
+                </button>
+            </div>
+
+            <!-- 分頁切換按鈕 -->
+            <nav class="flex space-x-1 bg-slate-900 p-1 rounded-xl border border-slate-700 w-full md:w-auto justify-center">
+                <button @click="currentTab = 'ranking'" :class="currentTab === 'ranking' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg font-medium text-sm transition">🏆 排行榜</button>
+                <button @click="currentTab = 'matches'" :class="currentTab === 'matches' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg font-medium text-sm transition">📜 記錄</button>
+                <button @click="currentTab = 'players'" :class="currentTab === 'players' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg font-medium text-sm transition">👥 玩家</button>
+                <button @click="currentTab = 'stats'" :class="currentTab === 'stats' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-lg font-medium text-sm transition">📊 統計</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 主要內容區 -->
+    <main class="max-w-7xl mx-auto px-4 py-6">
+
+        <!-- 1. 排行榜頁面 -->
+        <div x-show="currentTab === 'ranking'" class="space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-xl font-bold flex items-center gap-2"><span>👑</span> 戰神積分總榜</h2>
+                <span class="text-xs text-slate-400">目前房間: <strong class="text-blue-400 font-mono" x-text="roomId"></strong></span>
+            </div>
+
+            <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-700/50 text-slate-400 text-sm border-b border-slate-700">
+                                <th class="p-4 text-center w-16">名次</th>
+                                <th class="p-4">牌友名稱</th>
+                                <th class="p-4 text-center">總勝場 / 總局數</th>
+                                <th class="p-4 text-center">勝率</th>
+                                <th class="p-4 text-right">總得分</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700">
+                            <template x-for="(player, index) in rankings" :key="player.id">
+                                <tr class="hover:bg-slate-700/30 transition">
+                                    <td class="p-4 text-center font-bold">
+                                        <span :class="{
+                                            'text-yellow-400 text-lg': index === 0,
+                                            'text-slate-300 text-lg
