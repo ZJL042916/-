@@ -7,7 +7,6 @@
     <!-- 引入 Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 溫潤拿鐵／奶茶色系動態背景 */
         body {
             background-color: #f7f4ed;
             background-image: 
@@ -30,7 +29,7 @@
                     <h1 class="text-xl md:text-2xl font-black text-stone-900 tracking-tight">
                         麻將即時戰績排行榜
                     </h1>
-                    <p class="text-xs text-stone-500 font-medium">雲端多人連線同步系統</p>
+                    <p class="text-xs text-stone-500 font-medium">雲端多人連線同步系統 (牌友雲端同步版)</p>
                 </div>
             </div>
 
@@ -123,14 +122,14 @@
                         <h2 class="text-base font-bold text-amber-800 flex items-center gap-2">
                             <span class="p-1.5 bg-amber-100 rounded-xl border border-amber-200">🏆</span> 總累積戰績排行榜
                         </h2>
-                        <button onclick="loadGames()" class="text-xs font-semibold bg-stone-200/80 hover:bg-stone-300 text-stone-700 px-4 py-2.5 rounded-xl border border-stone-300 transition-all flex items-center gap-1.5 active:scale-95 shadow-sm">
+                        <button onclick="loadData()" class="text-xs font-semibold bg-stone-200/80 hover:bg-stone-300 text-stone-700 px-4 py-2.5 rounded-xl border border-stone-300 transition-all flex items-center gap-1.5 active:scale-95 shadow-sm">
                             <span>🔄</span> 重新整理
                         </button>
                     </div>
                     <div class="overflow-x-auto flex-1 p-5 md:p-6">
                         <div id="loading" class="text-center text-stone-500 py-16 text-sm flex flex-col items-center gap-2">
                             <div class="w-6 h-6 border-2 border-amber-700 border-t-transparent rounded-full animate-spin"></div>
-                            正在從 Google 雲端載入戰績...
+                            正在從 Google 雲端載入資料...
                         </div>
                         <table class="w-full text-left border-collapse hidden" id="rankTable">
                             <thead>
@@ -206,7 +205,7 @@
         <div id="pageFriends" class="space-y-6 hidden">
             <div class="bg-white/80 border border-stone-200/80 rounded-3xl p-6 md:p-8 shadow-xl backdrop-blur-md max-w-xl mx-auto">
                 <h2 class="text-base font-bold text-amber-800 mb-5 flex items-center gap-2">
-                    <span class="p-1.5 bg-amber-100 rounded-xl border border-amber-200">👥</span> 新增牌友與專屬綽號
+                    <span class="p-1.5 bg-amber-100 rounded-xl border border-amber-200">👥</span> 新增牌友與專屬綽號 (雲端同步)
                 </h2>
                 <form id="friendForm" class="space-y-4 mb-6">
                     <div>
@@ -217,12 +216,12 @@
                         <label class="block text-xs font-semibold text-stone-600 mb-1.5">專屬綽號</label>
                         <input type="text" id="friendNickname" placeholder="例如：二頭肌" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-stone-800 focus:outline-none focus:border-amber-600 shadow-inner transition-colors" required>
                     </div>
-                    <button type="submit" class="w-full bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-800 hover:to-amber-700 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-amber-900/20 text-sm active:scale-[0.98]">
-                        儲存牌友綽號
+                    <button type="submit" id="friendSubmitBtn" class="w-full bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-800 hover:to-amber-700 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-amber-900/20 text-sm active:scale-[0.98]">
+                        儲存牌友至雲端
                     </button>
                 </form>
 
-                <h3 class="text-xs uppercase tracking-wider text-stone-500 font-bold mb-3">現有牌友與綽號清單</h3>
+                <h3 class="text-xs uppercase tracking-wider text-stone-500 font-bold mb-3">雲端現有牌友與綽號清單</h3>
                 <div class="overflow-x-auto rounded-2xl border border-stone-200 shadow-inner bg-stone-50/50">
                     <table class="w-full text-left border-collapse text-sm">
                         <thead>
@@ -245,12 +244,7 @@
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz3c7X_Amn2wfe02Esonpr6YSDHnrldCdnh2fjq_AZyIgteFi--nO5XUYHwHCjVt4B9/exec";
 
         let games = [];
-        let friendsData = JSON.parse(localStorage.getItem('mahjong_friends_data')) || [
-            { name: "張嘉恩", nickname: "二頭肌" },
-            { name: "小頭", nickname: "神乎其技" },
-            { name: "牌友A", nickname: "摸牌手" },
-            { name: "牌友B", nickname: "大老千" }
-        ];
+        let friendsData = [];
 
         // 初始化日期與月份選擇器
         function setDefaultDates() {
@@ -288,7 +282,6 @@
                 if (currentVal) select.value = currentVal;
             });
         }
-        updatePlayerSelects();
 
         // 分頁切換功能
         function switchTab(tab) {
@@ -324,8 +317,8 @@
             }
         }
 
-        // 1. 從 Google 試算表讀取資料
-        async function loadGames() {
+        // 1. 從 Google 試算表同步讀取資料（戰績 + 牌友名單）
+        async function loadData() {
             const loading = document.getElementById('loading');
             const table = document.getElementById('rankTable');
             if (!loading || !table) return;
@@ -334,9 +327,15 @@
 
             try {
                 const response = await fetch(WEB_APP_URL);
-                games = await response.json();
+                const data = await response.json();
+                games = data.games || [];
+                friendsData = data.friends || [];
+
+                updatePlayerSelects();
                 renderLeaderboard();
                 renderMonthlyLeaderboard();
+                renderFriendsTable();
+
                 loading.style.display = 'none';
                 table.classList.remove('hidden');
             } catch (error) {
@@ -510,32 +509,55 @@
             });
         }
 
+        // 同步牌友名單至雲端
+        async function syncFriendsToCloud() {
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: "UPDATE_FRIENDS", friends: friendsData })
+                });
+            } catch (error) {
+                console.error('牌友名單同步雲端失敗:', error);
+            }
+        }
+
         // 新增牌友與綽號
-        document.getElementById('friendForm').addEventListener('submit', (e) => {
+        document.getElementById('friendForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = document.getElementById('friendName').value.trim();
+            const name = document.getElementById('friendName'].value.trim();
             const nickname = document.getElementById('friendNickname').value.trim();
             
             if (name && nickname) {
+                const btn = document.getElementById('friendSubmitBtn');
+                btn.innerText = '正在同步至雲端...';
+                btn.disabled = true;
+
                 friendsData.push({ name, nickname });
-                localStorage.setItem('mahjong_friends_data', JSON.stringify(friendsData));
+                await syncFriendsToCloud();
+
                 document.getElementById('friendName').value = '';
                 document.getElementById('friendNickname').value = '';
                 renderFriendsTable();
                 updatePlayerSelects();
-                alert(`成功新增牌友：${name} (${nickname})`);
+                
+                btn.innerText = '儲存牌友至雲端';
+                btn.disabled = false;
+                alert(`成功新增並同步牌友：${name} (${nickname})`);
             }
         });
 
         // 刪除牌友
-        function removeFriend(index) {
+        async function removeFriend(index) {
             friendsData.splice(index, 1);
-            localStorage.setItem('mahjong_friends_data', JSON.stringify(friendsData));
+            await syncFriendsToCloud();
             renderFriendsTable();
             updatePlayerSelects();
+            alert('已成功從雲端刪除該牌友！');
         }
 
-        // 5. 提交新戰績到 Google 試算表（含防呆機制）
+        // 5. 提交新戰績到 Google 試算表
         document.getElementById('gameForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -580,7 +602,7 @@
                 document.getElementById('gameForm').reset();
                 setDefaultDates();
                 updatePlayerSelects();
-                setTimeout(loadGames, 1500);
+                setTimeout(loadData, 1500);
             } catch (error) {
                 console.error('上傳失敗:', error);
                 alert('上傳失敗請稍後再試。');
@@ -590,7 +612,7 @@
             }
         });
 
-        loadGames();
+        loadData();
     </script>
 </body>
 </html>
