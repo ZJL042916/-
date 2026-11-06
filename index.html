@@ -49,7 +49,7 @@
                     <form id="gameForm" class="space-y-4">
                         <div>
                             <label class="block text-xs text-slate-400 mb-1">牌局日期</label>
-                            <!-- 改為一般選日期的格式 -->
+                            <!-- 一般日期選擇器 -->
                             <input type="date" id="gameDate" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500" required>
                         </div>
                         <div>
@@ -62,14 +62,14 @@
                                 <div>
                                     <label class="block text-xs text-slate-400 mb-1">玩家 1 (東)</label>
                                     <select id="p1Name" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500" required>
-                                        <!-- 動態載入牌友綽號 -->
+                                        <!-- 下拉選單連動綽號 -->
                                     </select>
                                     <input type="number" id="p1Score" placeholder="得分" value="500" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-emerald-400 font-bold" required>
                                 </div>
                                 <div>
                                     <label class="block text-xs text-slate-400 mb-1">玩家 2 (南)</label>
                                     <select id="p2Name" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500" required>
-                                        <!-- 動態載入牌友綽號 -->
+                                        <!-- 下拉選單連動綽號 -->
                                     </select>
                                     <input type="number" id="p2Score" placeholder="得分" value="-100" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-rose-400 font-bold" required>
                                 </div>
@@ -78,14 +78,14 @@
                                 <div>
                                     <label class="block text-xs text-slate-400 mb-1">玩家 3 (西)</label>
                                     <select id="p3Name" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500" required>
-                                        <!-- 動態載入牌友綽號 -->
+                                        <!-- 下拉選單連動綽號 -->
                                     </select>
                                     <input type="number" id="p3Score" placeholder="得分" value="-200" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-rose-400 font-bold" required>
                                 </div>
                                 <div>
                                     <label class="block text-xs text-slate-400 mb-1">玩家 4 (北)</label>
                                     <select id="p4Name" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500" required>
-                                        <!-- 動態載入牌友綽號 -->
+                                        <!-- 下拉選單連動綽號 -->
                                     </select>
                                     <input type="number" id="p4Score" placeholder="得分" value="-200" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-rose-400 font-bold" required>
                                 </div>
@@ -177,10 +177,13 @@
             { name: "牌友B", nickname: "大老千" }
         ];
 
-        // 初始化日期選擇器預設為今天
+        // 初始化日期為今天
         function setDefaultDate() {
             const today = new Date().toISOString().split('T')[0];
-            document.getElementById('gameDate').value = today;
+            const dateInput = document.getElementById('gameDate');
+            if (dateInput && !dateInput.value) {
+                dateInput.value = today;
+            }
         }
         setDefaultDate();
 
@@ -200,7 +203,6 @@
                     opt.innerText = display;
                     select.appendChild(opt);
                     
-                    // 預設給不同玩家不同預設值
                     if (!currentVal && i === index % friendsData.length) {
                         select.value = display;
                     }
@@ -222,7 +224,7 @@
                 pageFriends.classList.add('hidden');
                 tabRank.className = "px-4 py-1.5 text-xs font-semibold rounded-lg transition-all bg-blue-600 text-white shadow";
                 tabFriends.className = "px-4 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-white";
-                updatePlayerSelects(); // 切回排行榜時更新下拉選單
+                updatePlayerSelects();
             } else {
                 pageRank.classList.add('hidden');
                 pageFriends.classList.remove('hidden');
@@ -236,6 +238,7 @@
         async function loadGames() {
             const loading = document.getElementById('loading');
             const table = document.getElementById('rankTable');
+            if (!loading || !table) return;
             loading.style.display = 'block';
             table.classList.add('hidden');
 
@@ -284,15 +287,16 @@
             });
 
             const mvpBanner = document.getElementById('mvpBanner');
-            if (mvp && mvp.totalGames >= 1) {
+            if (mvpBanner && mvp && mvp.totalGames >= 1) {
                 document.getElementById('mvpName').innerText = mvp.name;
                 document.getElementById('mvpRate').innerText = `${mvp.rate}%`;
                 mvpBanner.classList.remove('hidden');
-            } else {
+            } else if (mvpBanner) {
                 mvpBanner.classList.add('hidden');
             }
 
             const tbody = document.getElementById('leaderboardBody');
+            if (!tbody) return;
             tbody.innerHTML = '';
 
             if (sorted.length === 0) {
@@ -320,6 +324,7 @@
         // 3. 渲染牌友與綽號表格
         function renderFriendsTable() {
             const fTable = document.getElementById('friendTableBody');
+            if (!fTable) return;
             fTable.innerHTML = '';
             if (friendsData.length === 0) {
                 fTable.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-slate-500">目前尚無牌友資料</td></tr>`;
