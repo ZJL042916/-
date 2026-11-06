@@ -48,8 +48,9 @@
                     <h2 class="text-lg font-semibold text-blue-400 mb-4">📝 記錄新牌局</h2>
                     <form id="gameForm" class="space-y-4">
                         <div>
-                            <label class="block text-xs text-slate-400 mb-1">牌局時間</label>
-                            <input type="datetime-local" id="gameTime" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500" required>
+                            <label class="block text-xs text-slate-400 mb-1">牌局日期</label>
+                            <!-- 改為一般選日期的格式 -->
+                            <input type="date" id="gameDate" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500" required>
                         </div>
                         <div>
                             <label class="block text-xs text-slate-400 mb-1">地點</label>
@@ -60,24 +61,32 @@
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
                                     <label class="block text-xs text-slate-400 mb-1">玩家 1 (東)</label>
-                                    <input type="text" id="p1Name" value="張嘉恩" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200" required>
+                                    <select id="p1Name" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500" required>
+                                        <!-- 動態載入牌友綽號 -->
+                                    </select>
                                     <input type="number" id="p1Score" placeholder="得分" value="500" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-emerald-400 font-bold" required>
                                 </div>
                                 <div>
                                     <label class="block text-xs text-slate-400 mb-1">玩家 2 (南)</label>
-                                    <input type="text" id="p2Name" value="小頭" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200" required>
+                                    <select id="p2Name" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500" required>
+                                        <!-- 動態載入牌友綽號 -->
+                                    </select>
                                     <input type="number" id="p2Score" placeholder="得分" value="-100" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-rose-400 font-bold" required>
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
                                     <label class="block text-xs text-slate-400 mb-1">玩家 3 (西)</label>
-                                    <input type="text" id="p3Name" value="牌友A" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200" required>
+                                    <select id="p3Name" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500" required>
+                                        <!-- 動態載入牌友綽號 -->
+                                    </select>
                                     <input type="number" id="p3Score" placeholder="得分" value="-200" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-rose-400 font-bold" required>
                                 </div>
                                 <div>
                                     <label class="block text-xs text-slate-400 mb-1">玩家 4 (北)</label>
-                                    <input type="text" id="p4Name" value="牌友B" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200" required>
+                                    <select id="p4Name" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500" required>
+                                        <!-- 動態載入牌友綽號 -->
+                                    </select>
                                     <input type="number" id="p4Score" placeholder="得分" value="-200" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-rose-400 font-bold" required>
                                 </div>
                             </div>
@@ -161,13 +170,45 @@
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz3c7X_Amn2wfe02Esonpr6YSDHnrldCdnh2fjq_AZyIgteFi--nO5XUYHwHCjVt4B9/exec";
 
         let games = [];
-        // 從 LocalStorage 載入好友與綽號資料
         let friendsData = JSON.parse(localStorage.getItem('mahjong_friends_data')) || [
             { name: "張嘉恩", nickname: "二頭肌" },
             { name: "小頭", nickname: "神乎其技" },
             { name: "牌友A", nickname: "摸牌手" },
             { name: "牌友B", nickname: "大老千" }
         ];
+
+        // 初始化日期選擇器預設為今天
+        function setDefaultDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('gameDate').value = today;
+        }
+        setDefaultDate();
+
+        // 更新玩家下拉選單選項
+        function updatePlayerSelects() {
+            const selects = ['p1Name', 'p2Name', 'p3Name', 'p4Name'];
+            selects.forEach((id, index) => {
+                const select = document.getElementById(id);
+                if (!select) return;
+                const currentVal = select.value;
+                select.innerHTML = '';
+                
+                friendsData.forEach((f, i) => {
+                    const display = `${f.name} (${f.nickname})`;
+                    const opt = document.createElement('option');
+                    opt.value = display;
+                    opt.innerText = display;
+                    select.appendChild(opt);
+                    
+                    // 預設給不同玩家不同預設值
+                    if (!currentVal && i === index % friendsData.length) {
+                        select.value = display;
+                    }
+                });
+                if (currentVal) select.value = currentVal;
+            });
+        }
+        updatePlayerSelects();
 
         // 分頁切換功能
         function switchTab(tab) {
@@ -181,6 +222,7 @@
                 pageFriends.classList.add('hidden');
                 tabRank.className = "px-4 py-1.5 text-xs font-semibold rounded-lg transition-all bg-blue-600 text-white shadow";
                 tabFriends.className = "px-4 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-white";
+                updatePlayerSelects(); // 切回排行榜時更新下拉選單
             } else {
                 pageRank.classList.add('hidden');
                 pageFriends.classList.remove('hidden');
@@ -189,13 +231,6 @@
                 renderFriendsTable();
             }
         }
-
-        function setDefaultDateTime() {
-            const now = new Date();
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            document.getElementById('gameTime').value = now.toISOString().slice(0, 16);
-        }
-        setDefaultDateTime();
 
         // 1. 從 Google 試算表讀取資料
         async function loadGames() {
@@ -250,11 +285,7 @@
 
             const mvpBanner = document.getElementById('mvpBanner');
             if (mvp && mvp.totalGames >= 1) {
-                // 檢查是否有對應的綽號
-                const found = friendsData.find(f => f.name === mvp.name);
-                const displayName = found ? `${mvp.name} (${found.nickname})` : mvp.name;
-                
-                document.getElementById('mvpName').innerText = displayName;
+                document.getElementById('mvpName').innerText = mvp.name;
                 document.getElementById('mvpRate').innerText = `${mvp.rate}%`;
                 mvpBanner.classList.remove('hidden');
             } else {
@@ -274,14 +305,10 @@
                 const scoreClass = data.totalScore >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
                 const scoreText = data.totalScore > 0 ? `+${data.totalScore}` : data.totalScore;
 
-                // 顯示名字與綽號
-                const found = friendsData.find(f => f.name === name);
-                const displayName = found ? `${name} <span class="text-xs text-sky-400 font-normal">(${found.nickname})</span>` : name;
-
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-800/35 transition-colors">
                         <td class="py-3 px-4 font-semibold text-sky-400">#${idx + 1}</td>
-                        <td class="py-3 px-4 font-medium text-white">${displayName}</td>
+                        <td class="py-3 px-4 font-medium text-white">${name}</td>
                         <td class="py-3 px-4 text-center text-slate-300">${data.totalGames}</td>
                         <td class="py-3 px-4 text-center text-slate-300">${winRate}%</td>
                         <td class="py-3 px-4 text-right ${scoreClass}">${scoreText}</td>
@@ -323,6 +350,7 @@
                 document.getElementById('friendName').value = '';
                 document.getElementById('friendNickname').value = '';
                 renderFriendsTable();
+                updatePlayerSelects();
                 alert(`成功新增牌友：${name} (${nickname})`);
             }
         });
@@ -332,6 +360,7 @@
             friendsData.splice(index, 1);
             localStorage.setItem('mahjong_friends_data', JSON.stringify(friendsData));
             renderFriendsTable();
+            updatePlayerSelects();
         }
 
         // 4. 提交新戰績到 Google 試算表
@@ -342,7 +371,7 @@
             btn.disabled = true;
 
             const newGame = {
-                timestamp: document.getElementById('gameTime').value,
+                timestamp: document.getElementById('gameDate').value,
                 location: document.getElementById('location').value,
                 p1Name: document.getElementById('p1Name').value,
                 p1Score: document.getElementById('p1Score').value,
@@ -364,7 +393,8 @@
 
                 alert('戰績已成功同步至 Google 雲端！');
                 document.getElementById('gameForm').reset();
-                setDefaultDateTime();
+                setDefaultDate();
+                updatePlayerSelects();
                 setTimeout(loadGames, 1500);
             } catch (error) {
                 console.error('上傳失敗:', error);
