@@ -29,7 +29,7 @@
                     <h1 class="text-xl md:text-2xl font-black text-stone-900 tracking-tight">
                         麻將即時戰績排行榜
                     </h1>
-                    <p class="text-xs text-stone-500 font-medium">雲端多人連線同步系統 (牌友雲端同步版)</p>
+                    <p class="text-xs text-stone-500 font-medium">雲端多人連線同步系統</p>
                 </div>
             </div>
 
@@ -244,7 +244,12 @@
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz3c7X_Amn2wfe02Esonpr6YSDHnrldCdnh2fjq_AZyIgteFi--nO5XUYHwHCjVt4B9/exec";
 
         let games = [];
-        let friendsData = [];
+        let friendsData = [
+            { name: "張嘉恩", nickname: "二頭肌" },
+            { name: "小頭", nickname: "神乎其技" },
+            { name: "牌友A", nickname: "摸牌手" },
+            { name: "牌友B", nickname: "大老千" }
+        ];
 
         // 初始化日期與月份選擇器
         function setDefaultDates() {
@@ -282,8 +287,9 @@
                 if (currentVal) select.value = currentVal;
             });
         }
+        updatePlayerSelects();
 
-        // 分頁切換功能
+        // 分頁切換功能（確保不受載入狀態影響，隨時可切換）
         function switchTab(tab) {
             const pageRank = document.getElementById('pageRank');
             const pageMonthly = document.getElementById('pageMonthly');
@@ -293,31 +299,33 @@
             const tabMonthly = document.getElementById('tabMonthly');
             const tabFriends = document.getElementById('tabFriends');
 
+            if (!pageRank || !pageMonthly || !pageFriends) return;
+
             pageRank.classList.add('hidden');
             pageMonthly.classList.add('hidden');
             pageFriends.classList.add('hidden');
 
             const inactiveClass = "px-4 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50";
-            tabRank.className = inactiveClass;
-            tabMonthly.className = inactiveClass;
-            tabFriends.className = inactiveClass;
+            if(tabRank) tabRank.className = inactiveClass;
+            if(tabMonthly) tabMonthly.className = inactiveClass;
+            if(tabFriends) tabFriends.className = inactiveClass;
 
             if (tab === 'rank') {
                 pageRank.classList.remove('hidden');
-                tabRank.className = "px-4 py-2 text-xs font-bold rounded-xl transition-all bg-amber-700 text-white shadow-md";
+                if(tabRank) tabRank.className = "px-4 py-2 text-xs font-bold rounded-xl transition-all bg-amber-700 text-white shadow-md";
                 updatePlayerSelects();
             } else if (tab === 'monthly') {
                 pageMonthly.classList.remove('hidden');
-                tabMonthly.className = "px-4 py-2 text-xs font-bold rounded-xl transition-all bg-amber-700 text-white shadow-md";
+                if(tabMonthly) tabMonthly.className = "px-4 py-2 text-xs font-bold rounded-xl transition-all bg-amber-700 text-white shadow-md";
                 renderMonthlyLeaderboard();
             } else {
                 pageFriends.classList.remove('hidden');
-                tabFriends.className = "px-4 py-2 text-xs font-bold rounded-xl transition-all bg-amber-700 text-white shadow-md";
+                if(tabFriends) tabFriends.className = "px-4 py-2 text-xs font-bold rounded-xl transition-all bg-amber-700 text-white shadow-md";
                 renderFriendsTable();
             }
         }
 
-        // 1. 從 Google 試算表同步讀取資料（戰績 + 牌友名單）
+        // 從 Google 試算表同步讀取資料（含逾時與錯誤防護）
         async function loadData() {
             const loading = document.getElementById('loading');
             const table = document.getElementById('rankTable');
@@ -326,10 +334,18 @@
             table.classList.add('hidden');
 
             try {
-                const response = await fetch(WEB_APP_URL);
+                // 設定 8 秒逾時機制，避免網路卡住時整個網頁死當
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+                const response = await fetch(WEB_APP_URL, { signal: controller.signal });
+                clearTimeout(timeoutId);
+
                 const data = await response.json();
                 games = data.games || [];
-                friendsData = data.friends || [];
+                if (data.friends && data.friends.length > 0) {
+                    friendsData = data.friends;
+                }
 
                 updatePlayerSelects();
                 renderLeaderboard();
@@ -339,12 +355,16 @@
                 loading.style.display = 'none';
                 table.classList.remove('hidden');
             } catch (error) {
-                console.error('讀取失敗:', error);
-                loading.innerText = '載入失敗，請檢查網路或 API 網址是否正確。';
+                console.error('讀取雲端資料失敗:', error);
+                loading.innerHTML = `
+                    <div class="text-rose-600 font-semibold mb-2">⚠️ 無法順利連接至 Google 雲端</div>
+                    <div class="text-xs text-stone-500 mb-4">請確認 Google Apps Script 是否已正確部署最新版本</div>
+                    <button onclick="loadData()" class="px-4 py-2 bg-amber-700 text-white text-xs font-bold rounded-xl shadow">重新嘗試載入</button>
+                `;
             }
         }
 
-        // 2. 渲染總排行榜與常勝軍 (MVP)
+        // 渲染總排行榜與常勝軍 (MVP)
         function renderLeaderboard() {
             const stats = {};
             games.forEach(g => {
@@ -412,7 +432,7 @@
             });
         }
 
-        // 3. 渲染月排行榜
+        // 渲染月排行榜
         function renderMonthlyLeaderboard() {
             const monthInput = document.getElementById('selectMonth');
             if (!monthInput) return;
@@ -487,7 +507,7 @@
             });
         }
 
-        // 4. 渲染牌友與綽號表格
+        // 渲染牌友與綽號表格
         function renderFriendsTable() {
             const fTable = document.getElementById('friendTableBody');
             if (!fTable) return;
@@ -526,8 +546,12 @@
         // 新增牌友與綽號
         document.getElementById('friendForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = document.getElementById('friendName'].value.trim();
-            const nickname = document.getElementById('friendNickname').value.trim();
+            const nameInput = document.getElementById('friendName');
+            const nicknameInput = document.getElementById('friendNickname');
+            if(!nameInput || !nicknameInput) return;
+
+            const name = nameInput.value.trim();
+            const nickname = nicknameInput.value.trim();
             
             if (name && nickname) {
                 const btn = document.getElementById('friendSubmitBtn');
@@ -537,8 +561,8 @@
                 friendsData.push({ name, nickname });
                 await syncFriendsToCloud();
 
-                document.getElementById('friendName').value = '';
-                document.getElementById('friendNickname').value = '';
+                nameInput.value = '';
+                nicknameInput.value = '';
                 renderFriendsTable();
                 updatePlayerSelects();
                 
@@ -557,7 +581,7 @@
             alert('已成功從雲端刪除該牌友！');
         }
 
-        // 5. 提交新戰績到 Google 試算表
+        // 提交新戰績到 Google 試算表
         document.getElementById('gameForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
