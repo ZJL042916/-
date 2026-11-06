@@ -35,13 +35,16 @@
 
             <!-- 分頁切換 Tabs -->
             <div class="flex flex-wrap justify-center bg-stone-200/70 border border-stone-300/60 rounded-2xl p-1.5 shadow-inner gap-1.5">
-                <button onclick="switchTab('rank')" id="tabRank" class="px-4 py-2 text-xs font-bold rounded-xl transition-all bg-amber-700 text-white shadow-md">
+                <button onclick="switchTab('rank')" id="tabRank" class="px-3 py-2 text-xs font-bold rounded-xl transition-all bg-amber-700 text-white shadow-md">
                     🏆 總排行榜
                 </button>
-                <button onclick="switchTab('monthly')" id="tabMonthly" class="px-4 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">
+                <button onclick="switchTab('monthly')" id="tabMonthly" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">
                     📅 月排行榜
                 </button>
-                <button onclick="switchTab('friends')" id="tabFriends" class="px-4 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">
+                <button onclick="switchTab('history')" id="tabHistory" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">
+                    📜 牌局明細
+                </button>
+                <button onclick="switchTab('friends')" id="tabFriends" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">
                     👥 牌友管理
                 </button>
             </div>
@@ -135,7 +138,7 @@
                             <thead>
                                 <tr class="border-b border-stone-200 text-stone-500 text-xs uppercase tracking-wider">
                                     <th class="py-3 px-4 font-bold">排名</th>
-                                    <th class="py-3 px-4 font-bold">牌友</th>
+                                    <th class="py-3 px-4 font-bold">牌友 (點擊看個人明細)</th>
                                     <th class="py-3 px-4 font-bold text-center">總場次</th>
                                     <th class="py-3 px-4 font-bold text-center">勝率</th>
                                     <th class="py-3 px-4 font-bold text-right">累積得分</th>
@@ -150,7 +153,6 @@
 
         <!-- ==================== 分頁二：月排行榜 ==================== -->
         <div id="pageMonthly" class="space-y-6 hidden">
-            <!-- 月份選擇控制列 -->
             <div class="bg-white/80 border border-stone-200/80 rounded-3xl p-5 md:p-6 shadow-xl backdrop-blur-md flex flex-col md:flex-row justify-between items-center gap-4">
                 <div class="flex items-center gap-3.5">
                     <div class="w-11 h-11 rounded-2xl bg-amber-100 border border-amber-200 flex items-center justify-center text-xl">
@@ -166,7 +168,6 @@
                 </div>
             </div>
 
-            <!-- 當月 MVP 與排行榜 -->
             <div class="bg-white/80 border border-stone-200/80 rounded-3xl shadow-xl backdrop-blur-md overflow-hidden">
                 <div id="monthMvpBanner" class="bg-gradient-to-r from-amber-50/80 via-white to-orange-50/80 border-b border-stone-200 p-5 md:p-6 flex items-center justify-between hidden">
                     <div class="flex items-center space-x-3.5">
@@ -201,7 +202,33 @@
             </div>
         </div>
 
-        <!-- ==================== 分頁三：牌友與綽號管理 ==================== -->
+        <!-- ==================== 分頁三：牌局明細與管理 ==================== -->
+        <div id="pageHistory" class="space-y-6 hidden">
+            <div class="bg-white/80 border border-stone-200/80 rounded-3xl shadow-xl backdrop-blur-md overflow-hidden p-5 md:p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-base font-bold text-amber-800 flex items-center gap-2">
+                            <span class="p-1.5 bg-amber-100 rounded-xl border border-amber-200">📜</span> 歷史牌局明細與管理
+                        </h2>
+                        <p class="text-xs text-stone-500 mt-0.5">檢視所有打牌紀錄，可進行修改或刪除</p>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="border-b border-stone-200 text-stone-500 text-xs uppercase tracking-wider">
+                                <th class="py-3 px-4 font-bold">日期 / 地點</th>
+                                <th class="py-3 px-4 font-bold">四人得分明細</th>
+                                <th class="py-3 px-4 font-bold text-right">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody" class="divide-y divide-stone-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 分頁四：牌友與綽號管理 ==================== -->
         <div id="pageFriends" class="space-y-6 hidden">
             <div class="bg-white/80 border border-stone-200/80 rounded-3xl p-6 md:p-8 shadow-xl backdrop-blur-md max-w-xl mx-auto">
                 <h2 class="text-base font-bold text-amber-800 mb-5 flex items-center gap-2">
@@ -237,6 +264,38 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- 個人戰績彈窗 (Modal) -->
+    <div id="playerModal" class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white border border-stone-200 rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl space-y-5 relative">
+            <button onclick="closePlayerModal()" class="absolute top-5 right-5 text-stone-400 hover:text-stone-700 text-xl font-bold">✕</button>
+            <div class="flex items-center space-x-3.5">
+                <div class="w-12 h-12 rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center text-2xl">🀄</div>
+                <div>
+                    <h3 id="modalPlayerName" class="text-xl font-black text-stone-900">-</h3>
+                    <p class="text-xs text-stone-500">個人對戰歷史與戰績總覽</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-3">
+                <div class="bg-stone-50 border border-stone-200 rounded-2xl p-3 text-center">
+                    <div class="text-[11px] text-stone-500 font-bold">總場次</div>
+                    <div id="modalTotalGames" class="text-lg font-black text-stone-800 mt-0.5">-</div>
+                </div>
+                <div class="bg-stone-50 border border-stone-200 rounded-2xl p-3 text-center">
+                    <div class="text-[11px] text-stone-500 font-bold">勝率</div>
+                    <div id="modalWinRate" class="text-lg font-black text-amber-700 mt-0.5">-</div>
+                </div>
+                <div class="bg-stone-50 border border-stone-200 rounded-2xl p-3 text-center">
+                    <div class="text-[11px] text-stone-500 font-bold">累積得分</div>
+                    <div id="modalTotalScore" class="text-lg font-black mt-0.5">-</div>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">最近對戰紀錄</h4>
+                <div id="modalHistoryList" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
+            </div>
+        </div>
     </div>
 
     <!-- JavaScript 邏輯 -->
@@ -288,34 +347,44 @@
         function switchTab(tab) {
             const pageRank = document.getElementById('pageRank');
             const pageMonthly = document.getElementById('pageMonthly');
+            const pageHistory = document.getElementById('pageHistory');
             const pageFriends = document.getElementById('pageFriends');
             
             const tabRank = document.getElementById('tabRank');
             const tabMonthly = document.getElementById('tabMonthly');
+            const tabHistory = document.getElementById('tabHistory');
             const tabFriends = document.getElementById('tabFriends');
 
-            if (!pageRank || !pageMonthly || !pageFriends) return;
+            if (!pageRank || !pageMonthly || !pageHistory || !pageFriends) return;
 
             pageRank.classList.add('hidden');
             pageMonthly.classList.add('hidden');
+            pageHistory.classList.add('hidden');
             pageFriends.classList.add('hidden');
 
-            const inactiveClass = "px-4 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50";
+            const inactiveClass = "px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50";
             if(tabRank) tabRank.className = inactiveClass;
             if(tabMonthly) tabMonthly.className = inactiveClass;
+            if(tabHistory) tabHistory.className = inactiveClass;
             if(tabFriends) tabFriends.className = inactiveClass;
+
+            const activeClass = "px-3 py-2 text-xs font-bold rounded-xl transition-all bg-amber-700 text-white shadow-md";
 
             if (tab === 'rank') {
                 pageRank.classList.remove('hidden');
-                if(tabRank) tabRank.className = "px-4 py-2 text-xs font-bold rounded-xl transition-all bg-amber-700 text-white shadow-md";
+                if(tabRank) tabRank.className = activeClass;
                 updatePlayerSelects();
             } else if (tab === 'monthly') {
                 pageMonthly.classList.remove('hidden');
-                if(tabMonthly) tabMonthly.className = "px-4 py-2 text-xs font-bold rounded-xl transition-all bg-amber-700 text-white shadow-md";
+                if(tabMonthly) tabMonthly.className = activeClass;
                 renderMonthlyLeaderboard();
+            } else if (tab === 'history') {
+                pageHistory.classList.remove('hidden');
+                if(tabHistory) tabHistory.className = activeClass;
+                renderHistoryTable();
             } else {
                 pageFriends.classList.remove('hidden');
-                if(tabFriends) tabFriends.className = "px-4 py-2 text-xs font-bold rounded-xl transition-all bg-amber-700 text-white shadow-md";
+                if(tabFriends) tabFriends.className = activeClass;
                 renderFriendsTable();
             }
         }
@@ -341,6 +410,7 @@
                 updatePlayerSelects();
                 renderLeaderboard();
                 renderMonthlyLeaderboard();
+                renderHistoryTable();
                 renderFriendsTable();
 
                 loading.style.display = 'none';
@@ -411,15 +481,73 @@
                 const rankBadge = idx === 0 ? 'text-amber-600 font-black' : idx === 1 ? 'text-stone-500 font-bold' : idx === 2 ? 'text-amber-800 font-bold' : 'text-stone-400';
 
                 tbody.innerHTML += `
-                    <tr class="hover:bg-stone-50/80 transition-colors">
+                    <tr class="hover:bg-stone-50/80 transition-colors cursor-pointer" onclick="openPlayerModal('${name}')">
                         <td class="py-4 px-4 font-semibold ${rankBadge}">#${idx + 1}</td>
-                        <td class="py-4 px-4 font-semibold text-stone-900">${name}</td>
+                        <td class="py-4 px-4 font-semibold text-amber-800 underline decoration-amber-300 underline-offset-4">${name}</td>
                         <td class="py-4 px-4 text-center text-stone-600">${data.totalGames}</td>
                         <td class="py-4 px-4 text-center text-stone-600">${winRate}%</td>
                         <td class="py-4 px-4 text-right ${scoreClass}">${scoreText}</td>
                     </tr>
                 `;
             });
+        }
+
+        function openPlayerModal(name) {
+            const modal = document.getElementById('playerModal');
+            document.getElementById('modalPlayerName').innerText = name;
+
+            let totalGames = 0;
+            let totalScore = 0;
+            let wins = 0;
+            let playerHistory = [];
+
+            games.forEach(g => {
+                if (g.scores && g.scores[name] !== undefined) {
+                    const score = Number(g.scores[name]);
+                    totalGames++;
+                    totalScore += score;
+                    if (score > 0) wins++;
+                    playerHistory.push({
+                        date: g.timestamp,
+                        location: g.location,
+                        score: score
+                    });
+                }
+            });
+
+            const winRate = totalGames > 0 ? Math.round((wins / totalGames) * 100) : 0;
+            document.getElementById('modalTotalGames').innerText = totalGames;
+            document.getElementById('modalWinRate').innerText = `${winRate}%`;
+            
+            const scoreElem = document.getElementById('modalTotalScore');
+            scoreElem.innerText = totalScore > 0 ? `+${totalScore}` : totalScore;
+            scoreElem.className = `text-lg font-black mt-0.5 ${totalScore >= 0 ? 'text-emerald-700' : 'text-rose-700'}`;
+
+            const historyList = document.getElementById('modalHistoryList');
+            historyList.innerHTML = '';
+            if (playerHistory.length === 0) {
+                historyList.innerHTML = `<div class="text-xs text-stone-400 text-center py-4">尚無對戰紀錄</div>`;
+            } else {
+                playerHistory.reverse().forEach(h => {
+                    const sClass = h.score >= 0 ? 'text-emerald-700' : 'text-rose-700';
+                    const sText = h.score > 0 ? `+${h.score}` : h.score;
+                    historyList.innerHTML += `
+                        <div class="flex justify-between items-center bg-stone-50 border border-stone-200/60 rounded-xl px-3 py-2 text-xs">
+                            <div>
+                                <div class="font-bold text-stone-800">${h.date}</div>
+                                <div class="text-[10px] text-stone-400">${h.location}</div>
+                            </div>
+                            <div class="font-black ${sClass}">${sText}</div>
+                        </div>
+                    `;
+                });
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closePlayerModal() {
+            document.getElementById('playerModal').classList.add('hidden');
         }
 
         function renderMonthlyLeaderboard() {
@@ -496,7 +624,75 @@
             });
         }
 
-        // 渲染牌友表格（將刪除按鈕改為修改，並顯示修改時間）
+        function renderHistoryTable() {
+            const hTable = document.getElementById('historyTableBody');
+            if (!hTable) return;
+            hTable.innerHTML = '';
+            if (games.length === 0) {
+                hTable.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-stone-400 font-medium">目前尚無歷史牌局記錄</td></tr>`;
+                return;
+            }
+            games.forEach((g, idx) => {
+                let scoresHtml = '';
+                if (g.scores) {
+                    Object.entries(g.scores).forEach(([pName, pScore]) => {
+                        const sClass = Number(pScore) >= 0 ? 'text-emerald-700' : 'text-rose-700';
+                        const sText = Number(pScore) > 0 ? `+${pScore}` : pScore;
+                        scoresHtml += `<span class="inline-block bg-stone-100 border border-stone-200 px-2 py-1 rounded-lg mr-2 mb-1 text-xs"><strong class="text-stone-800">${pName}:</strong> <span class="${sClass} font-bold">${sText}</span></span>`;
+                    });
+                }
+                hTable.innerHTML += `
+                    <tr class="hover:bg-stone-50/80 transition-colors">
+                        <td class="py-3.5 px-4">
+                            <div class="font-bold text-stone-900">${g.timestamp}</div>
+                            <div class="text-xs text-stone-500">${g.location}</div>
+                        </td>
+                        <td class="py-3.5 px-4">${scoresHtml}</td>
+                        <td class="py-3.5 px-4 text-right">
+                            <button onclick="editGame(${idx})" class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 px-3 py-1.5 rounded-xl border border-amber-200 transition-all font-semibold mr-1">修改</button>
+                            <button onclick="deleteGame(${idx})" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-1.5 rounded-xl border border-rose-200 transition-all font-semibold">刪除</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function deleteGame(index) {
+            if (confirm('確定要刪除這筆歷史牌局記錄嗎？此動作將同步更新雲端。')) {
+                games.splice(index, 1);
+                await syncGamesToCloud();
+                renderLeaderboard();
+                renderMonthlyLeaderboard();
+                renderHistoryTable();
+            }
+        }
+
+        async function editGame(index) {
+            const g = games[index];
+            const newLoc = prompt('修改牌局地點：', g.location);
+            if (newLoc !== null) {
+                g.location = newLoc.trim();
+                await syncGamesToCloud();
+                renderHistoryTable();
+                alert('牌局地點已更新！');
+            }
+        }
+
+        async function syncGamesToCloud() {
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: "UPDATE_GAMES", games: games })
+                });
+                alert('雲端戰績明細已同步更新！');
+            } catch (error) {
+                console.error('同步失敗:', error);
+                alert('雲端同步失敗，請稍後再試。');
+            }
+        }
+
         function renderFriendsTable() {
             const fTable = document.getElementById('friendTableBody');
             if (!fTable) return;
@@ -534,7 +730,6 @@
             }
         }
 
-        // 新增牌友（含防呆與時間戳）
         document.getElementById('friendForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const nameInput = document.getElementById('friendName');
@@ -546,7 +741,7 @@
             
             const exists = friendsData.some(f => f.name === name);
             if (exists) {
-                alert(`⚠️ 牌友新增失敗：名字「${name}」已經存在清單中了！若要更改請點擊右側「修改」。`);
+                alert(`⚠️ 牌友新增失敗：名字「${name}」已經存在清單中了！`);
                 return;
             }
 
@@ -570,7 +765,6 @@
             }
         });
 
-        // 修改牌友綽號功能
         async function editFriend(index) {
             const f = friendsData[index];
             const newNickname = prompt(`請輸入「${f.name}」的新綽號：`, f.nickname);
@@ -589,7 +783,6 @@
             }
         }
 
-        // 提交新戰績
         document.getElementById('gameForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
