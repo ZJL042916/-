@@ -9,118 +9,187 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen p-6 font-sans">
     <div class="max-w-4xl mx-auto">
-        <!-- 標題區 -->
-        <header class="mb-8 border-b border-slate-800 pb-4 flex justify-between items-center">
+        <!-- 標題區與分頁切換按鈕 -->
+        <header class="mb-6 border-b border-slate-800 pb-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-sky-200 bg-clip-text text-transparent">
                 🀄 麻將即時戰績排行榜
             </h1>
-            <span class="text-xs px-3 py-1 bg-blue-900/50 text-blue-300 rounded-full border border-blue-700/50">
-                ☁️ Google 雲端同步中
-            </span>
+            <!-- 分頁切換 Tabs -->
+            <div class="flex bg-slate-900 border border-slate-800 rounded-xl p-1 shadow-md">
+                <button onclick="switchTab('rank')" id="tabRank" class="px-4 py-1.5 text-xs font-semibold rounded-lg transition-all bg-blue-600 text-white shadow">
+                    🏆 戰績排行榜
+                </button>
+                <button onclick="switchTab('friends')" id="tabFriends" class="px-4 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-white">
+                    👥 牌友與綽號管理
+                </button>
+            </div>
         </header>
 
-        <!-- 常勝軍（最高勝率 MVP）展示區 -->
-        <div id="mvpBanner" class="mb-6 bg-gradient-to-r from-blue-900/40 via-slate-900 to-sky-900/40 border border-blue-500/30 rounded-2xl p-5 shadow-xl backdrop-blur-md flex items-center justify-between hidden">
-            <div class="flex items-center space-x-4">
-                <div class="text-3xl">👑</div>
-                <div>
-                    <div class="text-xs text-blue-400 font-semibold tracking-wider uppercase">本週常勝軍 (最高勝率 MVP)</div>
-                    <div id="mvpName" class="text-xl font-bold text-white mt-0.5">-</div>
+        <!-- ==================== 分頁一：戰績排行榜 ==================== -->
+        <div id="pageRank" class="space-y-6">
+            <!-- 常勝軍（最高勝率 MVP）展示區 -->
+            <div id="mvpBanner" class="bg-gradient-to-r from-blue-900/40 via-slate-900 to-sky-900/40 border border-blue-500/30 rounded-2xl p-5 shadow-xl backdrop-blur-md flex items-center justify-between hidden">
+                <div class="flex items-center space-x-4">
+                    <div class="text-3xl">👑</div>
+                    <div>
+                        <div class="text-xs text-blue-400 font-semibold tracking-wider uppercase">本週常勝軍 (最高勝率 MVP)</div>
+                        <div id="mvpName" class="text-xl font-bold text-white mt-0.5">-</div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div id="mvpRate" class="text-2xl font-black text-sky-400">-</div>
+                    <div class="text-xs text-slate-400">勝率</div>
                 </div>
             </div>
-            <div class="text-right">
-                <div id="mvpRate" class="text-2xl font-black text-sky-400">-</div>
-                <div class="text-xs text-slate-400">勝率</div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- 左側：新增對局表單 -->
+                <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-md md:col-span-1">
+                    <h2 class="text-lg font-semibold text-blue-400 mb-4">📝 記錄新牌局</h2>
+                    <form id="gameForm" class="space-y-4">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">牌局時間</label>
+                            <input type="datetime-local" id="gameTime" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">地點</label>
+                            <input type="text" id="location" value="新北市板橋區" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500" required>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">玩家 1 (東)</label>
+                                    <input type="text" id="p1Name" value="張嘉恩" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200" required>
+                                    <input type="number" id="p1Score" placeholder="得分" value="500" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-emerald-400 font-bold" required>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">玩家 2 (南)</label>
+                                    <input type="text" id="p2Name" value="小頭" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200" required>
+                                    <input type="number" id="p2Score" placeholder="得分" value="-100" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-rose-400 font-bold" required>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">玩家 3 (西)</label>
+                                    <input type="text" id="p3Name" value="牌友A" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200" required>
+                                    <input type="number" id="p3Score" placeholder="得分" value="-200" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-rose-400 font-bold" required>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">玩家 4 (北)</label>
+                                    <input type="text" id="p4Name" value="牌友B" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200" required>
+                                    <input type="number" id="p4Score" placeholder="得分" value="-200" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-rose-400 font-bold" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm shadow-lg shadow-blue-600/20">
+                            新增戰績並存入雲端
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 右側：排行榜表格 -->
+                <div class="bg-slate-900/80 border border-slate-800 rounded-2xl shadow-xl overflow-hidden backdrop-blur-md md:col-span-2 flex flex-col">
+                    <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+                        <h2 class="text-lg font-semibold text-blue-400">🏆 雲端累積戰績排行榜</h2>
+                        <button onclick="loadGames()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700">
+                            🔄 重新整理戰績
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto flex-1 p-6">
+                        <div id="loading" class="text-center text-slate-400 py-8">正在從 Google 雲端載入戰績...</div>
+                        <table class="w-full text-left border-collapse hidden" id="rankTable">
+                            <thead>
+                                <tr class="bg-slate-800/60 text-slate-400 text-xs uppercase tracking-wider">
+                                    <th class="py-3 px-4">排名</th>
+                                    <th class="py-3 px-4">牌友</th>
+                                    <th class="py-3 px-4 text-center">總場次</th>
+                                    <th class="py-3 px-4 text-center">勝率</th>
+                                    <th class="py-3 px-4 text-right">累積得分</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboardBody" class="divide-y divide-slate-800/60 text-sm">
+                                <!-- 動態載入 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- 主體內容 -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            <!-- 左側：新增對局表單 -->
-            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-md md:col-span-1">
-                <h2 class="text-lg font-semibold text-blue-400 mb-4">📝 記錄新牌局</h2>
-                <form id="gameForm" class="space-y-4">
+        <!-- ==================== 分頁二：牌友與綽號管理 ==================== -->
+        <div id="pageFriends" class="space-y-6 hidden">
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-md max-w-xl mx-auto">
+                <h2 class="text-lg font-semibold text-blue-400 mb-4">👥 新增牌友與綽號</h2>
+                <form id="friendForm" class="space-y-4 mb-6">
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">牌局時間</label>
-                        <input type="datetime-local" id="gameTime" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500" required>
+                        <label class="block text-xs text-slate-400 mb-1">牌友姓名</label>
+                        <input type="text" id="friendName" placeholder="例如：張嘉恩" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500" required>
                     </div>
                     <div>
-                        <label class="block text-xs text-slate-400 mb-1">地點</label>
-                        <input type="text" id="location" value="新北市板橋區" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500" required>
+                        <label class="block text-xs text-slate-400 mb-1">專屬綽號</label>
+                        <input type="text" id="friendNickname" placeholder="例如：二頭肌" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500" required>
                     </div>
-                    
-                    <div class="space-y-2">
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-xs text-slate-400 mb-1">玩家 1 (東)</label>
-                                <input type="text" id="p1Name" value="張嘉恩" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200" required>
-                                <input type="number" id="p1Score" placeholder="得分" value="500" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-emerald-400 font-bold" required>
-                            </div>
-                            <div>
-                                <label class="block text-xs text-slate-400 mb-1">玩家 2 (南)</label>
-                                <input type="text" id="p2Name" value="小頭" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200" required>
-                                <input type="number" id="p2Score" placeholder="得分" value="-100" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-rose-400 font-bold" required>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-xs text-slate-400 mb-1">玩家 3 (西)</label>
-                                <input type="text" id="p3Name" value="牌友A" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200" required>
-                                <input type="number" id="p3Score" placeholder="得分" value="-200" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-rose-400 font-bold" required>
-                            </div>
-                            <div>
-                                <label class="block text-xs text-slate-400 mb-1">玩家 4 (北)</label>
-                                <input type="text" id="p4Name" value="牌友B" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200" required>
-                                <input type="number" id="p4Score" placeholder="得分" value="-200" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-rose-400 font-bold" required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm shadow-lg shadow-blue-600/20">
-                        新增戰績並存入雲端
+                    <button type="submit" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm shadow-lg shadow-sky-600/20">
+                        儲存牌友綽號
                     </button>
                 </form>
-            </div>
 
-            <!-- 右側：排行榜與歷史表格 -->
-            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl shadow-xl overflow-hidden backdrop-blur-md md:col-span-2 flex flex-col">
-                <div class="p-6 border-b border-slate-800 flex justify-between items-center">
-                    <h2 class="text-lg font-semibold text-blue-400">🏆 雲端累積戰績排行榜</h2>
-                    <button onclick="loadGames()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700">
-                        🔄 重新整理戰績
-                    </button>
-                </div>
-                <div class="overflow-x-auto flex-1 p-6">
-                    <div id="loading" class="text-center text-slate-400 py-8">正在從 Google 雲端載入戰績...</div>
-                    <table class="w-full text-left border-collapse hidden" id="rankTable">
+                <h3 class="text-xs uppercase tracking-wider text-slate-400 mb-3">現有牌友與綽號名單</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
                         <thead>
-                            <tr class="bg-slate-800/60 text-slate-400 text-xs uppercase tracking-wider">
-                                <th class="py-3 px-4">排名</th>
-                                <th class="py-3 px-4">牌友</th>
-                                <th class="py-3 px-4 text-center">總場次</th>
-                                <th class="py-3 px-4 text-center">勝率</th>
-                                <th class="py-3 px-4 text-right">累積得分</th>
+                            <tr class="bg-slate-800/60 text-slate-400 text-xs">
+                                <th class="py-2.5 px-3">姓名</th>
+                                <th class="py-2.5 px-3">綽號</th>
+                                <th class="py-2.5 px-3 text-right">操作</th>
                             </tr>
                         </thead>
-                        <tbody id="leaderboardBody" class="divide-y divide-slate-800/60 text-sm">
+                        <tbody id="friendTableBody" class="divide-y divide-slate-800/60">
                             <!-- 動態載入 -->
                         </tbody>
                     </table>
                 </div>
             </div>
-
         </div>
+
     </div>
 
     <!-- JavaScript 邏輯 -->
     <script>
-        // 💡 記得保留你原本的 Google Apps Script 網址
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz3c7X_Amn2wfe02Esonpr6YSDHnrldCdnh2fjq_AZyIgteFi--nO5XUYHwHCjVt4B9/exec";
 
         let games = [];
+        // 從 LocalStorage 載入好友與綽號資料
+        let friendsData = JSON.parse(localStorage.getItem('mahjong_friends_data')) || [
+            { name: "張嘉恩", nickname: "二頭肌" },
+            { name: "小頭", nickname: "神乎其技" },
+            { name: "牌友A", nickname: "摸牌手" },
+            { name: "牌友B", nickname: "大老千" }
+        ];
 
-        // 自動將時間欄位填入當前本地時間
+        // 分頁切換功能
+        function switchTab(tab) {
+            const pageRank = document.getElementById('pageRank');
+            const pageFriends = document.getElementById('pageFriends');
+            const tabRank = document.getElementById('tabRank');
+            const tabFriends = document.getElementById('tabFriends');
+
+            if (tab === 'rank') {
+                pageRank.classList.remove('hidden');
+                pageFriends.classList.add('hidden');
+                tabRank.className = "px-4 py-1.5 text-xs font-semibold rounded-lg transition-all bg-blue-600 text-white shadow";
+                tabFriends.className = "px-4 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-white";
+            } else {
+                pageRank.classList.add('hidden');
+                pageFriends.classList.remove('hidden');
+                tabFriends.className = "px-4 py-1.5 text-xs font-semibold rounded-lg transition-all bg-sky-600 text-white shadow";
+                tabRank.className = "px-4 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-400 hover:text-white";
+                renderFriendsTable();
+            }
+        }
+
         function setDefaultDateTime() {
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -147,7 +216,7 @@
             }
         }
 
-        // 2. 渲染排行榜與常勝軍 (MVP) 畫面
+        // 2. 渲染排行榜與常勝軍 (MVP)
         function renderLeaderboard() {
             const stats = {};
             games.forEach(g => {
@@ -160,7 +229,6 @@
                 });
             });
 
-            // 排序：先比總得分，總得分一樣比勝率
             const sorted = Object.entries(stats).sort(([,a], [,b]) => {
                 if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
                 const rateA = a.totalGames ? (a.wins / a.totalGames) : 0;
@@ -168,7 +236,6 @@
                 return rateB - rateA;
             });
 
-            // 計算常勝軍 MVP（至少打過 1 場且勝率最高）
             let mvp = null;
             let highestRate = -1;
             Object.entries(stats).forEach(([name, data]) => {
@@ -181,10 +248,13 @@
                 }
             });
 
-            // 顯示或隱藏 MVP 橫幅
             const mvpBanner = document.getElementById('mvpBanner');
             if (mvp && mvp.totalGames >= 1) {
-                document.getElementById('mvpName').innerText = mvp.name;
+                // 檢查是否有對應的綽號
+                const found = friendsData.find(f => f.name === mvp.name);
+                const displayName = found ? `${mvp.name} (${found.nickname})` : mvp.name;
+                
+                document.getElementById('mvpName').innerText = displayName;
                 document.getElementById('mvpRate').innerText = `${mvp.rate}%`;
                 mvpBanner.classList.remove('hidden');
             } else {
@@ -204,10 +274,14 @@
                 const scoreClass = data.totalScore >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
                 const scoreText = data.totalScore > 0 ? `+${data.totalScore}` : data.totalScore;
 
+                // 顯示名字與綽號
+                const found = friendsData.find(f => f.name === name);
+                const displayName = found ? `${name} <span class="text-xs text-sky-400 font-normal">(${found.nickname})</span>` : name;
+
                 tbody.innerHTML += `
-                    <tr class="hover:bg-slate-800/30 transition-colors">
+                    <tr class="hover:bg-slate-800/35 transition-colors">
                         <td class="py-3 px-4 font-semibold text-sky-400">#${idx + 1}</td>
-                        <td class="py-3 px-4 font-medium text-white">${name}</td>
+                        <td class="py-3 px-4 font-medium text-white">${displayName}</td>
                         <td class="py-3 px-4 text-center text-slate-300">${data.totalGames}</td>
                         <td class="py-3 px-4 text-center text-slate-300">${winRate}%</td>
                         <td class="py-3 px-4 text-right ${scoreClass}">${scoreText}</td>
@@ -216,7 +290,51 @@
             });
         }
 
-        // 3. 提交新戰績到 Google 試算表
+        // 3. 渲染牌友與綽號表格
+        function renderFriendsTable() {
+            const fTable = document.getElementById('friendTableBody');
+            fTable.innerHTML = '';
+            if (friendsData.length === 0) {
+                fTable.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-slate-500">目前尚無牌友資料</td></tr>`;
+                return;
+            }
+            friendsData.forEach((f, idx) => {
+                fTable.innerHTML += `
+                    <tr class="hover:bg-slate-800/30">
+                        <td class="py-2.5 px-3 font-medium text-white">${f.name}</td>
+                        <td class="py-2.5 px-3 text-sky-400">${f.nickname}</td>
+                        <td class="py-2.5 px-3 text-right">
+                            <button onclick="removeFriend(${idx})" class="text-xs text-rose-400 hover:underline">刪除</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // 新增牌友與綽號
+        document.getElementById('friendForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('friendName').value.trim();
+            const nickname = document.getElementById('friendNickname').value.trim();
+            
+            if (name && nickname) {
+                friendsData.push({ name, nickname });
+                localStorage.setItem('mahjong_friends_data', JSON.stringify(friendsData));
+                document.getElementById('friendName').value = '';
+                document.getElementById('friendNickname').value = '';
+                renderFriendsTable();
+                alert(`成功新增牌友：${name} (${nickname})`);
+            }
+        });
+
+        // 刪除牌友
+        function removeFriend(index) {
+            friendsData.splice(index, 1);
+            localStorage.setItem('mahjong_friends_data', JSON.stringify(friendsData));
+            renderFriendsTable();
+        }
+
+        // 4. 提交新戰績到 Google 試算表
         document.getElementById('gameForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
