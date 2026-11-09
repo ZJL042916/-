@@ -39,7 +39,7 @@
                     🏆 總排行榜
                 </button>
                 <button onclick="switchTab('monthly')" id="tabMonthly" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">
-                    📅 月排行榜與歷史冠軍
+                    📅 月排行榜與積分冠軍
                 </button>
                 <button onclick="switchTab('history')" id="tabHistory" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">
                     📜 牌局明細
@@ -52,7 +52,7 @@
 
         <!-- ==================== 分頁一：總戰績排行榜 ==================== -->
         <div id="pageRank" class="space-y-6">
-            <!-- 常勝軍（最高勝率 MVP）展示區 -->
+            <!-- 常勝軍（綜合表現 MVP：評分含場次與勝率平衡）展示區 -->
             <div id="mvpBanner" class="bg-gradient-to-r from-amber-50/90 via-white to-orange-50/90 border border-amber-200 rounded-3xl p-6 shadow-xl backdrop-blur-md flex items-center justify-between relative overflow-hidden hidden">
                 <div class="absolute -right-6 -bottom-6 text-9xl text-amber-900/5 pointer-events-none font-black select-none">MVP</div>
                 <div class="flex items-center space-x-4 relative z-10">
@@ -60,13 +60,13 @@
                         👑
                     </div>
                     <div>
-                        <div class="text-xs text-amber-800 font-bold tracking-widest uppercase">總榜常勝軍 (最高勝率 MVP)</div>
+                        <div class="text-xs text-amber-800 font-bold tracking-widest uppercase">總榜常勝軍 (表現最佳 MVP)</div>
                         <div id="mvpName" class="text-xl md:text-2xl font-black text-stone-900 mt-0.5 tracking-wide">-</div>
                     </div>
                 </div>
                 <div class="text-right relative z-10">
                     <div id="mvpRate" class="text-2xl md:text-3xl font-black text-amber-700">-</div>
-                    <div class="text-xs text-stone-500 font-semibold tracking-wider">勝率</div>
+                    <div class="text-xs text-stone-500 font-semibold tracking-wider">綜合勝率</div>
                 </div>
             </div>
 
@@ -81,18 +81,27 @@
                             <label class="block text-xs font-semibold text-stone-600 mb-1.5">牌局日期</label>
                             <input type="date" id="gameDate" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-stone-800 focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-600/20 transition-all shadow-inner" required>
                         </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-xs font-semibold text-stone-600 mb-1.5">地點</label>
-                                <input type="text" id="location" value="新北市板橋區" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-stone-800 focus:outline-none focus:border-amber-600 shadow-inner" required>
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5">
+                                <label class="text-xs font-semibold text-stone-600">地點</label>
+                                <!-- 常用地點快速選單 -->
+                                <div class="text-[10px] space-x-1">
+                                    <span class="text-stone-400">常用:</span>
+                                    <button type="button" onclick="setLocation('新北市板橋區')" class="text-amber-700 hover:underline">板橋區</button>
+                                    <span class="text-stone-300">|</span>
+                                    <button type="button" onclick="setLocation('花蓮縣花蓮市')" class="text-amber-700 hover:underline">花蓮市</button>
+                                    <span class="text-stone-300">|</span>
+                                    <button type="button" onclick="setLocation('台北市')" class="text-amber-700 hover:underline">台北市</button>
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-stone-600 mb-1.5">台費 (元)</label>
-                                <input type="number" id="tableFee" value="0" min="0" placeholder="例如: 200" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-amber-800 font-bold focus:outline-none focus:border-amber-600 shadow-inner" required>
-                            </div>
+                            <input type="text" id="location" value="新北市板橋區" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-stone-800 focus:outline-none focus:border-amber-600 shadow-inner" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-stone-600 mb-1.5">台費 (元)</label>
+                            <input type="number" id="tableFee" value="0" min="0" placeholder="例如: 200" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-amber-800 font-bold focus:outline-none focus:border-amber-600 shadow-inner" required>
                         </div>
                         
-                        <!-- 四位玩家記分區 (帶有 贏/輸 切換按鈕) -->
+                        <!-- 四位玩家記分區 -->
                         <div class="space-y-3 pt-1" id="playersInputContainer"></div>
 
                         <button type="submit" id="submitBtn" class="w-full mt-2 bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-800 hover:to-amber-700 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-amber-900/20 text-sm active:scale-[0.98]">
@@ -122,7 +131,7 @@
                                     <th class="py-3 px-4 font-bold">排名</th>
                                     <th class="py-3 px-4 font-bold">牌友 (點擊看個人明細)</th>
                                     <th class="py-3 px-4 font-bold text-center">總場次</th>
-                                    <th class="py-3 px-4 font-bold text-center">勝率</th>
+                                    <th class="py-3 px-4 font-bold text-center">勝率 (貝氏加權)</th>
                                     <th class="py-3 px-4 font-bold text-right">累積得分</th>
                                 </tr>
                             </thead>
@@ -133,7 +142,7 @@
             </div>
         </div>
 
-        <!-- ==================== 分頁二：月排行榜與歷史月冠軍 ==================== -->
+        <!-- ==================== 分頁二：月排行榜與歷史積分冠軍 ==================== -->
         <div id="pageMonthly" class="space-y-6 hidden">
             <div class="bg-white/80 border border-stone-200/80 rounded-3xl p-5 md:p-6 shadow-xl backdrop-blur-md flex flex-col md:flex-row justify-between items-center gap-4">
                 <div class="flex items-center gap-3.5">
@@ -142,7 +151,7 @@
                     </div>
                     <div>
                         <h2 class="text-base font-bold text-amber-800">月度戰績統計</h2>
-                        <p class="text-xs text-stone-500">檢視指定月份的勝率與積分表現</p>
+                        <p class="text-xs text-stone-500">檢視指定月份的積分與表現排名</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
@@ -157,13 +166,13 @@
                             🎖️
                         </div>
                         <div>
-                            <div class="text-xs text-amber-800 font-bold uppercase tracking-wider">本月當月 MVP</div>
+                            <div class="text-xs text-amber-800 font-bold uppercase tracking-wider">本月最高積分 MVP (得分王)</div>
                             <div id="monthMvpName" class="text-lg font-bold text-stone-900 mt-0.5">-</div>
                         </div>
                     </div>
                     <div class="text-right">
-                        <div id="monthMvpRate" class="text-xl font-black text-amber-700">-</div>
-                        <div class="text-xs text-stone-500 font-medium">勝率</div>
+                        <div id="monthMvpScore" class="text-xl font-black text-amber-700">-</div>
+                        <div class="text-xs text-stone-500 font-medium">當月積分</div>
                     </div>
                 </div>
 
@@ -183,15 +192,15 @@
                 </div>
             </div>
 
-            <!-- 歷史月冠軍名人堂 -->
+            <!-- 歷史月積分冠軍名人堂 -->
             <div class="bg-white/80 border border-stone-200/80 rounded-3xl shadow-xl backdrop-blur-md overflow-hidden p-5 md:p-6 space-y-4">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-xl">
                         🏛️
                     </div>
                     <div>
-                        <h2 class="text-base font-bold text-amber-800">歷史月冠軍名人堂</h2>
-                        <p class="text-xs text-stone-500">歷年各月份勝率最高的常勝將軍總覽</p>
+                        <h2 class="text-base font-bold text-amber-800">歷史月積分冠軍名人堂 (得分王)</h2>
+                        <p class="text-xs text-stone-500">歷年各月份累積得分最高的常勝將軍總覽</p>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="historicalChampionsGrid"></div>
@@ -206,7 +215,7 @@
                         <h2 class="text-base font-bold text-amber-800 flex items-center gap-2">
                             <span class="p-1.5 bg-amber-100 rounded-xl border border-amber-200">📜</span> 歷史牌局明細與管理
                         </h2>
-                        <p class="text-xs text-stone-500 mt-0.5">檢視所有打牌紀錄，包含台費與得分明細</p>
+                        <p class="text-xs text-stone-500 mt-0.5">檢視所有打牌紀錄，支援點擊編輯完整明細</p>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
@@ -294,6 +303,46 @@
         </div>
     </div>
 
+    <!-- 💡 歷史牌局進階編輯彈窗 (Modal) -->
+    <div id="editGameModal" class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white border border-stone-200 rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl space-y-4 relative">
+            <button onclick="closeEditModal()" class="absolute top-5 right-5 text-stone-400 hover:text-stone-700 text-xl font-bold">✕</button>
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-xl">✏️</div>
+                <div>
+                    <h3 class="text-lg font-black text-stone-900">修改歷史牌局明細</h3>
+                    <p class="text-xs text-stone-500">更新此局的日期、地點、台費與分數</p>
+                </div>
+            </div>
+            
+            <form id="editGameForm" class="space-y-3 pt-2">
+                <input type="hidden" id="editGameIndex">
+                <div>
+                    <label class="block text-xs font-semibold text-stone-600 mb-1">日期</label>
+                    <input type="date" id="editDate" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-800 focus:outline-none focus:border-amber-600 shadow-inner" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-stone-600 mb-1">地點</label>
+                    <input type="text" id="editLocation" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-800 focus:outline-none focus:border-amber-600 shadow-inner" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-stone-600 mb-1">台費 (元)</label>
+                    <input type="number" id="editTableFee" min="0" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm font-bold text-amber-800 focus:outline-none focus:border-amber-600 shadow-inner" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-stone-600 mb-1">四人得分摘要說明</label>
+                    <div id="editScoresSummary" class="bg-stone-100 border border-stone-200 rounded-xl p-2.5 text-xs text-stone-700 space-y-1"></div>
+                    <p class="text-[10px] text-stone-400 mt-1">註：如需大幅變更四人分數與勝負，建議直接刪除此局後重新記錄新牌局。</p>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeEditModal()" class="w-1/2 bg-stone-200 hover:bg-stone-300 text-stone-700 font-bold py-2.5 rounded-xl text-xs transition-all">取消</button>
+                    <button type="submit" id="editSubmitBtn" class="w-1/2 bg-amber-700 hover:bg-amber-800 text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow-md">儲存修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- JavaScript 邏輯 -->
     <script>
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz3c7X_Amn2wfe02Esonpr6YSDHnrldCdnh2fjq_AZyIgteFi--nO5XUYHwHCjVt4B9/exec";
@@ -302,20 +351,16 @@
         let friendsData = [];
         let historicalChampions = [];
 
-        // 💡 輔助函式：從 "姓名 (綽號)" 中取出純姓名
         function getPureName(fullName) {
             if (!fullName) return "";
-            return fullName.split('(')[0].trim();
+            return String(fullName).split('(')[0].trim();
         }
 
-        // 💡 輔助函式：取得某個純姓名目前最新的完整顯示格式 (例如 "臻臻 (摸牌摸到天亮)")
         function getLatestDisplayName(pureName) {
-            // 先在 friendsData 中找最新設定
             const friend = friendsData.find(f => f.name === pureName);
             if (friend) {
                 return `${friend.name} (${friend.nickname})`;
             }
-            // 如果 friendsData 找不到，從歷史 games 裡面找最後出現的格式
             for (let i = games.length - 1; i >= 0; i--) {
                 const g = games[i];
                 if (g.scores) {
@@ -340,6 +385,10 @@
             }
         }
         setDefaultDates();
+
+        function setLocation(loc) {
+            document.getElementById('location').value = loc;
+        }
 
         function renderPlayerInputs() {
             const container = document.getElementById('playersInputContainer');
@@ -503,7 +552,7 @@
             }
         }
 
-        // 💡 總排行榜：改用純姓名合併統計
+        // 💡 總排行榜：採用貝氏勝率評分（平衡勝率與場次，避免隻打一場100%稱霸）
         function renderLeaderboard() {
             const stats = {};
             games.forEach(g => {
@@ -518,29 +567,37 @@
                 });
             });
 
+            // 貝氏勝率計算：(Wins + m * prior) / (Games + m)，假設全球平均勝率 prior = 0.5，權重 m = 2
+            const priorMean = 0.5;
+            const m = 2;
+
             const sorted = Object.entries(stats).sort(([,a], [,b]) => {
                 if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
-                const rateA = a.totalGames ? (a.wins / a.totalGames) : 0;
-                const rateB = b.totalGames ? (b.wins / b.totalGames) : 0;
-                return rateB - rateA;
+                const bayesianA = (a.wins + m * priorMean) / (a.totalGames + m);
+                const bayesianB = (b.wins + m * priorMean) / (b.totalGames + m);
+                return bayesianB - bayesianA;
             });
 
             let mvp = null;
-            let highestRate = -1;
+            let highestScore = -999999;
             Object.entries(stats).forEach(([pureName, data]) => {
-                if (data.totalGames > 0) {
-                    const rate = data.wins / data.totalGames;
-                    if (rate > highestRate) {
-                        highestRate = rate;
-                        mvp = { name: getLatestDisplayName(pureName), rate: Math.round(rate * 100), totalGames: data.totalGames };
-                    }
+                if (data.totalGames >= 2 && data.totalScore > highestScore) {
+                    highestScore = data.totalScore;
+                    const rawRate = data.totalGames ? (data.wins / data.totalGames) : 0;
+                    mvp = { name: getLatestDisplayName(pureName), rate: Math.round(rawRate * 100), totalGames: data.totalGames };
                 }
             });
+            // 若沒有打滿 2 場以上的，則退而求其次選總積分最高者
+            if (!mvp && sorted.length > 0) {
+                const [topName, topData] = sorted[0];
+                const rawRate = topData.totalGames ? (topData.wins / topData.totalGames) : 0;
+                mvp = { name: getLatestDisplayName(topName), rate: Math.round(rawRate * 100), totalGames: topData.totalGames };
+            }
 
             const mvpBanner = document.getElementById('mvpBanner');
             if (mvpBanner && mvp && mvp.totalGames >= 1) {
                 document.getElementById('mvpName').innerText = mvp.name;
-                document.getElementById('mvpRate').innerText = `${mvp.rate}%`;
+                document.getElementById('mvpRate').innerText = `${mvp.rate}% (場次: ${mvp.totalGames})`;
                 mvpBanner.classList.remove('hidden');
             } else if (mvpBanner) {
                 mvpBanner.classList.add('hidden');
@@ -574,7 +631,6 @@
             });
         }
 
-        // 💡 個人戰績 Modal：支援用純姓名查詢所有歷史對局
         function openPlayerModal(pureName) {
             const modal = document.getElementById('playerModal');
             document.getElementById('modalPlayerName').innerText = getLatestDisplayName(pureName);
@@ -637,7 +693,7 @@
             document.getElementById('playerModal').classList.add('hidden');
         }
 
-        // 💡 月排行榜：同樣改用純姓名合併統計
+        // 💡 月排行榜：依「當月總得分」排序（得分最高者為冠軍）
         function renderMonthlyLeaderboard() {
             const monthInput = document.getElementById('selectMonth');
             if (!monthInput) return;
@@ -659,29 +715,19 @@
                 }
             });
 
-            const sorted = Object.entries(stats).sort(([,a], [,b]) => {
-                if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
-                const rateA = a.totalGames ? (a.wins / a.totalGames) : 0;
-                const rateB = b.totalGames ? (b.wins / b.totalGames) : 0;
-                return rateB - rateA;
-            });
+            // 依當月總得分由高到低排序
+            const sorted = Object.entries(stats).sort(([,a], [,b]) => b.totalScore - a.totalScore);
 
             let monthMvp = null;
-            let highestRate = -1;
-            Object.entries(stats).forEach(([pureName, data]) => {
-                if (data.totalGames > 0) {
-                    const rate = data.wins / data.totalGames;
-                    if (rate > highestRate) {
-                        highestRate = rate;
-                        monthMvp = { name: getLatestDisplayName(pureName), rate: Math.round(rate * 100), totalGames: data.totalGames };
-                    }
-                }
-            });
+            if (sorted.length > 0) {
+                const [topName, topData] = sorted[0];
+                monthMvp = { name: getLatestDisplayName(topName), score: topData.totalScore > 0 ? `+${topData.totalScore}` : topData.totalScore };
+            }
 
             const monthMvpBanner = document.getElementById('monthMvpBanner');
-            if (monthMvpBanner && monthMvp && monthMvp.totalGames >= 1) {
+            if (monthMvpBanner && monthMvp) {
                 document.getElementById('monthMvpName').innerText = monthMvp.name;
-                document.getElementById('monthMvpRate').innerText = `${monthMvp.rate}%`;
+                document.getElementById('monthMvpScore').innerText = monthMvp.score;
                 monthMvpBanner.classList.remove('hidden');
             } else if (monthMvpBanner) {
                 monthMvpBanner.classList.add('hidden');
@@ -715,17 +761,63 @@
             });
         }
 
+        // 💡 歷史月積分冠軍（得分王名人堂）
         function renderHistoricalChampions() {
             const grid = document.getElementById('historicalChampionsGrid');
             if (!grid) return;
             grid.innerHTML = '';
 
-            if (historicalChampions.length === 0) {
+            // 計算每個月的積分冠軍
+            const monthlyChampions = {};
+            games.forEach(g => {
+                if (!g.timestamp || !g.scores) return;
+                const monthKey = g.timestamp.slice(0, 7);
+                if (monthKey.length === 7) {
+                    if (!monthlyChampions[monthKey]) monthlyChampions[monthKey] = {};
+                    Object.entries(g.scores).forEach(([fullName, score]) => {
+                        const pureName = getPureName(fullName);
+                        if (!pureName) return;
+                        if (!monthlyChampions[monthKey][pureName]) {
+                            monthlyChampions[monthKey][pureName] = { totalScore: 0, totalGames: 0, wins: 0 };
+                        }
+                        monthlyChampions[monthKey][pureName].totalScore += Number(score);
+                        monthlyChampions[monthKey][pureName].totalGames += 1;
+                        if (Number(score) > 0) monthlyChampions[monthKey][pureName].wins += 1;
+                    });
+                }
+            });
+
+            const calculatedChampions = [];
+            Object.entries(monthlyChampions).forEach(([month, players]) => {
+                let bestPlayer = null;
+                let maxScore = -999999;
+                Object.entries(players).forEach(([pureName, data]) => {
+                    if (data.totalScore > maxScore) {
+                        maxScore = data.totalScore;
+                        const winRate = data.totalGames ? Math.round((data.wins / data.totalGames) * 100) : 0;
+                        bestPlayer = {
+                            month: month,
+                            name: getLatestDisplayName(pureName),
+                            totalGames: data.totalGames,
+                            winRate: winRate,
+                            totalScore: data.totalScore
+                        };
+                    }
+                });
+                if (bestPlayer) {
+                    calculatedChampions.push(bestPlayer);
+                }
+            });
+
+            // 依月份反向排序（最新月份排前面）
+            calculatedChampions.sort((a, b) => b.month.localeCompare(a.month));
+
+            if (calculatedChampions.length === 0) {
                 grid.innerHTML = `<div class="col-span-full text-center py-8 text-stone-400 text-xs font-medium">尚無歷史月冠軍資料</div>`;
                 return;
             }
 
-            historicalChampions.forEach(c => {
+            calculatedChampions.forEach(c => {
                 const scoreClass = c.totalScore >= 0 ? 'text-emerald-700' : 'text-rose-700';
                 const scoreText = c.totalScore > 0 ? `+${c.totalScore}` : c.totalScore;
                 
@@ -735,27 +827,25 @@
                     monthDisplay = `${parts[0]}年${parts[1]}月`;
                 }
 
-                // 確保歷史冠軍也用最新顯示名稱
-                const displayName = getLatestDisplayName(c.name);
-
                 grid.innerHTML += `
                     <div class="bg-gradient-to-br from-amber-50/80 via-white to-stone-50 border border-amber-200/80 rounded-2xl p-4 shadow-sm flex items-center justify-between">
                         <div class="space-y-1">
                             <div class="text-xs font-black text-amber-800 tracking-wider flex items-center gap-1">
-                                <span>🎖️</span> ${monthDisplay} 冠軍
+                                <span>🎖️</span> ${monthDisplay} 積分冠軍
                             </div>
-                            <div class="text-base font-black text-stone-900">${displayName}</div>
+                            <div class="text-base font-black text-stone-900">${c.name}</div>
                             <div class="text-[11px] text-stone-500">場次: ${c.totalGames} | 勝率: <span class="font-bold text-amber-700">${c.winRate}%</span></div>
                         </div>
                         <div class="text-right">
                             <div class="text-sm font-black ${scoreClass}">${scoreText}</div>
-                            <div class="text-[10px] text-stone-400 font-semibold">積分</div>
+                            <div class="text-[10px] text-stone-400 font-semibold">總積分</div>
                         </div>
                     </div>
                 `;
             });
         }
 
+        // 💡 歷史牌局明細與進階修改管理
         function renderHistoryTable() {
             const hTable = document.getElementById('historyTableBody');
             if (!hTable) return;
@@ -767,10 +857,11 @@
             games.forEach((g, idx) => {
                 let scoresHtml = '';
                 if (g.scores) {
-                    Object.entries(g.scores).forEach(([pName, pScore]) => {
+                    Object.entries(g.scores).forEach(([fullName, pScore]) => {
+                        const displayName = getLatestDisplayName(getPureName(fullName));
                         const sClass = Number(pScore) >= 0 ? 'text-emerald-700' : 'text-rose-700';
                         const sText = Number(pScore) > 0 ? `+${pScore}` : pScore;
-                        scoresHtml += `<span class="inline-block bg-stone-100 border border-stone-200 px-2 py-1 rounded-lg mr-2 mb-1 text-xs"><strong class="text-stone-800">${pName}:</strong> <span class="${sClass} font-bold">${sText}</span></span>`;
+                        scoresHtml += `<span class="inline-block bg-stone-100 border border-stone-200 px-2 py-1 rounded-lg mr-2 mb-1 text-xs"><strong class="text-stone-800">${displayName}:</strong> <span class="${sClass} font-bold">${sText}</span></span>`;
                     });
                 }
                 const feeText = g.tableFee ? `<div class="text-[11px] text-amber-800 font-semibold mt-0.5">台費: $${g.tableFee}</div>` : '';
@@ -783,7 +874,7 @@
                         </td>
                         <td class="py-3.5 px-4">${scoresHtml}</td>
                         <td class="py-3.5 px-4 text-right">
-                            <button onclick="editGame(${idx})" class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 px-3 py-1.5 rounded-xl border border-amber-200 transition-all font-semibold mr-1">修改</button>
+                            <button onclick="openEditModal(${idx})" class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 px-3 py-1.5 rounded-xl border border-amber-200 transition-all font-semibold mr-1">修改</button>
                             <button onclick="deleteGame(${idx})" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-1.5 rounded-xl border border-rose-200 transition-all font-semibold">刪除</button>
                         </td>
                     </tr>
@@ -791,25 +882,61 @@
             });
         }
 
+        function openEditModal(index) {
+            const g = games[index];
+            document.getElementById('editGameIndex').value = index;
+            document.getElementById('editDate').value = g.timestamp;
+            document.getElementById('editLocation').value = g.location;
+            document.getElementById('editTableFee').value = g.tableFee || 0;
+
+            const summaryContainer = document.getElementById('editScoresSummary');
+            let summaryHtml = '';
+            if (g.scores) {
+                Object.entries(g.scores).forEach(([fullName, score]) => {
+                    const displayName = getLatestDisplayName(getPureName(fullName));
+                    const sText = Number(score) > 0 ? `+${score}` : score;
+                    summaryHtml += `<div>• <strong>${displayName}</strong>: ${sText} 分</div>`;
+                });
+            }
+            summaryContainer.innerHTML = summaryHtml;
+            document.getElementById('editGameModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editGameModal').classList.add('hidden');
+        }
+
+        document.getElementById('editGameForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const index = Number(document.getElementById('editGameIndex').value);
+            const newDate = document.getElementById('editDate').value;
+            const newLoc = document.getElementById('editLocation').value.trim();
+            const newFee = document.getElementById('editTableFee').value;
+
+            if (games[index]) {
+                games[index].timestamp = newDate;
+                games[index].location = newLoc;
+                games[index].tableFee = newFee;
+
+                const btn = document.getElementById('editSubmitBtn');
+                btn.innerText = '儲存中...';
+                btn.disabled = true;
+
+                await syncGamesToCloud();
+                closeEditModal();
+                loadData();
+
+                btn.innerText = '儲存修改';
+                btn.disabled = false;
+                alert('牌局明細已成功更新！');
+            }
+        });
+
         async function deleteGame(index) {
             if (confirm('確定要刪除這筆歷史牌局記錄嗎？此動作將同步更新雲端。')) {
                 games.splice(index, 1);
                 await syncGamesToCloud();
-                renderLeaderboard();
-                renderMonthlyLeaderboard();
-                renderHistoricalChampions();
-                renderHistoryTable();
-            }
-        }
-
-        async function editGame(index) {
-            const g = games[index];
-            const newLoc = prompt('修改牌局地點：', g.location);
-            if (newLoc !== null) {
-                g.location = newLoc.trim();
-                await syncGamesToCloud();
-                renderHistoryTable();
-                alert('牌局地點已更新！');
+                loadData();
             }
         }
 
@@ -821,7 +948,6 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ type: "UPDATE_GAMES", games: games })
                 });
-                alert('雲端戰績明細已同步更新！');
             } catch (error) {
                 console.error('同步失敗:', error);
                 alert('雲端同步失敗，請稍後再試。');
@@ -865,6 +991,7 @@
             }
         }
 
+        // 💡 牌友管理防呆：檢查姓名是否重複
         document.getElementById('friendForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const nameInput = document.getElementById('friendName');
@@ -874,9 +1001,10 @@
             const name = nameInput.value.trim();
             const nickname = nicknameInput.value.trim();
             
+            // 檢查是否重複
             const exists = friendsData.some(f => f.name === name);
             if (exists) {
-                alert(`⚠️ 牌友新增失敗：名字「${name}」已經存在清單中了！`);
+                alert(`⚠️ 防呆提示：牌友「${name}」已經存在清單中囉！若要修改綽號請點擊下方清單的「修改」按鈕。`);
                 return;
             }
 
@@ -887,7 +1015,7 @@
 
                 const nowStr = new Date().toLocaleString('zh-TW', { hour12: false });
                 friendsData.push({ name, nickname, updatedAt: nowStr });
-                await syncGamesToCloud(); // 修正：此處應同步 friends，但保留現有架構即可
+                await syncFriendsToCloud();
 
                 nameInput.value = '';
                 nicknameInput.value = '';
@@ -932,7 +1060,6 @@
             const p3Name = document.getElementById('p3Name').value;
             const p4Name = document.getElementById('p4Name').value;
 
-            // 💡 檢查四人「純姓名」是否重複，避免同一局選到同一個人
             const purePlayers = [getPureName(p1Name), getPureName(p2Name), getPureName(p3Name), getPureName(p4Name)];
             if (new Set(purePlayers).size !== purePlayers.length) {
                 alert('⚠️ 記分防呆：四位玩家不能有重複的人選，請重新選擇！');
