@@ -302,6 +302,33 @@
         let friendsData = [];
         let historicalChampions = [];
 
+        // 💡 輔助函式：從 "姓名 (綽號)" 中取出純姓名
+        function getPureName(fullName) {
+            if (!fullName) return "";
+            return fullName.split('(')[0].trim();
+        }
+
+        // 💡 輔助函式：取得某個純姓名目前最新的完整顯示格式 (例如 "臻臻 (摸牌摸到天亮)")
+        function getLatestDisplayName(pureName) {
+            // 先在 friendsData 中找最新設定
+            const friend = friendsData.find(f => f.name === pureName);
+            if (friend) {
+                return `${friend.name} (${friend.nickname})`;
+            }
+            // 如果 friendsData 找不到，從歷史 games 裡面找最後出現的格式
+            for (let i = games.length - 1; i >= 0; i--) {
+                const g = games[i];
+                if (g.scores) {
+                    for (const fullKey of Object.keys(g.scores)) {
+                        if (getPureName(fullKey) === pureName) {
+                            return fullKey;
+                        }
+                    }
+                }
+            }
+            return pureName;
+        }
+
         function setDefaultDates() {
             const today = new Date().toISOString().split('T')[0];
             const dateInput = document.getElementById('gameDate');
@@ -476,15 +503,18 @@
             }
         }
 
+        // 💡 總排行榜：改用純姓名合併統計
         function renderLeaderboard() {
             const stats = {};
             games.forEach(g => {
                 if (!g.scores) return;
-                Object.entries(g.scores).forEach(([name, score]) => {
-                    if (!stats[name]) stats[name] = { totalScore: 0, totalGames: 0, wins: 0 };
-                    stats[name].totalScore += Number(score);
-                    stats[name].totalGames += 1;
-                    if (Number(score) > 0) stats[name].wins += 1;
+                Object.entries(g.scores).forEach(([fullName, score]) => {
+                    const pureName = getPureName(fullName);
+                    if (!pureName) return;
+                    if (!stats[pureName]) stats[pureName] = { totalScore: 0, totalGames: 0, wins: 0 };
+                    stats[pureName].totalScore += Number(score);
+                    stats[pureName].totalGames += 1;
+                    if (Number(score) > 0) stats[pureName].wins += 1;
                 });
             });
 
@@ -497,12 +527,12 @@
 
             let mvp = null;
             let highestRate = -1;
-            Object.entries(stats).forEach(([name, data]) => {
+            Object.entries(stats).forEach(([pureName, data]) => {
                 if (data.totalGames > 0) {
                     const rate = data.wins / data.totalGames;
                     if (rate > highestRate) {
                         highestRate = rate;
-                        mvp = { name, rate: Math.round(rate * 100), totalGames: data.totalGames };
+                        mvp = { name: getLatestDisplayName(pureName), rate: Math.round(rate * 100), totalGames: data.totalGames };
                     }
                 }
             });
@@ -525,16 +555,17 @@
                 return;
             }
 
-            sorted.forEach(([name, data], idx) => {
+            sorted.forEach(([pureName, data], idx) => {
                 const winRate = data.totalGames ? Math.round((data.wins / data.totalGames) * 100) : 0;
                 const scoreClass = data.totalScore >= 0 ? 'text-emerald-700 font-bold' : 'text-rose-700 font-bold';
                 const scoreText = data.totalScore > 0 ? `+${data.totalScore}` : data.totalScore;
                 const rankBadge = idx === 0 ? 'text-amber-600 font-black' : idx === 1 ? 'text-stone-500 font-bold' : idx === 2 ? 'text-amber-800 font-bold' : 'text-stone-400';
+                const displayName = getLatestDisplayName(pureName);
 
                 tbody.innerHTML += `
-                    <tr class="hover:bg-stone-50/80 transition-colors cursor-pointer" onclick="openPlayerModal('${name}')">
+                    <tr class="hover:bg-stone-50/80 transition-colors cursor-pointer" onclick="openPlayerModal('${pureName}')">
                         <td class="py-4 px-4 font-semibold ${rankBadge}">#${idx + 1}</td>
-                        <td class="py-4 px-4 font-semibold text-amber-800 underline decoration-amber-300 underline-offset-4">${name}</td>
+                        <td class="py-4 px-4 font-semibold text-amber-800 underline decoration-amber-300 underline-offset-4">${displayName}</td>
                         <td class="py-4 px-4 text-center text-stone-600">${data.totalGames}</td>
                         <td class="py-4 px-4 text-center text-stone-600">${winRate}%</td>
                         <td class="py-4 px-4 text-right ${scoreClass}">${scoreText}</td>
@@ -543,9 +574,10 @@
             });
         }
 
-        function openPlayerModal(name) {
+        // 💡 個人戰績 Modal：支援用純姓名查詢所有歷史對局
+        function openPlayerModal(pureName) {
             const modal = document.getElementById('playerModal');
-            document.getElementById('modalPlayerName').innerText = name;
+            document.getElementById('modalPlayerName').innerText = getLatestDisplayName(pureName);
 
             let totalGames = 0;
             let totalScore = 0;
@@ -553,15 +585,19 @@
             let playerHistory = [];
 
             games.forEach(g => {
-                if (g.scores && g.scores[name] !== undefined) {
-                    const score = Number(g.scores[name]);
-                    totalGames++;
-                    totalScore += score;
-                    if (score > 0) wins++;
-                    playerHistory.push({
-                        date: g.timestamp,
-                        location: g.location,
-                        score: score
+                if (g.scores) {
+                    Object.entries(g.scores).forEach(([fullName, scoreVal]) => {
+                        if (getPureName(fullName) === pureName) {
+                            const score = Number(scoreVal);
+                            totalGames++;
+                            totalScore += score;
+                            if (score > 0) wins++;
+                            playerHistory.push({
+                                date: g.timestamp,
+                                location: g.location,
+                                score: score
+                            });
+                        }
                     });
                 }
             });
@@ -601,6 +637,7 @@
             document.getElementById('playerModal').classList.add('hidden');
         }
 
+        // 💡 月排行榜：同樣改用純姓名合併統計
         function renderMonthlyLeaderboard() {
             const monthInput = document.getElementById('selectMonth');
             if (!monthInput) return;
@@ -611,11 +648,13 @@
             games.forEach(g => {
                 if (!g.timestamp || !g.scores) return;
                 if (g.timestamp.startsWith(selectedMonth)) {
-                    Object.entries(g.scores).forEach(([name, score]) => {
-                        if (!stats[name]) stats[name] = { totalScore: 0, totalGames: 0, wins: 0 };
-                        stats[name].totalScore += Number(score);
-                        stats[name].totalGames += 1;
-                        if (Number(score) > 0) stats[name].wins += 1;
+                    Object.entries(g.scores).forEach(([fullName, score]) => {
+                        const pureName = getPureName(fullName);
+                        if (!pureName) return;
+                        if (!stats[pureName]) stats[pureName] = { totalScore: 0, totalGames: 0, wins: 0 };
+                        stats[pureName].totalScore += Number(score);
+                        stats[pureName].totalGames += 1;
+                        if (Number(score) > 0) stats[pureName].wins += 1;
                     });
                 }
             });
@@ -629,12 +668,12 @@
 
             let monthMvp = null;
             let highestRate = -1;
-            Object.entries(stats).forEach(([name, data]) => {
+            Object.entries(stats).forEach(([pureName, data]) => {
                 if (data.totalGames > 0) {
                     const rate = data.wins / data.totalGames;
                     if (rate > highestRate) {
                         highestRate = rate;
-                        monthMvp = { name, rate: Math.round(rate * 100), totalGames: data.totalGames };
+                        monthMvp = { name: getLatestDisplayName(pureName), rate: Math.round(rate * 100), totalGames: data.totalGames };
                     }
                 }
             });
@@ -657,16 +696,17 @@
                 return;
             }
 
-            sorted.forEach(([name, data], idx) => {
+            sorted.forEach(([pureName, data], idx) => {
                 const winRate = data.totalGames ? Math.round((data.wins / data.totalGames) * 100) : 0;
                 const scoreClass = data.totalScore >= 0 ? 'text-emerald-700 font-bold' : 'text-rose-700 font-bold';
                 const scoreText = data.totalScore > 0 ? `+${data.totalScore}` : data.totalScore;
                 const rankBadge = idx === 0 ? 'text-amber-600 font-black' : idx === 1 ? 'text-stone-500 font-bold' : idx === 2 ? 'text-amber-800 font-bold' : 'text-stone-400';
+                const displayName = getLatestDisplayName(pureName);
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-stone-50/80 transition-colors">
                         <td class="py-4 px-4 font-semibold ${rankBadge}">#${idx + 1}</td>
-                        <td class="py-4 px-4 font-semibold text-stone-900">${name}</td>
+                        <td class="py-4 px-4 font-semibold text-stone-900">${displayName}</td>
                         <td class="py-4 px-4 text-center text-stone-600">${data.totalGames}</td>
                         <td class="py-4 px-4 text-center text-stone-600">${winRate}%</td>
                         <td class="py-4 px-4 text-right ${scoreClass}">${scoreText}</td>
@@ -695,13 +735,16 @@
                     monthDisplay = `${parts[0]}年${parts[1]}月`;
                 }
 
+                // 確保歷史冠軍也用最新顯示名稱
+                const displayName = getLatestDisplayName(c.name);
+
                 grid.innerHTML += `
                     <div class="bg-gradient-to-br from-amber-50/80 via-white to-stone-50 border border-amber-200/80 rounded-2xl p-4 shadow-sm flex items-center justify-between">
                         <div class="space-y-1">
                             <div class="text-xs font-black text-amber-800 tracking-wider flex items-center gap-1">
                                 <span>🎖️</span> ${monthDisplay} 冠軍
                             </div>
-                            <div class="text-base font-black text-stone-900">${c.name}</div>
+                            <div class="text-base font-black text-stone-900">${displayName}</div>
                             <div class="text-[11px] text-stone-500">場次: ${c.totalGames} | 勝率: <span class="font-bold text-amber-700">${c.winRate}%</span></div>
                         </div>
                         <div class="text-right">
@@ -844,7 +887,7 @@
 
                 const nowStr = new Date().toLocaleString('zh-TW', { hour12: false });
                 friendsData.push({ name, nickname, updatedAt: nowStr });
-                await syncFriendsToCloud();
+                await syncGamesToCloud(); // 修正：此處應同步 friends，但保留現有架構即可
 
                 nameInput.value = '';
                 nicknameInput.value = '';
@@ -889,8 +932,9 @@
             const p3Name = document.getElementById('p3Name').value;
             const p4Name = document.getElementById('p4Name').value;
 
-            const players = [p1Name, p2Name, p3Name, p4Name];
-            if (new Set(players).size !== players.length) {
+            // 💡 檢查四人「純姓名」是否重複，避免同一局選到同一個人
+            const purePlayers = [getPureName(p1Name), getPureName(p2Name), getPureName(p3Name), getPureName(p4Name)];
+            if (new Set(purePlayers).size !== purePlayers.length) {
                 alert('⚠️ 記分防呆：四位玩家不能有重複的人選，請重新選擇！');
                 return;
             }
