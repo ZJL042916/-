@@ -339,7 +339,7 @@
         </div>
     </div>
 
-    <!-- 💡 常用地點管理彈窗 (Modal) -->
+    <!-- 常用地點管理彈窗 (Modal) -->
     <div id="locationModal" class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white border border-stone-200 rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl space-y-5 relative">
             <button onclick="closeLocationManager()" class="absolute top-5 right-5 text-stone-400 hover:text-stone-700 text-xl font-bold">✕</button>
@@ -351,13 +351,11 @@
                 </div>
             </div>
 
-            <!-- 新增常用地點表單 -->
             <form id="addLocationForm" class="flex gap-2">
                 <input type="text" id="newLocationInput" placeholder="例如：新北市板橋區民生路" class="flex-1 bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-600 shadow-inner" required>
                 <button type="submit" class="bg-amber-700 hover:bg-amber-800 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all shadow-sm">新增</button>
             </form>
 
-            <!-- 常用地點清單 -->
             <div>
                 <h4 class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">現有常用地點清單</h4>
                 <div id="locationListContainer" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
@@ -373,7 +371,6 @@
         let friendsData = [];
         let historicalChampions = [];
 
-        // 預設常用地點，並存放在瀏覽器 LocalStorage 中供自訂修改
         let defaultLocations = ["新北市板橋區", "花蓮縣花蓮市", "台北市"];
         function getSavedLocations() {
             const saved = localStorage.getItem('mahjong_saved_locations');
@@ -1099,7 +1096,7 @@
             
             const exists = friendsData.some(f => f.name === name);
             if (exists) {
-                alert(`⚠️ 防呆提示：牌友「${name}」已經存在清單中囉！若要修改綽號請點擊下方清單的「修改」按鈕。`);
+                alert(`⚠️ 防呆提示：牌友「${name}」已經存在清單中囉！若要修改綽號請點擊下方清單的環節。`);
                 return;
             }
 
@@ -1200,7 +1197,6 @@
                 });
 
                 alert('戰績與台費已成功同步至 Google 雲端！');
-                document.getElementById('gameForm': reset ? document.getElementById('gameForm').reset() : ''); // 兼容防呆
                 document.getElementById('gameForm').reset();
                 setDefaultDates();
                 renderQuickLocations();
