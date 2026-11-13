@@ -12,22 +12,35 @@
         body { font-family: system-ui, -apple-system, sans-serif; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800" x-data="mahjongApp()">
+<body class="bg-[#fbf9f5] text-slate-800" x-data="mahjongApp()">
 
-    <div class="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
+    <div class="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
         
-        <!-- Header -->
-        <header class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <!-- 頂部 Header 與導航頁籤 -->
+        <header class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
-                <div class="bg-emerald-100 text-emerald-600 p-3 rounded-xl text-2xl">🀄</div>
+                <div class="bg-amber-700 text-white p-3 rounded-xl text-2xl font-bold shadow-sm">🀄</div>
                 <div>
                     <h1 class="text-2xl font-bold text-slate-900">麻將即時戰績排行榜</h1>
                     <p class="text-sm text-slate-500">雲端多人連線同步系統</p>
                 </div>
             </div>
-            <button @click="loadData()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2 shadow-sm">
-                🔄 重新整理
-            </button>
+
+            <!-- 頁籤切換按鈕群組 -->
+            <div class="bg-slate-100 p-1.5 rounded-xl flex flex-wrap gap-1 shadow-inner">
+                <button @click="currentTab = 'leaderboard'" :class="currentTab === 'leaderboard' ? 'bg-[#b45309] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'" class="px-4 py-2 rounded-lg text-sm font-medium transition">
+                    🏆 總排行榜
+                </button>
+                <button @click="currentTab = 'monthly'" :class="currentTab === 'monthly' ? 'bg-[#b45309] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'" class="px-4 py-2 rounded-lg text-sm font-medium transition">
+                    📊 月排行榜與積分冠軍
+                </button>
+                <button @click="currentTab = 'games'" :class="currentTab === 'games' ? 'bg-[#b45309] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'" class="px-4 py-2 rounded-lg text-sm font-medium transition">
+                    📜 牌局明細
+                </button>
+                <button @click="currentTab = 'players'" :class="currentTab === 'players' ? 'bg-[#b45309] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'" class="px-4 py-2 rounded-lg text-sm font-medium transition">
+                    👥 牌友管理
+                </button>
+            </div>
         </header>
 
         <!-- 載入中狀態 -->
@@ -36,232 +49,211 @@
             <p class="text-slate-500 font-medium">正在從 Google 雲端載入資料...</p>
         </div>
 
-        <div x-show="!loading" class="space-y-6">
+        <div x-show="!loading" class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
             
-            <!-- MVP 榮譽榜 -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div class="bg-gradient-to-br from-amber-500 to-amber-600 text-white p-5 rounded-2xl shadow-sm flex items-center justify-between">
-                    <div>
-                        <div class="text-amber-100 text-xs font-semibold tracking-wider uppercase">總榜常勝軍 (表現最佳 MVP)</div>
-                        <div class="text-2xl font-bold mt-1" x-text="topPlayer ? topPlayer.name : '暫無資料'"></div>
-                        <div class="text-xs text-amber-100 mt-1">綜合勝率: <span x-text="topPlayer ? topPlayer.bayesWinRate + '%' : '0%'"></span></div>
-                    </div>
-                    <div class="text-4xl">👑</div>
-                </div>
-
-                <div class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-5 rounded-2xl shadow-sm flex items-center justify-between">
-                    <div>
-                        <div class="text-emerald-100 text-xs font-semibold tracking-wider uppercase">本月積分王 (得分最高)</div>
-                        <div class="text-2xl font-bold mt-1" x-text="currentMonthTopPlayer ? currentMonthTopPlayer.name : '本月尚無資料'"></div>
-                        <div class="text-xs text-emerald-100 mt-1">當月積分: <span x-text="currentMonthTopPlayer ? (currentMonthTopPlayer.score > 0 ? '+' + currentMonthTopPlayer.score : currentMonthTopPlayer.score) : 0"></span></div>
-                    </div>
-                    <div class="text-4xl">🎖️</div>
-                </div>
-            </div>
-
-            <!-- 📝 記錄新牌局區塊 -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
+            <!-- 左側：記錄新牌局表單 (固定在左側) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4 lg:col-span-1">
                 <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>📝</span> 記錄新牌局</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                
+                <div class="space-y-4">
                     <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">日期</label>
-                        <input type="date" x-model="newGame.date" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm">
+                        <label class="block text-xs font-medium text-slate-500 mb-1">牌局日期</label>
+                        <input type="date" x-model="newGame.date" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">地點</label>
-                        <input type="text" x-model="newGame.location" placeholder="例如：大三元" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm">
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="text-xs font-medium text-slate-500">地點</label>
+                            <button @click="alert('常用地點管理功能')" class="text-xs text-amber-700 hover:underline">⚙️ 管理常用地點</button>
+                        </div>
+                        <input type="text" x-model="newGame.location" placeholder="例如：新北市板橋區" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">總台費 (元)</label>
-                        <input type="number" x-model="newGame.fee" placeholder="0" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm">
+                        <label class="block text-xs font-medium text-slate-500 mb-1">台費 (元)</label>
+                        <input type="number" x-model="newGame.fee" placeholder="0" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600">
                     </div>
-                </div>
-                <div class="text-xs text-slate-400">（四人得分明細與提交功能可依你原本的 Apps Script 邏輯對應）</div>
-            </div>
-
-            <!-- 🏆 總累積戰績排行榜 -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                <div class="p-5 border-b border-slate-100 flex justify-between items-center">
-                    <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>🏆</span> 總累積戰績排行榜</h2>
-                    <span class="text-xs text-slate-400">點擊牌友姓名可看個人詳細戰績</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 text-slate-500 text-xs font-semibold border-b border-slate-100">
-                                <th class="p-4 w-16">排名</th>
-                                <th class="p-4">牌友 (點擊看個人明細)</th>
-                                <th class="p-4 text-center">總場次</th>
-                                <th class="p-4 text-center">勝率 (貝氏加權)</th>
-                                <th class="p-4 text-right">累積得分</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 text-sm">
-                            <template x-for="(p, index) in leaderboard" :key="p.name">
-                                <tr class="hover:bg-slate-50 transition">
-                                    <td class="p-4 font-bold text-slate-400" x-text="'#' + (index + 1)"></td>
-                                    <td class="p-4">
-                                        <button @click="openPlayerDetail(p)" class="font-medium text-emerald-600 hover:text-emerald-800 hover:underline text-left" x-text="p.name"></button>
-                                    </td>
-                                    <td class="p-4 text-center text-slate-600" x-text="p.games"></td>
-                                    <td class="p-4 text-center text-slate-600" x-text="p.bayesWinRate + '%'"></td>
-                                    <td class="p-4 text-right font-bold" :class="p.score >= 0 ? 'text-rose-600' : 'text-emerald-600'" x-text="(p.score > 0 ? '+' : '') + p.score"></td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
+                    
+                    <div class="pt-2">
+                        <button class="w-full bg-[#b45309] hover:bg-[#92400e] text-white font-medium py-3 rounded-xl shadow-sm transition">
+                            新增戰績並存入雲端
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- 💰 歷史台費與場地費分攤統計 (新功能) -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-4">
-                    <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>💰</span> 歷史台費與場地費分攤統計</h2>
-                    <span class="text-xs bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full font-medium">以 4 人均攤計算</span>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                        <div class="text-xs text-slate-500">歷史總台費支出</div>
-                        <div class="text-2xl font-bold text-slate-800 mt-1" x-text="'$' + totalFeeAmount"></div>
-                        <div class="text-xs text-slate-400 mt-1">來自所有已記錄的牌局</div>
-                    </div>
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 sm:col-span-2">
-                        <div class="text-xs text-slate-500 mb-2">個人總台費分攤貢獻榜</div>
-                        <div class="flex flex-wrap gap-2">
-                            <template x-for="f in feeContributions" :key="f.name">
-                                <div class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-xs flex items-center gap-2 shadow-xs">
-                                    <span class="font-medium text-slate-700" x-text="f.name"></span>
-                                    <span class="text-emerald-600 font-bold" x-text="'$' + f.amount"></span>
-                                </div>
-                            </template>
+            <!-- 右側：動態切換頁籤內容 -->
+            <div class="lg:col-span-2 space-y-6">
+
+                <!-- 1. 總排行榜頁籤 -->
+                <div x-show="currentTab === 'leaderboard'" class="space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div class="p-5 border-b border-slate-100 flex justify-between items-center">
+                            <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>🏆</span> 總累積戰績排行榜</h2>
+                            <button @click="loadData()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5">
+                                🔄 重新整理
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-500 text-xs font-semibold border-b border-slate-100">
+                                        <th class="p-4 w-16">排名</th>
+                                        <th class="p-4">牌友 (點擊看個人明細)</th>
+                                        <th class="p-4 text-center">總場次</th>
+                                        <th class="p-4 text-center">勝率 (貝氏加權)</th>
+                                        <th class="p-4 text-right">累積得分</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 text-sm">
+                                    <template x-for="(p, index) in leaderboard" :key="p.name">
+                                        <tr class="hover:bg-slate-50 transition">
+                                            <td class="p-4 font-bold text-slate-400" x-text="'#' + (index + 1)"></td>
+                                            <td class="p-4">
+                                                <button @click="openPlayerDetail(p)" class="font-medium text-amber-700 hover:underline text-left" x-text="p.name"></button>
+                                            </td>
+                                            <td class="p-4 text-center text-slate-600" x-text="p.games"></td>
+                                            <td class="p-4 text-center text-slate-600" x-text="p.bayesWinRate + '%'"></td>
+                                            <td class="p-4 text-right font-bold" :class="p.score >= 0 ? 'text-rose-600' : 'text-emerald-600'" x-text="(p.score > 0 ? '+' : '') + p.score"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- ⚔️ 雙人對戰紀錄與天敵分析 (新功能) -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-4">
-                    <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>⚔️</span> 雙人對戰紀錄與天敵分析</h2>
-                    <span class="text-xs text-slate-400">選擇兩位牌友查看同桌對決</span>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">選擇牌友 A</label>
-                        <select x-model="matchupPlayer1" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                            <option value="">-- 請選擇牌友 --</option>
-                            <template x-for="p in leaderboard" :key="p.name">
-                                <option :value="p.name" x-text="p.name"></option>
-                            </template>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-500 mb-1">選擇牌友 B</label>
-                        <select x-model="matchupPlayer2" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                            <option value="">-- 請選擇牌友 --</option>
-                            <template x-for="p in leaderboard" :key="p.name">
-                                <option :value="p.name" x-text="p.name"></option>
-                            </template>
-                        </select>
-                    </div>
-                </div>
-
-                <template x-if="matchupPlayer1 && matchupPlayer2">
-                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-3 mt-4">
-                        <div class="text-center font-bold text-slate-700 text-sm" x-text="matchupPlayer1 + ' VS ' + matchupPlayer2 + ' 同桌對戰數據'"></div>
-                        <div class="grid grid-cols-3 gap-2 text-center">
-                            <div class="bg-white p-3 rounded-lg border border-slate-100">
-                                <div class="text-xs text-slate-400">共同同桌場次</div>
-                                <div class="text-lg font-bold text-slate-800 mt-1" x-text="matchupStats.commonGames"></div>
-                            </div>
-                            <div class="bg-white p-3 rounded-lg border border-slate-100">
-                                <div class="text-xs text-slate-400" x-text="matchupPlayer1 + ' 贏過幾場'"></div>
-                                <div class="text-lg font-bold text-rose-600 mt-1" x-text="matchupStats.p1Wins"></div>
-                            </div>
-                            <div class="bg-white p-3 rounded-lg border border-slate-100">
-                                <div class="text-xs text-slate-400" x-text="matchupPlayer2 + ' 贏過幾場'"></div>
-                                <div class="text-lg font-bold text-rose-600 mt-1" x-text="matchupStats.p2Wins"></div>
-                            </div>
+                    <!-- 💰 歷史台費統計區塊 -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                            <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>💰</span> 歷史台費與場地費分攤統計</h2>
+                            <span class="text-xs bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full font-medium">以 4 人均攤計算</span>
                         </div>
-                        <div class="text-xs text-center text-slate-500 pt-1" x-text="matchupStats.summaryText"></div>
-                    </div>
-                </template>
-            </div>
-
-            <!-- 月度戰績統計 -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-4">
-                    <div>
-                        <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>📅</span> 月度戰績統計</h2>
-                        <p class="text-xs text-slate-400">檢視指定月份的積分與表現排名</p>
-                    </div>
-                    <select x-model="selectedMonth" @change="filterMonthData()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                        <template x-for="m in availableMonths" :key="m">
-                            <option :value="m" x-text="m"></option>
-                        </template>
-                    </select>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 text-slate-500 text-xs font-semibold border-b border-slate-100">
-                                <th class="p-3 w-16">排名</th>
-                                <th class="p-3">牌友</th>
-                                <th class="p-3 text-center">當月場次</th>
-                                <th class="p-3 text-center">當月勝率</th>
-                                <th class="p-3 text-right">當月得分</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 text-sm">
-                            <template x-for="(p, index) in monthlyLeaderboard" :key="p.name">
-                                <tr class="hover:bg-slate-50 transition">
-                                    <td class="p-3 font-bold text-slate-400" x-text="'#' + (index + 1)"></td>
-                                    <td class="p-3 font-medium text-slate-700" x-text="p.name"></td>
-                                    <td class="p-3 text-center text-slate-600" x-text="p.games"></td>
-                                    <td class="p-3 text-center text-slate-600" x-text="p.bayesWinRate + '%'"></td>
-                                    <td class="p-3 text-right font-bold" :class="p.score >= 0 ? 'text-rose-600' : 'text-emerald-600'" x-text="(p.score > 0 ? '+' : '') + p.score"></td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 歷史牌局明細與管理 -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
-                <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>📜</span> 歷史牌局明細與管理</h2>
-                <div class="space-y-3">
-                    <template x-for="game in rawGames" :key="game.id">
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                            <div>
-                                <div class="text-xs font-semibold text-slate-500" x-text="game.date + ' | ' + game.location + ' | 台費: $' + game.fee"></div>
-                                <div class="flex flex-wrap gap-2 mt-2">
-                                    <template x-for="res in game.results" :key="res.name">
-                                        <span class="text-xs bg-white px-2.5 py-1 rounded-lg border border-slate-200 font-medium">
-                                            <span class="text-slate-700" x-text="res.name + ': '"></span>
-                                            <span :class="res.score >= 0 ? 'text-rose-600 font-bold' : 'text-emerald-600 font-bold'" x-text="(res.score > 0 ? '+' : '') + res.score"></span>
-                                        </span>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                <div class="text-xs text-slate-500">歷史總台費支出</div>
+                                <div class="text-2xl font-bold text-slate-800 mt-1" x-text="'$' + totalFeeAmount"></div>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 sm:col-span-2">
+                                <div class="text-xs text-slate-500 mb-2">個人總台費分攤貢獻榜</div>
+                                <div class="flex flex-wrap gap-2">
+                                    <template x-for="f in feeContributions" :key="f.name">
+                                        <div class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-xs flex items-center gap-2 shadow-xs">
+                                            <span class="font-medium text-slate-700" x-text="f.name"></span>
+                                            <span class="text-amber-700 font-bold" x-text="'$' + f.amount"></span>
+                                        </div>
                                     </template>
                                 </div>
                             </div>
                         </div>
-                    </template>
-                </div>
-            </div>
+                    </div>
 
-            <!-- 👥 新增牌友與地點管理區塊 -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
-                    <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>👥</span> 新增牌友與專屬綽號</h2>
-                    <p class="text-xs text-slate-400">在此管理群組內的常駐牌咖與稱號</p>
+                    <!-- ⚔️ 雙人對戰天敵分析區塊 -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                            <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>⚔️</span> 雙人對戰紀錄與天敵分析</h2>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 mb-1">選擇牌友 A</label>
+                                <select x-model="matchupPlayer1" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm">
+                                    <option value="">-- 請選擇 --</option>
+                                    <template x-for="p in leaderboard" :key="p.name">
+                                        <option :value="p.name" x-text="p.name"></option>
+                                    </template>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 mb-1">選擇牌友 B</label>
+                                <select x-model="matchupPlayer2" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm">
+                                    <option value="">-- 請選擇 --</option>
+                                    <template x-for="p in leaderboard" :key="p.name">
+                                        <option :value="p.name" x-text="p.name"></option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+                        <template x-if="matchupPlayer1 && matchupPlayer2">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 mt-4 text-center">
+                                <div class="font-bold text-slate-700 text-sm" x-text="matchupPlayer1 + ' VS ' + matchupPlayer2"></div>
+                                <div class="text-xs text-slate-600" x-text="'共同同桌場次: ' + matchupStats.commonGames + ' 場 | ' + matchupPlayer1 + ' 勝: ' + matchupStats.p1Wins + ' 場 | ' + matchupPlayer2 + ' 勝: ' + matchupStats.p2Wins + ' 場'"></div>
+                                <div class="text-xs text-amber-700 font-medium pt-1" x-text="matchupStats.summaryText"></div>
+                            </div>
+                        </template>
+                    </div>
                 </div>
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
-                    <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>🏛️</span> 管理雲端常用地點</h2>
-                    <p class="text-xs text-slate-400">在此維護常去的牌局據點</p>
-                </div>
-            </div>
 
+                <!-- 2. 月排行榜與積分冠軍頁籤 -->
+                <div x-show="currentTab === 'monthly'" class="space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+                            <h2 class="font-bold text-lg text-slate-800">📊 月度戰績統計</h2>
+                            <select x-model="selectedMonth" @change="filterMonthData()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium">
+                                <template x-for="m in availableMonths" :key="m">
+                                    <option :value="m" x-text="m"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-500 text-xs font-semibold border-b border-slate-100">
+                                        <th class="p-3 w-16">排名</th>
+                                        <th class="p-3">牌友</th>
+                                        <th class="p-3 text-center">當月場次</th>
+                                        <th class="p-3 text-center">當月勝率</th>
+                                        <th class="p-3 text-right">當月得分</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 text-sm">
+                                    <template x-for="(p, index) in monthlyLeaderboard" :key="p.name">
+                                        <tr class="hover:bg-slate-50 transition">
+                                            <td class="p-3 font-bold text-slate-400" x-text="'#' + (index + 1)"></td>
+                                            <td class="p-3 font-medium text-slate-700" x-text="p.name"></td>
+                                            <td class="p-3 text-center text-slate-600" x-text="p.games"></td>
+                                            <td class="p-3 text-center text-slate-600" x-text="p.bayesWinRate + '%'"></td>
+                                            <td class="p-3 text-right font-bold" :class="p.score >= 0 ? 'text-rose-600' : 'text-emerald-600'" x-text="(p.score > 0 ? '+' : '') + p.score"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. 牌局明細頁籤 -->
+                <div x-show="currentTab === 'games'" class="space-y-4">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
+                        <h2 class="font-bold text-lg text-slate-800">📜 歷史牌局明細與管理</h2>
+                        <div class="space-y-3">
+                            <template x-for="game in rawGames" :key="game.id">
+                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-2">
+                                    <div class="text-xs font-semibold text-slate-500" x-text="game.date + ' | 地點: ' + game.location + ' | 台費: $' + game.fee"></div>
+                                    <div class="flex flex-wrap gap-2">
+                                        <template x-for="res in game.results" :key="res.name">
+                                            <span class="text-xs bg-white px-2.5 py-1 rounded-lg border border-slate-200 font-medium">
+                                                <span class="text-slate-700" x-text="res.name + ': '"></span>
+                                                <span :class="res.score >= 0 ? 'text-rose-600 font-bold' : 'text-emerald-600 font-bold'" x-text="(res.score > 0 ? '+' : '') + res.score"></span>
+                                            </span>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. 牌友管理頁籤 -->
+                <div x-show="currentTab === 'players'" class="space-y-4">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
+                        <h2 class="font-bold text-lg text-slate-800">👥 牌友與綽號管理</h2>
+                        <p class="text-xs text-slate-500">在此管理群組內的常駐牌咖與專屬綽號。</p>
+                        <div class="flex flex-wrap gap-2 pt-2">
+                            <template x-for="p in leaderboard" :key="p.name">
+                                <span class="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-xl text-xs font-medium border border-slate-200" x-text="p.name"></span>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
 
         <!-- 個人明細彈窗 -->
@@ -287,9 +279,6 @@
                 </div>
                 <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
                     <div class="text-xs font-bold text-slate-500 pt-2">歷史對局明細</div>
-                    <template x-if="selectedPlayer && selectedPlayer.history.length === 0">
-                        <p class="text-xs text-slate-400">尚無參賽紀錄</p>
-                    </template>
                     <template x-for="h in (selectedPlayer ? selectedPlayer.history : [])" :key="h.date + h.location">
                         <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs flex justify-between items-center">
                             <div>
@@ -306,27 +295,22 @@
     </div>
 
     <script>
-        // 請確認此處為你實際部署的 Google Apps Script 網址
+        // 請確保此處為你實際部署的 Google Apps Script 網址
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby.../exec";
 
         function mahjongApp() {
             return {
                 loading: true,
+                currentTab: 'leaderboard',
                 rawGames: [],
                 leaderboard: [],
-                topPlayer: null,
                 selectedPlayer: null,
-                
-                // 新牌局表單變數
                 newGame: { date: '', location: '', fee: '' },
 
-                // 月度統計變數
                 availableMonths: [],
                 selectedMonth: '',
                 monthlyLeaderboard: [],
-                currentMonthTopPlayer: null,
 
-                // 新功能變數 (台費與對戰)
                 totalFeeAmount: 0,
                 feeContributions: [],
                 matchupPlayer1: '',
@@ -366,7 +350,6 @@
 
                         let month = game.date ? game.date.substring(0, 7) : '未知月份';
                         monthsSet.add(month);
-
                         if (!monthStats[month]) monthStats[month] = {};
 
                         let results = game.results || [];
@@ -374,35 +357,29 @@
                             let name = res.name;
                             let score = Number(res.score) || 0;
 
-                            // 總榜統計
                             if (!stats[name]) stats[name] = { name: name, games: 0, wins: 0, score: 0, history: [] };
                             stats[name].games += 1;
                             if (score > 0) stats[name].wins += 1;
                             stats[name].score += score;
                             stats[name].history.push({ date: game.date, location: game.location, score: score });
 
-                            // 月度統計
                             if (!monthStats[month][name]) monthStats[month][name] = { name: name, games: 0, wins: 0, score: 0 };
                             monthStats[month][name].games += 1;
                             if (score > 0) monthStats[month][name].wins += 1;
                             monthStats[month][name].score += score;
 
-                            // 台費統計
                             if (!feeMap[name]) feeMap[name] = 0;
                             feeMap[name] += perPersonFee;
                         });
                     });
 
-                    // 總排行榜處理
                     let lb = Object.values(stats).map(p => {
                         let bayesWinRate = Math.round(((p.wins + 1) / (p.games + 2)) * 100);
                         return { ...p, bayesWinRate };
                     });
                     lb.sort((a, b) => b.score - a.score);
                     this.leaderboard = lb;
-                    if (lb.length > 0) this.topPlayer = lb[0];
 
-                    // 月份下拉選單
                     this.availableMonths = Array.from(monthsSet).sort().reverse();
                     if (this.availableMonths.length > 0 && !this.selectedMonth) {
                         this.selectedMonth = this.availableMonths[0];
@@ -410,7 +387,6 @@
                     this.allMonthStats = monthStats;
                     this.filterMonthData();
 
-                    // 台費統計
                     this.totalFeeAmount = totalFee;
                     this.feeContributions = Object.keys(feeMap).map(name => ({
                         name: name,
@@ -421,7 +397,6 @@
                 filterMonthData() {
                     if (!this.selectedMonth || !this.allMonthStats[this.selectedMonth]) {
                         this.monthlyLeaderboard = [];
-                        this.currentMonthTopPlayer = null;
                         return;
                     }
                     let mData = this.allMonthStats[this.selectedMonth];
@@ -431,7 +406,6 @@
                     });
                     mlb.sort((a, b) => b.score - a.score);
                     this.monthlyLeaderboard = mlb;
-                    this.currentMonthTopPlayer = mlb.length > 0 ? mlb[0] : null;
                 },
 
                 openPlayerDetail(player) {
@@ -442,33 +416,22 @@
                     if (!this.matchupPlayer1 || !this.matchupPlayer2 || this.matchupPlayer1 === this.matchupPlayer2) {
                         return { commonGames: 0, p1Wins: 0, p2Wins: 0, summaryText: '請選擇兩位不同的牌友進行對戰分析' };
                     }
-
-                    let commonGames = 0;
-                    let p1Wins = 0;
-                    let p2Wins = 0;
-
+                    let commonGames = 0, p1Wins = 0, p2Wins = 0;
                     this.rawGames.forEach(game => {
                         let p1Res = game.results.find(r => r.name === this.matchupPlayer1);
                         let p2Res = game.results.find(r => r.name === this.matchupPlayer2);
-
                         if (p1Res && p2Res) {
                             commonGames++;
                             if (Number(p1Res.score) > Number(p2Res.score)) p1Wins++;
                             if (Number(p2Res.score) > Number(p1Res.score)) p2Wins++;
                         }
                     });
-
                     let summaryText = `${this.matchupPlayer1} 與 ${this.matchupPlayer2} 總共同桌過 ${commonGames} 場。`;
                     if (commonGames > 0) {
-                        if (p1Wins > p2Wins) {
-                            summaryText += ` 在對戰中 ${this.matchupPlayer1} 佔居上風！`;
-                        } else if (p2Wins > p1Wins) {
-                            summaryText += ` 在對戰中 ${this.matchupPlayer2} 佔居上風！`;
-                        } else {
-                            summaryText += ` 雙方目前平分秋色！`;
-                        }
+                        if (p1Wins > p2Wins) summaryText += ` 在對戰中 ${this.matchupPlayer1} 佔居上風！`;
+                        else if (p2Wins > p1Wins) summaryText += ` 在對戰中 ${this.matchupPlayer2} 佔居上風！`;
+                        else summaryText += ` 雙方目前平分秋色！`;
                     }
-
                     return { commonGames, p1Wins, p2Wins, summaryText };
                 }
             }
