@@ -26,13 +26,14 @@
                 </div>
                 <div>
                     <h1 class="text-xl md:text-2xl font-black text-stone-900 tracking-tight">麻將即時戰績排行榜</h1>
-                    <p class="text-xs text-stone-500 font-medium">雲端多人連線同步系統 (含台費與天敵分析)</p>
+                    <p class="text-xs text-stone-500 font-medium">雲端多人連線同步系統 (含極速記牌與俱樂部洞察)</p>
                 </div>
             </div>
 
             <div class="flex flex-wrap justify-center bg-stone-200/70 border border-stone-300/60 rounded-2xl p-1.5 shadow-inner gap-1.5">
                 <button onclick="switchTab('rank')" id="tabRank" class="px-3 py-2 text-xs font-bold rounded-xl transition-all bg-amber-700 text-white shadow-md">🏆 總排行榜</button>
-                <button onclick="switchTab('monthly')" id="tabMonthly" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">📅 月排行榜與積分冠軍</button>
+                <button onclick="switchTab('insights')" id="tabInsights" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">📈 俱樂部洞察與殿堂</button>
+                <button onclick="switchTab('monthly')" id="tabMonthly" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">📅 月排行榜</button>
                 <button onclick="switchTab('history')" id="tabHistory" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">📜 牌局明細</button>
                 <button onclick="switchTab('friends')" id="tabFriends" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">👥 牌友管理</button>
             </div>
@@ -56,11 +57,18 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- 左側：記錄新牌局 -->
+                <!-- 左側：記錄新牌局 (內含常用 4 人組快捷代入) -->
                 <div class="bg-white/85 border border-stone-200/80 rounded-3xl p-6 shadow-xl backdrop-blur-md md:col-span-1">
-                    <h2 class="text-base font-bold text-amber-800 mb-5 flex items-center gap-2">
+                    <h2 class="text-base font-bold text-amber-800 mb-4 flex items-center gap-2">
                         <span class="p-1.5 bg-amber-100 rounded-xl border border-amber-200">📝</span> 記錄新牌局
                     </h2>
+
+                    <!-- ⚡ 常用固定 4 人組快捷按鈕 -->
+                    <div class="mb-4 bg-amber-50/50 border border-amber-200/60 p-3 rounded-2xl">
+                        <label class="block text-[11px] font-bold text-amber-900 mb-1.5">⚡ 常用固定 4 人組快捷代入：</label>
+                        <div class="flex flex-wrap gap-1.5" id="groupButtonsContainer"></div>
+                    </div>
+
                     <form id="gameForm" class="space-y-4">
                         <div>
                             <label class="block text-xs font-semibold text-stone-600 mb-1.5">牌局日期</label>
@@ -83,13 +91,19 @@
                         
                         <div class="space-y-3 pt-1" id="playersInputContainer"></div>
 
+                        <!-- 💡 賽後結算小幫手預覽 -->
+                        <div id="settlementPreview" class="bg-stone-50 border border-stone-200 rounded-2xl p-3 text-xs text-stone-600 space-y-1">
+                            <span class="font-bold text-amber-800 block">💡 賽後結算小幫手：</span>
+                            <span id="settlementText">請輸入分數以預覽每人台費分攤</span>
+                        </div>
+
                         <button type="submit" id="submitBtn" class="w-full mt-2 bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-800 hover:to-amber-700 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-amber-900/20 text-sm active:scale-[0.98]">
                             新增戰績並存入雲端
                         </button>
                     </form>
                 </div>
 
-                <!-- 右側：排行榜 + 新增的台費與天敵分析區塊 -->
+                <!-- 右側：總排行榜 -->
                 <div class="md:col-span-2 space-y-6 flex flex-col">
                     <div class="bg-white/85 border border-stone-200/80 rounded-3xl shadow-xl backdrop-blur-md flex flex-col overflow-hidden">
                         <div class="p-5 md:p-6 border-b border-stone-200 flex justify-between items-center bg-stone-50/50">
@@ -119,77 +133,98 @@
                             </table>
                         </div>
                     </div>
-
-                    <!-- 💰 歷史台費與場地費分攤統計 (新功能) -->
-                    <div class="bg-white/85 border border-stone-200/80 rounded-3xl shadow-xl backdrop-blur-md p-6 space-y-4">
-                        <div class="flex items-center justify-between border-b border-stone-200 pb-4">
-                            <h2 class="text-base font-bold text-amber-800 flex items-center gap-2">
-                                <span class="p-1.5 bg-amber-100 rounded-xl border border-amber-200">💰</span> 歷史台費與場地費分攤統計
-                            </h2>
-                            <span class="text-xs bg-amber-50 text-amber-800 px-3 py-1 rounded-full font-bold border border-amber-200">以 4 人均攤計算</span>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div class="bg-stone-50/80 border border-stone-200 rounded-2xl p-4">
-                                <div class="text-xs text-stone-500 font-semibold">歷史總台費支出</div>
-                                <div class="text-2xl font-black text-stone-900 mt-1" id="totalFeeDisplay">$0</div>
-                                <div class="text-[11px] text-stone-400 mt-1">來自所有已記錄的牌局</div>
-                            </div>
-                            <div class="bg-stone-50/80 border border-stone-200 rounded-2xl p-4 sm:col-span-2">
-                                <div class="text-xs text-stone-500 font-semibold mb-2">個人總台費分攤貢獻榜 (幫大家出了多少場地/飲料費)</div>
-                                <div class="flex flex-wrap gap-2" id="feeContributionsContainer">
-                                    <span class="text-xs text-stone-400">載入中...</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ⚔️ 雙人對戰紀錄與天敵分析 (新功能) -->
-                    <div class="bg-white/85 border border-stone-200/80 rounded-3xl shadow-xl backdrop-blur-md p-6 space-y-4">
-                        <div class="flex items-center justify-between border-b border-stone-200 pb-4">
-                            <h2 class="text-base font-bold text-amber-800 flex items-center gap-2">
-                                <span class="p-1.5 bg-amber-100 rounded-xl border border-amber-200">⚔️</span> 雙人對戰紀錄與天敵分析
-                            </h2>
-                            <span class="text-xs text-stone-400">選擇兩位牌友查看同桌對決</span>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-stone-600 mb-1.5">選擇牌友 A</label>
-                                <select id="matchupPlayer1" onchange="renderMatchupStats()" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-3 py-2 text-sm text-stone-800 focus:outline-none focus:border-amber-600">
-                                    <option value="">-- 請選擇牌友 --</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-stone-600 mb-1.5">選擇牌友 B</label>
-                                <select id="matchupPlayer2" onchange="renderMatchupStats()" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-3 py-2 text-sm text-stone-800 focus:outline-none focus:border-amber-600">
-                                    <option value="">-- 請選擇牌友 --</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div id="matchupResultContainer" class="hidden bg-stone-50/80 border border-stone-200 rounded-2xl p-5 space-y-3">
-                            <div class="text-center font-black text-stone-800 text-sm" id="matchupTitle">-</div>
-                            <div class="grid grid-cols-3 gap-3 text-center">
-                                <div class="bg-white border border-stone-200 rounded-xl p-3">
-                                    <div class="text-[11px] text-stone-500 font-bold">共同同桌場次</div>
-                                    <div class="text-lg font-black text-stone-800 mt-0.5" id="matchupCommonGames">0</div>
-                                </div>
-                                <div class="bg-white border border-stone-200 rounded-xl p-3">
-                                    <div class="text-[11px] text-stone-500 font-bold" id="p1WinLabel">A 贏過</div>
-                                    <div class="text-lg font-black text-rose-700 mt-0.5" id="matchupP1Wins">0</div>
-                                </div>
-                                <div class="bg-white border border-stone-200 rounded-xl p-3">
-                                    <div class="text-[11px] text-stone-500 font-bold" id="p2WinLabel">B 贏過</div>
-                                    <div class="text-lg font-black text-rose-700 mt-0.5" id="matchupP2Wins">0</div>
-                                </div>
-                            </div>
-                            <div class="text-xs text-center text-amber-800 font-bold pt-1" id="matchupSummaryText">-</div>
-                        </div>
-                    </div>
-
                 </div>
             </div>
         </div>
 
-        <!-- ==================== 分頁二：月排行榜與歷史積分冠軍 ==================== -->
+        <!-- ==================== 分頁二：📈 俱樂部洞察與殿堂 (四大傳奇獎項) ==================== -->
+        <div id="pageInsights" class="space-y-6 hidden">
+            <div class="bg-white/85 border border-stone-200/80 rounded-3xl p-6 shadow-xl backdrop-blur-md space-y-4">
+                <div class="flex items-center gap-3 border-b border-stone-200 pb-4">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-xl">🏛️</div>
+                    <div>
+                        <h2 class="text-base font-bold text-amber-800">俱樂部榮譽殿堂 (四大傳奇獎項)</h2>
+                        <p class="text-xs text-stone-500">俱樂部歷史最高榮譽與傳奇紀錄</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="legendsGrid"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 💰 歷史台費與場地費分攤統計 -->
+                <div class="bg-white/85 border border-stone-200/80 rounded-3xl shadow-xl backdrop-blur-md p-6 space-y-4">
+                    <div class="flex items-center justify-between border-b border-stone-200 pb-4">
+                        <h2 class="text-base font-bold text-amber-800 flex items-center gap-2">
+                            <span class="p-1.5 bg-amber-100 rounded-xl border border-amber-200">💰</span> 歷史台費與場地費分攤
+                        </h2>
+                        <span class="text-xs bg-amber-50 text-amber-800 px-3 py-1 rounded-full font-bold border border-amber-200">以 4 人均攤計算</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="bg-stone-50/80 border border-stone-200 rounded-2xl p-4 flex justify-between items-center">
+                            <div>
+                                <div class="text-xs text-stone-500 font-semibold">歷史總台費支出</div>
+                                <div class="text-xl font-black text-stone-900 mt-0.5" id="totalFeeDisplay">$0</div>
+                            </div>
+                            <div class="text-xs text-stone-400">來自所有已記錄牌局</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-stone-500 font-semibold mb-2">個人總台費分攤貢獻榜</div>
+                            <div class="flex flex-wrap gap-2" id="feeContributionsContainer">
+                                <span class="text-xs text-stone-400">載入中...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ⚔️ 雙人對戰紀錄與天敵分析 (含點數流向帳本) -->
+                <div class="bg-white/85 border border-stone-200/80 rounded-3xl shadow-xl backdrop-blur-md p-6 space-y-4">
+                    <div class="flex items-center justify-between border-b border-stone-200 pb-4">
+                        <h2 class="text-base font-bold text-amber-800 flex items-center gap-2">
+                            <span class="p-1.5 bg-amber-100 rounded-xl border border-amber-200">⚔️</span> 雙人對戰天敵交叉分析
+                        </h2>
+                        <span class="text-xs text-stone-400">帳本點數流向</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-stone-600 mb-1">玩家 A</label>
+                            <select id="matchupPlayer1" onchange="renderMatchupStats()" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-xs text-stone-800 focus:outline-none focus:border-amber-600">
+                                <option value="">-- 選擇 --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-stone-600 mb-1">玩家 B</label>
+                            <select id="matchupPlayer2" onchange="renderMatchupStats()" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-xs text-stone-800 focus:outline-none focus:border-amber-600">
+                                <option value="">-- 選擇 --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="matchupResultContainer" class="hidden bg-stone-50/80 border border-stone-200 rounded-2xl p-4 space-y-3">
+                        <div class="text-center font-black text-stone-800 text-xs" id="matchupTitle">-</div>
+                        <div class="grid grid-cols-3 gap-2 text-center">
+                            <div class="bg-white border border-stone-200 rounded-xl p-2.5">
+                                <div class="text-[10px] text-stone-500 font-bold">同桌場次</div>
+                                <div class="text-sm font-black text-stone-800 mt-0.5" id="matchupCommonGames">0</div>
+                            </div>
+                            <div class="bg-white border border-stone-200 rounded-xl p-2.5">
+                                <div class="text-[10px] text-stone-500 font-bold" id="p1WinLabel">A 贏過</div>
+                                <div class="text-sm font-black text-rose-700 mt-0.5" id="matchupP1Wins">0</div>
+                            </div>
+                            <div class="bg-white border border-stone-200 rounded-xl p-2.5">
+                                <div class="text-[10px] text-stone-500 font-bold" id="p2WinLabel">B 贏過</div>
+                                <div class="text-sm font-black text-rose-700 mt-0.5" id="matchupP2Wins">0</div>
+                            </div>
+                        </div>
+                        <div class="bg-white border border-stone-200 rounded-xl p-2.5 text-center">
+                            <div class="text-[10px] text-stone-500 font-bold">兩人直接淨點數流向 (A vs B)</div>
+                            <div class="text-sm font-black mt-0.5" id="matchupNetFlow">0 分</div>
+                        </div>
+                        <div class="text-[11px] text-center text-amber-800 font-bold" id="matchupSummaryText">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 分頁三：月排行榜 ==================== -->
         <div id="pageMonthly" class="space-y-6 hidden">
             <div class="bg-white/85 border border-stone-200/80 rounded-3xl p-5 md:p-6 shadow-xl backdrop-blur-md flex flex-col md:flex-row justify-between items-center gap-4">
                 <div class="flex items-center gap-3.5">
@@ -232,20 +267,9 @@
                     </table>
                 </div>
             </div>
-
-            <div class="bg-white/85 border border-stone-200/80 rounded-3xl shadow-xl backdrop-blur-md overflow-hidden p-5 md:p-6 space-y-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-xl">🏛️</div>
-                    <div>
-                        <h2 class="text-base font-bold text-amber-800">歷史月積分冠軍名人堂 (得分王)</h2>
-                        <p class="text-xs text-stone-500">歷年各月份累積得分最高的常勝將軍總覽</p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="historicalChampionsGrid"></div>
-            </div>
         </div>
 
-        <!-- ==================== 分頁三：牌局明細與管理 ==================== -->
+        <!-- ==================== 分頁四：牌局明細 ==================== -->
         <div id="pageHistory" class="space-y-6 hidden">
             <div class="bg-white/85 border border-stone-200/80 rounded-3xl shadow-xl backdrop-blur-md overflow-hidden p-5 md:p-6">
                 <h2 class="text-base font-bold text-amber-800 flex items-center gap-2 mb-4">
@@ -266,7 +290,7 @@
             </div>
         </div>
 
-        <!-- ==================== 分頁四：牌友與綽號管理 ==================== -->
+        <!-- ==================== 分頁五：牌友管理 ==================== -->
         <div id="pageFriends" class="space-y-6 hidden">
             <div class="bg-white/85 border border-stone-200/80 rounded-3xl p-6 md:p-8 shadow-xl backdrop-blur-md max-w-xl mx-auto">
                 <h2 class="text-base font-bold text-amber-800 mb-5 flex items-center gap-2">
@@ -299,11 +323,20 @@
         </div>
     </div>
 
-    <!-- 個人戰績 Modal -->
+    <!-- 👑 個人戰績 Modal (含氣勢狀態、風格標籤與宿敵與肥羊分析) -->
     <div id="playerModal" class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white border border-stone-200 rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl space-y-5 relative">
-            <button onclick="closePlayerModal()" class="absolute top-5 right-5 text-stone-400 font-bold">✕</button>
-            <h3 id="modalPlayerName" class="text-xl font-black text-stone-900">-</h3>
+        <div class="bg-white border border-stone-200 rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl space-y-5 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closePlayerModal()" class="absolute top-5 right-5 text-stone-400 font-bold text-lg">✕</button>
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 id="modalPlayerName" class="text-xl font-black text-stone-900">-</h3>
+                    <div id="modalStreakBadge" class="inline-block text-xs px-2.5 py-1 rounded-full font-bold mt-1.5"></div>
+                </div>
+                <div class="text-right">
+                    <span id="modalStyleTag" class="text-xs bg-amber-50 text-amber-800 px-3 py-1 rounded-full font-bold border border-amber-200"></span>
+                </div>
+            </div>
+
             <div class="grid grid-cols-3 gap-3">
                 <div class="bg-stone-50 border border-stone-200 rounded-2xl p-3 text-center">
                     <div class="text-[11px] text-stone-500 font-bold">總場次</div>
@@ -318,7 +351,18 @@
                     <div id="modalTotalScore" class="text-lg font-black">-</div>
                 </div>
             </div>
-            <div id="modalHistoryList" class="space-y-2 max-h-48 overflow-y-auto"></div>
+
+            <!-- 🎯 底部壓軸：剋星與肥羊榜 -->
+            <div class="border-t border-stone-200 pt-4 space-y-2.5">
+                <h4 class="font-bold text-stone-700 text-xs flex items-center gap-1"><span>🎯</span> 宿敵與肥羊分析 (同桌對戰大數據)</h4>
+                <div id="modalNemesis" class="bg-rose-50 border border-rose-100 p-3 rounded-2xl text-xs text-rose-800 font-medium">⚡ 最大剋星：統計中...</div>
+                <div id="modalCashCow" class="bg-emerald-50 border border-emerald-100 p-3 rounded-2xl text-xs text-emerald-800 font-medium">🐑 頭號肥羊：統計中...</div>
+            </div>
+
+            <div class="border-t border-stone-200 pt-3">
+                <div class="text-xs font-bold text-stone-600 mb-2">近期戰績紀錄</div>
+                <div id="modalHistoryList" class="space-y-2 max-h-40 overflow-y-auto"></div>
+            </div>
         </div>
     </div>
 
@@ -361,14 +405,11 @@
         async function syncLocationsToCloud() {
             try {
                 await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
+                    method: 'POST', mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ type: "UPDATE_LOCATIONS", locations: locationsData })
                 });
-            } catch (error) {
-                console.error('常用地點同步失敗:', error);
-            }
+            } catch (error) { console.error('常用地點同步失敗:', error); }
         }
 
         function renderQuickLocations() {
@@ -386,9 +427,7 @@
             document.getElementById('locationModal').classList.remove('hidden');
         }
 
-        function closeLocationManager() {
-            document.getElementById('locationModal').classList.add('hidden');
-        }
+        function closeLocationManager() { document.getElementById('locationModal').classList.add('hidden'); }
 
         function renderLocationManagerList() {
             const container = document.getElementById('locationListContainer');
@@ -399,8 +438,7 @@
                     <div class="flex justify-between items-center bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs">
                         <span class="font-bold text-stone-800">${loc}</span>
                         <button type="button" onclick="deleteLocation(${idx})" class="text-rose-600 font-semibold px-2 py-1 rounded-lg hover:bg-rose-50">刪除</button>
-                    </div>
-                `;
+                    </div>`;
             });
             container.innerHTML = html;
         }
@@ -410,23 +448,17 @@
             const input = document.getElementById('newLocationInput');
             const val = input.value.trim();
             if (!val) return;
-            if (locationsData.includes(val)) {
-                alert('⚠️ 此地點已經在常用清單中了！');
-                return;
-            }
+            if (locationsData.includes(val)) { alert('⚠️ 此地點已經在常用清單中了！'); return; }
             locationsData.push(val);
             await syncLocationsToCloud();
             renderQuickLocations();
             renderLocationManagerList();
             input.value = '';
-            alert('常用地點已新增並同步至雲端！');
+            alert('常用地點已新增！');
         });
 
         async function deleteLocation(index) {
-            if (locationsData.length <= 1) {
-                alert('⚠️ 至少需要保留一個常用地點！');
-                return;
-            }
+            if (locationsData.length <= 1) { alert('⚠️ 至少需要保留一個常用地點！'); return; }
             locationsData.splice(index, 1);
             await syncLocationsToCloud();
             renderQuickLocations();
@@ -462,8 +494,38 @@
         }
         setDefaultDates();
 
-        function setLocation(loc) {
-            document.getElementById('location').value = loc;
+        function setLocation(loc) { document.getElementById('location').value = loc; }
+
+        // ⚡ 渲染常用 4 人組快捷按鈕
+        function renderGroupButtons() {
+            const container = document.getElementById('groupButtonsContainer');
+            if (!container) return;
+            if (friendsData.length < 4) {
+                container.innerHTML = `<span class="text-[11px] text-stone-400">請先至牌友管理新增至少 4 位牌友</span>`;
+                return;
+            }
+            let html = '';
+            const defaultGroups = [
+                { name: "宿舍班底", members: [friendsData[0]?.name, friendsData[1]?.name, friendsData[2]?.name, friendsData[3]?.name] },
+                { name: "固定好友團", members: friendsData.slice(0, 4).map(f => f.name) }
+            ];
+            defaultGroups.forEach(g => {
+                if (g.members.every(Boolean)) {
+                    html += `<button type="button" onclick='applyGroup(${JSON.stringify(g.members)})' class="text-[11px] bg-white hover:bg-amber-100 text-amber-900 px-2.5 py-1 rounded-xl border border-amber-300 font-bold transition-all shadow-sm">👥 ${g.name}</button>`;
+                }
+            });
+            container.innerHTML = html || `<span class="text-[11px] text-stone-400">尚無常用群組</span>`;
+        }
+
+        function applyGroup(members) {
+            if (members.length >= 4) {
+                for (let i = 1; i <= 4; i++) {
+                    const select = document.getElementById(`p${i}Name`);
+                    const pure = members[i-1];
+                    const targetOption = Array.from(select.options).find(opt => getPureName(opt.value) === pure);
+                    if (targetOption) select.value = targetOption.value;
+                }
+            }
         }
 
         function renderPlayerInputs() {
@@ -489,18 +551,19 @@
                         </div>
                         <div class="grid grid-cols-3 gap-2">
                             <div class="col-span-2">
-                                <select id="p${i}Name" class="w-full bg-white border border-stone-300 rounded-xl px-2.5 py-2 text-xs text-stone-800 focus:outline-none focus:border-amber-600 shadow-inner" required></select>
+                                <select id="p${i}Name" onchange="updateSettlementPreview()" class="w-full bg-white border border-stone-300 rounded-xl px-2.5 py-2 text-xs text-stone-800 focus:outline-none focus:border-amber-600 shadow-inner" required></select>
                             </div>
                             <div>
-                                <input type="number" id="p${i}Score" placeholder="分數" min="0" value="${defaults[i-1].defaultVal}" class="w-full bg-white border border-stone-300 rounded-xl px-2.5 py-2 text-xs font-black shadow-inner text-center text-emerald-700" required>
+                                <input type="number" id="p${i}Score" oninput="updateSettlementPreview()" placeholder="分數" min="0" value="${defaults[i-1].defaultVal}" class="w-full bg-white border border-stone-300 rounded-xl px-2.5 py-2 text-xs font-black shadow-inner text-center text-emerald-700" required>
                                 <input type="hidden" id="p${i}Sign" value="${defaults[i-1].defaultSign}">
                             </div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }
             container.innerHTML = html;
             updatePlayerSelects();
+            renderGroupButtons();
+            updateSettlementPreview();
         }
 
         function setPlayerSign(playerIndex, sign) {
@@ -518,6 +581,15 @@
                 loseBtn.className = "px-2 py-0.5 rounded-md bg-rose-700 text-white shadow-sm";
                 scoreInput.className = "w-full bg-white border border-stone-300 rounded-xl px-2.5 py-2 text-xs font-black shadow-inner text-center text-rose-700";
             }
+            updateSettlementPreview();
+        }
+
+        function updateSettlementPreview() {
+            const fee = Number(document.getElementById('tableFee')?.value) || 0;
+            const perPersonFee = Math.round(fee / 4);
+            let summaryText = `每人均攤台費 $${perPersonFee} 元。總得分相加需為 0 才能送出。`;
+            const sTextElem = document.getElementById('settlementText');
+            if (sTextElem) sTextElem.innerText = summaryText;
         }
 
         function updatePlayerSelects() {
@@ -528,7 +600,7 @@
                 const currentVal = select.value;
                 select.innerHTML = '';
                 if (friendsData.length === 0) {
-                    select.innerHTML = `<option value="">請先至「牌友管理」新增</option>`;
+                    select.innerHTML = `<option value="">請先至牌友管理新增</option>`;
                     return;
                 }
                 friendsData.forEach((f) => {
@@ -545,34 +617,35 @@
             const p1Select = document.getElementById('matchupPlayer1');
             const p2Select = document.getElementById('matchupPlayer2');
             if (!p1Select || !p2Select) return;
-
             const currentP1 = p1Select.value;
             const currentP2 = p2Select.value;
-
-            let optionsHtml = '<option value="">-- 請選擇牌友 --</option>';
+            let optionsHtml = '<option value="">-- 請選擇 --</option>';
             friendsData.forEach(f => {
-                const fullName = `${f.name} (${f.nickname})`;
-                optionsHtml += `<option value="${f.name}">${fullName}</option>`;
+                optionsHtml += `<option value="${f.name}">${f.name} (${f.nickname})</option>`;
             });
-
             p1Select.innerHTML = optionsHtml;
             p2Select.innerHTML = optionsHtml;
-
             if (currentP1) p1Select.value = currentP1;
             if (currentP2) p2Select.value = currentP2;
         }
 
         function switchTab(tab) {
-            ['Rank', 'Monthly', 'History', 'Friends'].forEach(t => {
-                document.getElementById('page' + t).classList.add('hidden');
-                document.getElementById('tab' + t).className = "px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50";
+            ['Rank', 'Insights', 'Monthly', 'History', 'Friends'].forEach(t => {
+                const page = document.getElementById('page' + t);
+                const btn = document.getElementById('tab' + t);
+                if (page) page.classList.add('hidden');
+                if (btn) btn.className = "px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50";
             });
-            document.getElementById('page' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.remove('hidden');
-            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).className = "px-3 py-2 text-xs font-bold rounded-xl transition-all bg-amber-700 text-white shadow-md";
-            if (tab === 'rank') { updatePlayerSelects(); updateMatchupDropdowns(); }
-            if (tab === 'monthly') { renderMonthlyLeaderboard(); renderHistoricalChampions(); }
-            if (tab === 'history') renderHistoryTable();
-            if (tab === 'friends') renderFriendsTable();
+            const targetPage = document.getElementById('page' + tab.charAt(0).toUpperCase() + tab.slice(1));
+            const targetBtn = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1));
+            if (targetPage) targetPage.classList.remove('hidden');
+            if (targetBtn) targetBtn.className = "px-3 py-2 text-xs font-bold rounded-xl transition-all bg-amber-700 text-white shadow-md";
+
+            if (tab === 'rank') { updatePlayerSelects(); }
+            if (tab === 'insights') { renderLegends(); renderFeeStatistics(); updateMatchupDropdowns(); }
+            if (tab === 'monthly') { renderMonthlyLeaderboard(); }
+            if (tab === 'history') { renderHistoryTable(); }
+            if (tab === 'friends') { renderFriendsTable(); }
         }
 
         async function loadData() {
@@ -595,9 +668,9 @@
                 renderPlayerInputs();
                 renderLeaderboard();
                 renderFeeStatistics();
+                renderLegends();
                 updateMatchupDropdowns();
                 renderMonthlyLeaderboard();
-                renderHistoricalChampions();
                 renderHistoryTable();
                 renderFriendsTable();
 
@@ -669,21 +742,96 @@
                         <td class="py-4 px-4 text-center text-stone-600">${data.totalGames}</td>
                         <td class="py-4 px-4 text-center text-stone-600">${winRate}%</td>
                         <td class="py-4 px-4 text-right ${scoreClass}">${scoreText}</td>
-                    </tr>
-                `;
+                    </tr>`;
             });
         }
 
-        // 💰 渲染歷史台費與分攤統計
+        // 🏛️ 渲染俱樂部洞察分頁與四大傳奇獎項（含你的專屬笑梗稱號）
+        function renderLegends() {
+            const grid = document.getElementById('legendsGrid');
+            if (!grid) return;
+
+            let totalGamesMap = {};
+            let maxScore = -999999, highScoreStr = '尚無紀錄';
+            let maxAttendance = 0, attendanceKing = '尚無紀錄';
+            let topOverall = '尚無紀錄', maxTotalScore = -999999;
+            let bestWinRate = -1, winRateKing = '尚無紀錄';
+
+            let playerScoresMap = {};
+            games.forEach(g => {
+                if (!g.scores) return;
+                Object.entries(g.scores).forEach(([fullName, scoreVal]) => {
+                    const pure = getPureName(fullName);
+                    const score = Number(scoreVal);
+                    if (!pure) return;
+                    totalGamesMap[pure] = (totalGamesMap[pure] || 0) + 1;
+                    if (!playerScoresMap[pure]) playerScoresMap[pure] = [];
+                    playerScoresMap[pure].push({ date: g.timestamp, score: score });
+
+                    if (score > maxScore) {
+                        maxScore = score;
+                        highScoreStr = `${getLatestDisplayName(pure)} (+${score}分)`;
+                    }
+                });
+            });
+
+            Object.entries(totalGamesMap).forEach(([pure, count]) => {
+                if (count > maxAttendance) {
+                    maxAttendance = count;
+                    attendanceKing = `${getLatestDisplayName(pure)} (${count}場)`;
+                }
+            });
+
+            Object.entries(playerScoresMap).forEach(([pure, arr]) => {
+                let total = arr.reduce((sum, item) => sum + item.score, 0);
+                let wins = arr.filter(item => item.score > 0).length;
+                let rate = arr.length > 0 ? Math.round((wins / arr.length) * 100) : 0;
+
+                if (total > maxTotalScore) {
+                    maxTotalScore = total;
+                    topOverall = `${getLatestDisplayName(pure)} (${total > 0 ? '+' + total : total}分)`;
+                }
+
+                if (arr.length >= 2 && rate > bestWinRate) {
+                    bestWinRate = rate;
+                    winRateKing = `${getLatestDisplayName(pure)} (${rate}%)`;
+                }
+            });
+
+            if (winRateKing === '尚無紀錄' && Object.keys(playerScoresMap).length > 0) {
+                winRateKing = topOverall;
+            }
+
+            grid.innerHTML = `
+                <div class="bg-gradient-to-br from-amber-500 to-orange-600 text-white p-5 rounded-2xl shadow-md">
+                    <div class="text-xs opacity-90 uppercase tracking-wider font-bold">🕒 本群最強印鈔機</div>
+                    <div class="text-lg font-black mt-1">${topOverall}</div>
+                    <div class="text-[11px] opacity-80 mt-1">累積得分最高統治者</div>
+                </div>
+                <div class="bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-5 rounded-2xl shadow-md">
+                    <div class="text-xs opacity-90 uppercase tracking-wider font-bold">🏃‍♂️ 全勤苦行僧</div>
+                    <div class="text-lg font-black mt-1">${attendanceKing}</div>
+                    <div class="text-[11px] opacity-80 mt-1">出賽最熱血積極</div>
+                </div>
+                <div class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white p-5 rounded-2xl shadow-md">
+                    <div class="text-xs opacity-90 uppercase tracking-wider font-bold">🔥 不敗戰神・常勝無敵</div>
+                    <div class="text-lg font-black mt-1">${winRateKing}</div>
+                    <div class="text-[11px] opacity-80 mt-1">綜合勝率最高常勝軍</div>
+                </div>
+                <div class="bg-gradient-to-br from-purple-500 to-pink-600 text-white p-5 rounded-2xl shadow-md">
+                    <div class="text-xs opacity-90 uppercase tracking-wider font-bold">💥 天降神蹟・一波帶走</div>
+                    <div class="text-lg font-black mt-1">${highScoreStr}</div>
+                    <div class="text-[11px] opacity-80 mt-1">歷史單場最高得分紀錄</div>
+                </div>`;
+        }
+
         function renderFeeStatistics() {
             let totalFee = 0;
             const feeMap = {};
-
             games.forEach(g => {
                 const fee = Number(g.tableFee) || 0;
                 totalFee += fee;
                 const perPersonFee = fee / 4;
-
                 if (g.scores) {
                     Object.keys(g.scores).forEach(fullName => {
                         const pureName = getPureName(fullName);
@@ -693,31 +841,25 @@
                     });
                 }
             });
-
             document.getElementById('totalFeeDisplay').innerText = `$${totalFee}`;
-
             const container = document.getElementById('feeContributionsContainer');
             const sortedFee = Object.entries(feeMap).sort(([,a], [,b]) => b - a);
-
             if (sortedFee.length === 0 || totalFee === 0) {
                 container.innerHTML = `<span class="text-xs text-stone-400">尚無台費支出紀錄</span>`;
                 return;
             }
-
             let html = '';
             sortedFee.forEach(([pureName, amount]) => {
                 const displayName = getLatestDisplayName(pureName);
                 html += `
-                    <div class="bg-white px-3 py-2 rounded-xl border border-stone-200 text-xs flex items-center gap-2 shadow-sm">
+                    <div class="bg-white px-3.5 py-2.5 rounded-xl border border-stone-200 text-xs flex items-center justify-between shadow-sm w-full sm:w-[48%]">
                         <span class="font-semibold text-stone-700">${displayName}</span>
                         <span class="text-amber-700 font-black">$${Math.round(amount)}</span>
-                    </div>
-                `;
+                    </div>`;
             });
             container.innerHTML = html;
         }
 
-        // ⚔️ 渲染雙人對戰與天敵分析
         function renderMatchupStats() {
             const p1 = document.getElementById('matchupPlayer1').value;
             const p2 = document.getElementById('matchupPlayer2').value;
@@ -728,43 +870,42 @@
                 return;
             }
 
-            let commonGames = 0;
-            let p1Wins = 0;
-            let p2Wins = 0;
-
+            let commonGames = 0, p1Wins = 0, p2Wins = 0, netFlow = 0;
             games.forEach(g => {
                 if (!g.scores) return;
                 let scoresMap = {};
                 Object.entries(g.scores).forEach(([fullName, score]) => {
                     scoresMap[getPureName(fullName)] = Number(score);
                 });
-
                 if (scoresMap.hasOwnProperty(p1) && scoresMap.hasOwnProperty(p2)) {
                     commonGames++;
-                    if (scoresMap[p1] > scoresMap[p2]) p1Wins++;
-                    if (scoresMap[p2] > scoresMap[p1]) p2Wins++;
+                    const s1 = scoresMap[p1];
+                    const s2 = scoresMap[p2];
+                    if (s1 > s2) p1Wins++;
+                    if (s2 > s1) p2Wins++;
+                    netFlow += (s1 - s2);
                 }
             });
 
             const dispP1 = getLatestDisplayName(p1);
             const dispP2 = getLatestDisplayName(p2);
 
-            document.getElementById('matchupTitle').innerText = `${dispP1} VS ${dispP2} 同桌對戰數據`;
+            document.getElementById('matchupTitle').innerText = `${dispP1} VS ${dispP2} 同桌對戰帳本`;
             document.getElementById('p1WinLabel').innerText = `${dispP1} 贏過`;
             document.getElementById('p2WinLabel').innerText = `${dispP2} 贏過`;
             document.getElementById('matchupCommonGames').innerText = commonGames;
             document.getElementById('matchupP1Wins').innerText = p1Wins;
             document.getElementById('matchupP2Wins').innerText = p2Wins;
 
-            let summaryText = `${dispP1} 與 ${dispP2} 總共同桌過 ${commonGames} 場。`;
+            const netElem = document.getElementById('matchupNetFlow');
+            netElem.innerText = netFlow > 0 ? `+${netFlow} 分 (${dispP1} 從 ${dispP2} 手中淨賺)` : netFlow < 0 ? `${netFlow} 分 (${dispP2} 從 ${dispP1} 手中淨賺)` : `0 分 (平手)`;
+            netElem.className = `text-sm font-black mt-0.5 ${netFlow > 0 ? 'text-emerald-700' : netFlow < 0 ? 'text-rose-700' : 'text-stone-800'}`;
+
+            let summaryText = `${dispP1} 與 ${dispP2} 共同桌過 ${commonGames} 場。`;
             if (commonGames > 0) {
-                if (p1Wins > p2Wins) {
-                    summaryText += ` 🏆 在對戰中 ${dispP1} 佔居上風！`;
-                } else if (p2Wins > p1Wins) {
-                    summaryText += ` 🏆 在對戰中 ${dispP2} 佔居上風！`;
-                } else {
-                    summaryText += ` 🤝 雙方目前平分秋色！`;
-                }
+                if (netFlow > 0) summaryText += ` 🎯 數據顯示 ${dispP2} 是 ${dispP1} 的頭號提款機！`;
+                else if (netFlow < 0) summaryText += ` ⚡ 數據顯示 ${dispP1} 遇到 ${dispP2} 經常失血！`;
+                else summaryText += ` 🤝 雙方對戰互有勝負，點數平分秋色！`;
             } else {
                 summaryText += ` 尚未有同桌對戰紀錄。`;
             }
@@ -773,23 +914,65 @@
         }
 
         function openPlayerModal(pureName) {
-            document.getElementById('modalPlayerName').innerText = getLatestDisplayName(pureName);
+            const displayName = getLatestDisplayName(pureName);
+            document.getElementById('modalPlayerName').innerText = displayName;
+            
             let totalGames = 0, totalScore = 0, wins = 0, historyHtml = '';
+            let opponentNetMap = {};
+
             games.forEach(g => {
                 if (g.scores) {
-                    Object.entries(g.scores).forEach(([fullName, scoreVal]) => {
-                        if (getPureName(fullName) === pureName) {
-                            const score = Number(scoreVal);
-                            totalGames++; totalScore += score; if (score > 0) wins++;
-                            const sClass = score >= 0 ? 'text-emerald-700' : 'text-rose-700';
-                            const sText = score > 0 ? `+${score}` : score;
-                            historyHtml += `<div class="flex justify-between items-center bg-stone-50 border border-stone-200/60 rounded-xl px-3 py-2 text-xs"><div><div class="font-bold">${g.timestamp}</div><div class="text-[10px] text-stone-400">${g.location}</div></div><div class="font-black ${sClass}">${sText}</div></div>`;
-                        }
+                    let scoresMap = {};
+                    Object.entries(g.scores).forEach(([fN, sV]) => {
+                        scoresMap[getPureName(fN)] = Number(sV);
                     });
+
+                    if (scoresMap.hasOwnProperty(pureName)) {
+                        const myScore = scoresMap[pureName];
+                        totalGames++; totalScore += myScore; if (myScore > 0) wins++;
+                        const sClass = myScore >= 0 ? 'text-emerald-700' : 'text-rose-700';
+                        const sText = myScore > 0 ? `+${myScore}` : myScore;
+                        historyHtml += `<div class="flex justify-between items-center bg-stone-50 border border-stone-200/60 rounded-xl px-3 py-2 text-xs"><div><div class="font-bold">${g.timestamp}</div><div class="text-[10px] text-stone-400">${g.location}</div></div><div class="font-black ${sClass}">${sText} 分</div></div>`;
+
+                        Object.entries(scoresMap).forEach(([oppPure, oppScore]) => {
+                            if (oppPure !== pureName) {
+                                if (!opponentNetMap[oppPure]) opponentNetMap[oppPure] = 0;
+                                opponentNetMap[oppPure] += (myScore - oppScore);
+                            }
+                        });
+                    }
                 }
             });
+
+            const winRate = totalGames > 0 ? Math.round((wins/totalGames)*100) : 0;
+            const streakBadge = document.getElementById('modalStreakBadge');
+            if (winRate >= 60) {
+                streakBadge.innerText = "🔥 目前氣勢如虹 (常勝高潮中)";
+                streakBadge.className = "inline-block text-xs px-3 py-1 rounded-full font-bold mt-1.5 bg-emerald-100 text-emerald-800";
+            } else if (winRate <= 30 && totalGames >= 3) {
+                streakBadge.innerText = "💧 陷入低潮期 (急需補血...牌運集氣中)";
+                streakBadge.className = "inline-block text-xs px-3 py-1 rounded-full font-bold mt-1.5 bg-rose-100 text-rose-800";
+            } else {
+                streakBadge.innerText = "⚖️ 狀態平穩 (穩扎穩打型)";
+                streakBadge.className = "inline-block text-xs px-3 py-1 rounded-full font-bold mt-1.5 bg-amber-100 text-amber-800";
+            }
+
+            document.getElementById('modalStyleTag').innerText = totalScore > 500 ? "大砲得分手 🚀" : totalScore < -300 ? "悲情大分母 🛡️" : "穩健防守派 ☕";
+
+            let sortedOpponents = Object.entries(opponentNetMap).sort(([,a], [,b]) => a - b);
+            let nemesisText = "尚無足夠同桌數據";
+            let cashCowText = "尚無足夠同桌數據";
+            if (sortedOpponents.length > 0) {
+                const worstOpp = sortedOpponents[0];
+                const bestOpp = sortedOpponents[sortedOpponents.length - 1];
+                if (worstOpp[1] < 0) nemesisText = `⚡ 最大剋星：${getLatestDisplayName(worstOpp[0])} (同桌對戰淨輸 ${Math.abs(worstOpp[1])} 分)`;
+                if (bestOpp[1] > 0) cashCowText = `🐑 頭號肥羊：${getLatestDisplayName(bestOpp[0])} (同桌對戰淨賺 +${bestOpp[1]} 分)`;
+            }
+            document.getElementById('modalNemesis').innerText = nemesisText;
+            document.getElementById('modalCashCow').innerText = cashCowText;
+
             document.getElementById('modalTotalGames').innerText = totalGames;
-            document.getElementById('modalWinRate').innerText = `${totalGames > 0 ? Math.round((wins/totalGames)*100) : 0}%`;
+            document.getElementById('modalWinRate').innerText = `${winRate}%`;
             const sElem = document.getElementById('modalTotalScore');
             sElem.innerText = totalScore > 0 ? `+${totalScore}` : totalScore;
             sElem.className = `text-lg font-black ${totalScore >= 0 ? 'text-emerald-700' : 'text-rose-700'}`;
@@ -843,36 +1026,6 @@
             });
         }
 
-        function renderHistoricalChampions() {
-            const grid = document.getElementById('historicalChampionsGrid');
-            if (!grid) return;
-            const champions = {};
-            games.forEach(g => {
-                if (!g.timestamp || !g.scores) return;
-                const m = g.timestamp.slice(0, 7);
-                if (!champions[m]) champions[m] = {};
-                Object.entries(g.scores).forEach(([fullName, score]) => {
-                    const pure = getPureName(fullName);
-                    if (!champions[m][pure]) champions[m][pure] = { totalScore: 0, totalGames: 0, wins: 0 };
-                    champions[m][pure].totalScore += Number(score);
-                    champions[m][pure].totalGames += 1;
-                    if (Number(score) > 0) champions[m][pure].wins += 1;
-                });
-            });
-            let html = '';
-            Object.entries(champions).sort().reverse().forEach(([m, players]) => {
-                let best = null, maxS = -999999;
-                Object.entries(players).forEach(([pure, d]) => {
-                    if (d.totalScore > maxS) { maxS = d.totalScore; best = { name: getLatestDisplayName(pure), ...d }; }
-                });
-                if (best) {
-                    const sText = best.totalScore > 0 ? `+${best.totalScore}` : best.totalScore;
-                    html += `<div class="bg-gradient-to-br from-amber-50 to-white border border-amber-200 rounded-2xl p-4 flex justify-between items-center"><div><div class="text-xs font-bold text-amber-800">🎖️ ${m.replace('-','年')}月 積分冠軍</div><div class="text-base font-black">${best.name}</div><div class="text-[11px] text-stone-500">場次: ${best.totalGames} | 勝率: ${Math.round((best.wins/best.totalGames)*100)}%</div></div><div class="text-right font-black ${best.totalScore >= 0 ? 'text-emerald-700' : 'text-rose-700'}">${sText}</div></div>`;
-                }
-            });
-            grid.innerHTML = html || `<div class="col-span-full text-center py-8 text-stone-400">尚無歷史月冠軍</div>`;
-        }
-
         function renderHistoryTable() {
             const hTable = document.getElementById('historyTableBody');
             if (!hTable) return;
@@ -881,9 +1034,7 @@
                 hTable.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-stone-400">尚無歷史牌局</td></tr>`;
                 return;
             }
-
             const sortedGames = [...games].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
             sortedGames.forEach((g) => {
                 const realIdx = games.indexOf(g);
                 let scoresHtml = '';
@@ -978,16 +1129,14 @@
             e.preventDefault();
             const name = document.getElementById('friendName').value.trim();
             const nickname = document.getElementById('friendNickname').value.trim();
-            if (friendsData.some(f => f.name === name)) {
-                alert(`⚠️ 牌友「${name}」已存在！`);
-                return;
-            }
+            if (friendsData.some(f => f.name === name)) { alert(`⚠️ 牌友「${name}」已存在！`); return; }
             if (name && nickname) {
                 friendsData.push({ name, nickname, updatedAt: new Date().toLocaleString('zh-TW', { hour12: false }) });
                 await syncFriendsToCloud();
                 document.getElementById('friendForm').reset();
                 renderFriendsTable();
                 updatePlayerSelects();
+                renderGroupButtons();
                 alert(`成功新增牌友：${name} (${nickname})`);
             }
         });
@@ -1007,10 +1156,7 @@
 
         document.getElementById('gameForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (friendsData.length < 4) {
-                alert('⚠️ 牌友至少需要 4 位！');
-                return;
-            }
+            if (friendsData.length < 4) { alert('⚠️ 牌友至少需要 4 位！'); return; }
             const p1N = document.getElementById('p1Name').value;
             const p2N = document.getElementById('p2Name').value;
             const p3N = document.getElementById('p3Name').value;
