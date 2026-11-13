@@ -337,11 +337,11 @@
             </div>
         </div>
 
-        <!-- ==================== 分頁六：常用群組管理 (網頁直接操作) ==================== -->
+        <!-- ==================== 分頁六：常用群組管理 ==================== -->
         <div id="pageGroups" class="space-y-6 hidden">
             <div class="bg-white/85 border border-stone-200/80 rounded-3xl p-6 md:p-8 shadow-xl backdrop-blur-md max-w-xl mx-auto space-y-6">
                 <h2 class="text-base font-bold text-amber-800 flex items-center gap-2">
-                    <span class="p-1.5 bg-amber-100 rounded-xl border border-amber-200">👥</span> 常用 4 人組設定 (免進後台)
+                    <span class="p-1.5 bg-amber-100 rounded-xl border border-amber-200">👥</span> 常用 4 人組設定
                 </h2>
                 <form id="groupForm" class="space-y-4">
                     <div>
@@ -907,7 +907,6 @@
                 </div>`;
         }
 
-        // 🎖️ 渲染歷史月冠軍牆
         function renderHistoryMonthlyChampions() {
             const grid = document.getElementById('historyMonthlyChampionsGrid');
             if (!grid) return;
