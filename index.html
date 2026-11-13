@@ -59,10 +59,31 @@
                 </div>
             </div>
 
-            <!-- 總排行榜 -->
+            <!-- 📝 記錄新牌局區塊 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
+                <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>📝</span> 記錄新牌局</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">日期</label>
+                        <input type="date" x-model="newGame.date" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">地點</label>
+                        <input type="text" x-model="newGame.location" placeholder="例如：大三元" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1">總台費 (元)</label>
+                        <input type="number" x-model="newGame.fee" placeholder="0" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm">
+                    </div>
+                </div>
+                <div class="text-xs text-slate-400">（四人得分明細與提交功能可依你原本的 Apps Script 邏輯對應）</div>
+            </div>
+
+            <!-- 🏆 總累積戰績排行榜 -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                 <div class="p-5 border-b border-slate-100 flex justify-between items-center">
                     <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>🏆</span> 總累積戰績排行榜</h2>
+                    <span class="text-xs text-slate-400">點擊牌友姓名可看個人詳細戰績</span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
@@ -229,6 +250,18 @@
                 </div>
             </div>
 
+            <!-- 👥 新增牌友與地點管理區塊 -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
+                    <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>👥</span> 新增牌友與專屬綽號</h2>
+                    <p class="text-xs text-slate-400">在此管理群組內的常駐牌咖與稱號</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
+                    <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>🏛️</span> 管理雲端常用地點</h2>
+                    <p class="text-xs text-slate-400">在此維護常去的牌局據點</p>
+                </div>
+            </div>
+
         </div>
 
         <!-- 個人明細彈窗 -->
@@ -284,6 +317,9 @@
                 topPlayer: null,
                 selectedPlayer: null,
                 
+                // 新牌局表單變數
+                newGame: { date: '', location: '', fee: '' },
+
                 // 月度統計變數
                 availableMonths: [],
                 selectedMonth: '',
