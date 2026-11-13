@@ -18,6 +18,7 @@
 <body class="text-stone-800 min-h-screen p-4 md:p-8 font-sans selection:bg-amber-600 selection:text-white">
     <div class="max-w-5xl mx-auto space-y-6">
         
+        <!-- 頂部標題與分頁切換 -->
         <header class="flex flex-col md:flex-row justify-between items-center gap-4 bg-white/85 border border-stone-200/80 p-5 md:p-6 rounded-3xl shadow-xl backdrop-blur-md">
             <div class="flex items-center space-x-3.5">
                 <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-700 via-amber-600 to-yellow-600 flex items-center justify-center text-2xl text-white shadow-lg shadow-amber-900/10">
@@ -37,7 +38,7 @@
             </div>
         </header>
 
-        <!-- 總排行榜分頁 -->
+        <!-- ==================== 分頁一：總戰績排行榜 ==================== -->
         <div id="pageRank" class="space-y-6">
             <div id="mvpBanner" class="bg-gradient-to-r from-amber-50/90 via-white to-orange-50/90 border border-amber-200 rounded-3xl p-6 shadow-xl backdrop-blur-md flex items-center justify-between relative overflow-hidden hidden">
                 <div class="absolute -right-6 -bottom-6 text-9xl text-amber-900/5 pointer-events-none font-black select-none">MVP</div>
@@ -120,7 +121,7 @@
             </div>
         </div>
 
-        <!-- 月排行榜分頁 -->
+        <!-- ==================== 分頁二：月排行榜與歷史積分冠軍 ==================== -->
         <div id="pageMonthly" class="space-y-6 hidden">
             <div class="bg-white/85 border border-stone-200/80 rounded-3xl p-5 md:p-6 shadow-xl backdrop-blur-md flex flex-col md:flex-row justify-between items-center gap-4">
                 <div class="flex items-center gap-3.5">
@@ -176,7 +177,7 @@
             </div>
         </div>
 
-        <!-- 牌局明細分頁 -->
+        <!-- ==================== 分頁三：牌局明細與管理 ==================== -->
         <div id="pageHistory" class="space-y-6 hidden">
             <div class="bg-white/85 border border-stone-200/80 rounded-3xl shadow-xl backdrop-blur-md overflow-hidden p-5 md:p-6">
                 <h2 class="text-base font-bold text-amber-800 flex items-center gap-2 mb-4">
@@ -197,7 +198,7 @@
             </div>
         </div>
 
-        <!-- 牌友管理分頁 -->
+        <!-- ==================== 分頁四：牌友與綽號管理 ==================== -->
         <div id="pageFriends" class="space-y-6 hidden">
             <div class="bg-white/85 border border-stone-200/80 rounded-3xl p-6 md:p-8 shadow-xl backdrop-blur-md max-w-xl mx-auto">
                 <h2 class="text-base font-bold text-amber-800 mb-5 flex items-center gap-2">
@@ -689,7 +690,12 @@
                 hTable.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-stone-400">尚無歷史牌局</td></tr>`;
                 return;
             }
-            games.forEach((g, idx) => {
+
+            // 💡 依照日期由新到舊排序
+            const sortedGames = [...games].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            sortedGames.forEach((g) => {
+                const realIdx = games.indexOf(g);
                 let scoresHtml = '';
                 if (g.scores) {
                     Object.entries(g.scores).forEach(([fullName, pScore]) => {
@@ -702,7 +708,7 @@
                     <tr class="hover:bg-stone-50/80">
                         <td class="py-3.5 px-4"><div class="font-bold">${g.timestamp}</div><div class="text-xs text-stone-500">${g.location}</div>${g.tableFee?`$${g.tableFee}`:''}</td>
                         <td class="py-3.5 px-4">${scoresHtml}</td>
-                        <td class="py-3.5 px-4 text-right"><button onclick="openEditModal(${idx})" class="text-xs bg-amber-50 text-amber-800 px-3 py-1.5 rounded-xl border border-amber-200 mr-1">修改</button><button onclick="deleteGame(${idx})" class="text-xs bg-rose-50 text-rose-700 px-3 py-1.5 rounded-xl border border-rose-200">刪除</button></td>
+                        <td class="py-3.5 px-4 text-right"><button onclick="openEditModal(${realIdx})" class="text-xs bg-amber-50 text-amber-800 px-3 py-1.5 rounded-xl border border-amber-200 mr-1">修改</button><button onclick="deleteGame(${realIdx})" class="text-xs bg-rose-50 text-rose-700 px-3 py-1.5 rounded-xl border border-rose-200">刪除</button></td>
                     </tr>`;
             });
         }
@@ -817,8 +823,8 @@
             }
             const p1N = document.getElementById('p1Name').value;
             const p2N = document.getElementById('p2Name').value;
-            const p3N = document.getElementById('p3N').value;
-            const p4N = document.getElementById('p4N').value;
+            const p3N = document.getElementById('p3Name').value;
+            const p4N = document.getElementById('p4Name').value;
             if (new Set([getPureName(p1N), getPureName(p2N), getPureName(p3N), getPureName(p4N)]).size !== 4) {
                 alert('⚠️ 四位玩家不能重複！');
                 return;
