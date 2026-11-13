@@ -12,7 +12,7 @@
         body { font-family: system-ui, -apple-system, sans-serif; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-p-4" x-data="mahjongApp()">
+<body class="bg-slate-50 text-slate-800" x-data="mahjongApp()">
 
     <div class="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
         
@@ -22,7 +22,7 @@
                 <div class="bg-emerald-100 text-emerald-600 p-3 rounded-xl text-2xl">🀄</div>
                 <div>
                     <h1 class="text-2xl font-bold text-slate-900">麻將即時戰績排行榜</h1>
-                    <p class="text-sm text-slate-500">雲端多人連線同步系統 (含台費與天敵分析)</p>
+                    <p class="text-sm text-slate-500">雲端多人連線同步系統</p>
                 </div>
             </div>
             <button @click="loadData()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2 shadow-sm">
@@ -33,7 +33,7 @@
         <!-- 載入中狀態 -->
         <div x-show="loading" class="bg-white p-12 rounded-2xl shadow-sm border border-slate-100 text-center space-y-3">
             <div class="inline-block animate-spin text-3xl">⏳</div>
-            <p class="text-slate-500 font-medium">正在從 Google 雲端載入資料與計算數據...</p>
+            <p class="text-slate-500 font-medium">正在從 Google 雲端載入資料...</p>
         </div>
 
         <div x-show="!loading" class="space-y-6">
@@ -44,18 +44,18 @@
                     <div>
                         <div class="text-amber-100 text-xs font-semibold tracking-wider uppercase">總榜常勝軍 (表現最佳 MVP)</div>
                         <div class="text-2xl font-bold mt-1" x-text="topPlayer ? topPlayer.name : '暫無資料'"></div>
-                        <div class="text-xs text-amber-100 mt-1">累積得分: <span x-text="topPlayer ? (topPlayer.score > 0 ? '+' + topPlayer.score : topPlayer.score) : 0"></span></div>
+                        <div class="text-xs text-amber-100 mt-1">綜合勝率: <span x-text="topPlayer ? topPlayer.bayesWinRate + '%' : '0%'"></span></div>
                     </div>
                     <div class="text-4xl">👑</div>
                 </div>
 
-                <div class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-5 rounded-2xl shadow-sm flex items-center justify-between">
+                <div class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-5 rounded-2xl shadow-sm flex items-center justify-between">
                     <div>
-                        <div class="text-blue-100 text-xs font-semibold tracking-wider uppercase">全勤勞模 (出賽最多)</div>
-                        <div class="text-2xl font-bold mt-1" x-text="mostActivePlayer ? mostActivePlayer.name : '暫無資料'"></div>
-                        <div class="text-xs text-blue-100 mt-1">總出賽場次: <span x-text="mostActivePlayer ? mostActivePlayer.games : 0"></span> 場</div>
+                        <div class="text-emerald-100 text-xs font-semibold tracking-wider uppercase">本月積分王 (得分最高)</div>
+                        <div class="text-2xl font-bold mt-1" x-text="currentMonthTopPlayer ? currentMonthTopPlayer.name : '本月尚無資料'"></div>
+                        <div class="text-xs text-emerald-100 mt-1">當月積分: <span x-text="currentMonthTopPlayer ? (currentMonthTopPlayer.score > 0 ? '+' + currentMonthTopPlayer.score : currentMonthTopPlayer.score) : 0"></span></div>
                     </div>
-                    <div class="text-4xl">🏅</div>
+                    <div class="text-4xl">🎖️</div>
                 </div>
             </div>
 
@@ -63,7 +63,6 @@
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                 <div class="p-5 border-b border-slate-100 flex justify-between items-center">
                     <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>🏆</span> 總累積戰績排行榜</h2>
-                    <span class="text-xs text-slate-400">點擊牌友姓名可看個人詳細戰績</span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
@@ -93,7 +92,7 @@
                 </div>
             </div>
 
-            <!-- 💰 新增功能：台費與花費統計 -->
+            <!-- 💰 歷史台費與場地費分攤統計 (新功能) -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-4">
                     <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>💰</span> 歷史台費與場地費分攤統計</h2>
@@ -106,7 +105,7 @@
                         <div class="text-xs text-slate-400 mt-1">來自所有已記錄的牌局</div>
                     </div>
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 sm:col-span-2">
-                        <div class="text-xs text-slate-500 mb-2">個人總台費分攤貢獻榜 (幫大家出了多少場地/飲料費)</div>
+                        <div class="text-xs text-slate-500 mb-2">個人總台費分攤貢獻榜</div>
                         <div class="flex flex-wrap gap-2">
                             <template x-for="f in feeContributions" :key="f.name">
                                 <div class="bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-xs flex items-center gap-2 shadow-xs">
@@ -119,11 +118,11 @@
                 </div>
             </div>
 
-            <!-- ⚔️ 新增功能：對戰組合 / 天敵分析 -->
+            <!-- ⚔️ 雙人對戰紀錄與天敵分析 (新功能) -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-4">
                     <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>⚔️</span> 雙人對戰紀錄與天敵分析</h2>
-                    <span class="text-xs text-slate-400">選擇兩位牌友查看彼此同桌時的勝負對決</span>
+                    <span class="text-xs text-slate-400">選擇兩位牌友查看同桌對決</span>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
@@ -146,7 +145,6 @@
                     </div>
                 </div>
 
-                <!-- 對戰分析結果面板 -->
                 <template x-if="matchupPlayer1 && matchupPlayer2">
                     <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-3 mt-4">
                         <div class="text-center font-bold text-slate-700 text-sm" x-text="matchupPlayer1 + ' VS ' + matchupPlayer2 + ' 同桌對戰數據'"></div>
@@ -169,7 +167,47 @@
                 </template>
             </div>
 
-            <!-- 歷史牌局明細 -->
+            <!-- 月度戰績統計 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-4">
+                    <div>
+                        <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>📅</span> 月度戰績統計</h2>
+                        <p class="text-xs text-slate-400">檢視指定月份的積分與表現排名</p>
+                    </div>
+                    <select x-model="selectedMonth" @change="filterMonthData()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <template x-for="m in availableMonths" :key="m">
+                            <option :value="m" x-text="m"></option>
+                        </template>
+                    </select>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 text-xs font-semibold border-b border-slate-100">
+                                <th class="p-3 w-16">排名</th>
+                                <th class="p-3">牌友</th>
+                                <th class="p-3 text-center">當月場次</th>
+                                <th class="p-3 text-center">當月勝率</th>
+                                <th class="p-3 text-right">當月得分</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-sm">
+                            <template x-for="(p, index) in monthlyLeaderboard" :key="p.name">
+                                <tr class="hover:bg-slate-50 transition">
+                                    <td class="p-3 font-bold text-slate-400" x-text="'#' + (index + 1)"></td>
+                                    <td class="p-3 font-medium text-slate-700" x-text="p.name"></td>
+                                    <td class="p-3 text-center text-slate-600" x-text="p.games"></td>
+                                    <td class="p-3 text-center text-slate-600" x-text="p.bayesWinRate + '%'"></td>
+                                    <td class="p-3 text-right font-bold" :class="p.score >= 0 ? 'text-rose-600' : 'text-emerald-600'" x-text="(p.score > 0 ? '+' : '') + p.score"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 歷史牌局明細與管理 -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
                 <h2 class="font-bold text-lg text-slate-800 flex items-center gap-2"><span>📜</span> 歷史牌局明細與管理</h2>
                 <div class="space-y-3">
@@ -235,7 +273,7 @@
     </div>
 
     <script>
-        // 請將此處替換為你實際部署的 Google Apps Script 網址
+        // 請確認此處為你實際部署的 Google Apps Script 網址
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby.../exec";
 
         function mahjongApp() {
@@ -244,10 +282,15 @@
                 rawGames: [],
                 leaderboard: [],
                 topPlayer: null,
-                mostActivePlayer: null,
                 selectedPlayer: null,
                 
-                // 新功能變數
+                // 月度統計變數
+                availableMonths: [],
+                selectedMonth: '',
+                monthlyLeaderboard: [],
+                currentMonthTopPlayer: null,
+
+                // 新功能變數 (台費與對戰)
                 totalFeeAmount: 0,
                 feeContributions: [],
                 matchupPlayer1: '',
@@ -259,7 +302,6 @@
 
                 loadData() {
                     this.loading = true;
-                    // 若無後台網址，這裡先用模擬結構或串接你的 API
                     fetch(WEB_APP_URL + "?action=getData")
                         .then(res => res.json())
                         .then(data => {
@@ -267,16 +309,17 @@
                             this.loading = false;
                         })
                         .catch(err => {
-                            console.error("載入失敗，使用示範或檢查 API 連結", err);
+                            console.error("載入失敗", err);
                             this.loading = false;
                         });
                 },
 
                 processData(data) {
-                    // 假設後台回傳格式包含 games
                     this.rawGames = data.games || [];
                     
                     let stats = {};
+                    let monthStats = {};
+                    let monthsSet = new Set();
                     let totalFee = 0;
                     let feeMap = {};
 
@@ -285,47 +328,74 @@
                         totalFee += fee;
                         let perPersonFee = fee / 4;
 
+                        let month = game.date ? game.date.substring(0, 7) : '未知月份';
+                        monthsSet.add(month);
+
+                        if (!monthStats[month]) monthStats[month] = {};
+
                         let results = game.results || [];
                         results.forEach(res => {
                             let name = res.name;
                             let score = Number(res.score) || 0;
 
-                            if (!stats[name]) {
-                                stats[name] = { name: name, games: 0, wins: 0, score: 0, history: [] };
-                            }
-                            if (!feeMap[name]) {
-                                feeMap[name] = 0;
-                            }
-
+                            // 總榜統計
+                            if (!stats[name]) stats[name] = { name: name, games: 0, wins: 0, score: 0, history: [] };
                             stats[name].games += 1;
                             if (score > 0) stats[name].wins += 1;
                             stats[name].score += score;
                             stats[name].history.push({ date: game.date, location: game.location, score: score });
 
+                            // 月度統計
+                            if (!monthStats[month][name]) monthStats[month][name] = { name: name, games: 0, wins: 0, score: 0 };
+                            monthStats[month][name].games += 1;
+                            if (score > 0) monthStats[month][name].wins += 1;
+                            monthStats[month][name].score += score;
+
+                            // 台費統計
+                            if (!feeMap[name]) feeMap[name] = 0;
                             feeMap[name] += perPersonFee;
                         });
                     });
 
-                    // 計算貝氏加權勝率與排序
+                    // 總排行榜處理
                     let lb = Object.values(stats).map(p => {
                         let bayesWinRate = Math.round(((p.wins + 1) / (p.games + 2)) * 100);
                         return { ...p, bayesWinRate };
                     });
-
                     lb.sort((a, b) => b.score - a.score);
                     this.leaderboard = lb;
+                    if (lb.length > 0) this.topPlayer = lb[0];
 
-                    if (lb.length > 0) {
-                        this.topPlayer = lb[0];
-                        let activeSorted = [...lb].sort((a, b) => b.games - a.games);
-                        this.mostActivePlayer = activeSorted[0];
+                    // 月份下拉選單
+                    this.availableMonths = Array.from(monthsSet).sort().reverse();
+                    if (this.availableMonths.length > 0 && !this.selectedMonth) {
+                        this.selectedMonth = this.availableMonths[0];
                     }
+                    this.allMonthStats = monthStats;
+                    this.filterMonthData();
 
+                    // 台費統計
                     this.totalFeeAmount = totalFee;
                     this.feeContributions = Object.keys(feeMap).map(name => ({
                         name: name,
                         amount: Math.round(feeMap[name])
                     })).sort((a, b) => b.amount - a.amount);
+                },
+
+                filterMonthData() {
+                    if (!this.selectedMonth || !this.allMonthStats[this.selectedMonth]) {
+                        this.monthlyLeaderboard = [];
+                        this.currentMonthTopPlayer = null;
+                        return;
+                    }
+                    let mData = this.allMonthStats[this.selectedMonth];
+                    let mlb = Object.values(mData).map(p => {
+                        let bayesWinRate = Math.round(((p.wins + 1) / (p.games + 2)) * 100);
+                        return { ...p, bayesWinRate };
+                    });
+                    mlb.sort((a, b) => b.score - a.score);
+                    this.monthlyLeaderboard = mlb;
+                    this.currentMonthTopPlayer = mlb.length > 0 ? mlb[0] : null;
                 },
 
                 openPlayerDetail(player) {
