@@ -32,10 +32,11 @@
 
             <div class="flex flex-wrap justify-center bg-stone-200/70 border border-stone-300/60 rounded-2xl p-1.5 shadow-inner gap-1.5">
                 <button onclick="switchTab('rank')" id="tabRank" class="px-3 py-2 text-xs font-bold rounded-xl transition-all bg-amber-700 text-white shadow-md">🏆 總排行榜</button>
-                <button onclick="switchTab('insights')" id="tabInsights" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">📈 俱樂部洞察與殿堂</button>
+                <button onclick="switchTab('insights')" id="tabInsights" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">📈 俱樂部洞察</button>
                 <button onclick="switchTab('monthly')" id="tabMonthly" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">📅 月排行榜</button>
                 <button onclick="switchTab('history')" id="tabHistory" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">📜 牌局明細</button>
                 <button onclick="switchTab('friends')" id="tabFriends" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">👥 牌友管理</button>
+                <button onclick="switchTab('groups')" id="tabGroups" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">👥 常用群組</button>
             </div>
         </header>
 
@@ -57,7 +58,7 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- 左側：記錄新牌局 (內含常用 4 人組快捷代入) -->
+                <!-- 左側：記錄新牌局 -->
                 <div class="bg-white/85 border border-stone-200/80 rounded-3xl p-6 shadow-xl backdrop-blur-md md:col-span-1">
                     <h2 class="text-base font-bold text-amber-800 mb-4 flex items-center gap-2">
                         <span class="p-1.5 bg-amber-100 rounded-xl border border-amber-200">📝</span> 記錄新牌局
@@ -91,7 +92,6 @@
                         
                         <div class="space-y-3 pt-1" id="playersInputContainer"></div>
 
-                        <!-- 💡 賽後結算小幫手預覽 -->
                         <div id="settlementPreview" class="bg-stone-50 border border-stone-200 rounded-2xl p-3 text-xs text-stone-600 space-y-1">
                             <span class="font-bold text-amber-800 block">💡 賽後結算小幫手：</span>
                             <span id="settlementText">請輸入分數以預覽每人台費分攤</span>
@@ -125,7 +125,7 @@
                                         <th class="py-3 px-4 font-bold">排名</th>
                                         <th class="py-3 px-4 font-bold">牌友 (點擊看個人明細)</th>
                                         <th class="py-3 px-4 font-bold text-center">總場次</th>
-                                        <th class="py-3 px-4 font-bold text-center">勝率 (貝氏加權)</th>
+                                        <th class="py-3 px-4 font-bold text-center">勝率</th>
                                         <th class="py-3 px-4 font-bold text-right">累積得分</th>
                                     </tr>
                                 </thead>
@@ -137,8 +137,9 @@
             </div>
         </div>
 
-        <!-- ==================== 分頁二：📈 俱樂部洞察與殿堂 (四大傳奇獎項) ==================== -->
+        <!-- ==================== 分頁二：📈 俱樂部洞察與殿堂 ==================== -->
         <div id="pageInsights" class="space-y-6 hidden">
+            <!-- 四大傳奇獎項 -->
             <div class="bg-white/85 border border-stone-200/80 rounded-3xl p-6 shadow-xl backdrop-blur-md space-y-4">
                 <div class="flex items-center gap-3 border-b border-stone-200 pb-4">
                     <div class="w-10 h-10 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-xl">🏛️</div>
@@ -148,6 +149,20 @@
                     </div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="legendsGrid"></div>
+            </div>
+
+            <!-- 🎖️ 歷屆月度 MVP 殿堂 (歷史月冠軍牆) -->
+            <div class="bg-white/85 border border-stone-200/80 rounded-3xl p-6 shadow-xl backdrop-blur-md space-y-4">
+                <div class="flex items-center gap-3 border-b border-stone-200 pb-4">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-xl">🎖️</div>
+                    <div>
+                        <h2 class="text-base font-bold text-amber-800">歷屆月度 MVP 殿堂 (歷史月冠軍牆)</h2>
+                        <p class="text-xs text-stone-500">自動統計過去每一個月份的積分總霸主</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="historyMonthlyChampionsGrid">
+                    <span class="text-xs text-stone-400">載入中...</span>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -176,7 +191,7 @@
                     </div>
                 </div>
 
-                <!-- ⚔️ 雙人對戰紀錄與天敵分析 (含點數流向帳本) -->
+                <!-- ⚔️ 雙人對戰紀錄與天敵分析 -->
                 <div class="bg-white/85 border border-stone-200/80 rounded-3xl shadow-xl backdrop-blur-md p-6 space-y-4">
                     <div class="flex items-center justify-between border-b border-stone-200 pb-4">
                         <h2 class="text-base font-bold text-amber-800 flex items-center gap-2">
@@ -321,9 +336,56 @@
                 </div>
             </div>
         </div>
+
+        <!-- ==================== 分頁六：常用群組管理 (網頁直接操作) ==================== -->
+        <div id="pageGroups" class="space-y-6 hidden">
+            <div class="bg-white/85 border border-stone-200/80 rounded-3xl p-6 md:p-8 shadow-xl backdrop-blur-md max-w-xl mx-auto space-y-6">
+                <h2 class="text-base font-bold text-amber-800 flex items-center gap-2">
+                    <span class="p-1.5 bg-amber-100 rounded-xl border border-amber-200">👥</span> 常用 4 人組設定 (免進後台)
+                </h2>
+                <form id="groupForm" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-600 mb-1.5">群組名稱</label>
+                        <input type="text" id="groupNameInput" placeholder="例如：宿舍班底" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-stone-800 focus:outline-none focus:border-amber-600 shadow-inner" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-stone-600 mb-1">成員 1</label>
+                            <select id="gMember1" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-xs text-stone-800 focus:outline-none focus:border-amber-600" required></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-stone-600 mb-1">成員 2</label>
+                            <select id="gMember2" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-xs text-stone-800 focus:outline-none focus:border-amber-600" required></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-stone-600 mb-1">成員 3</label>
+                            <select id="gMember3" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-xs text-stone-800 focus:outline-none focus:border-amber-600" required></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-stone-600 mb-1">成員 4</label>
+                            <select id="gMember4" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-xs text-stone-800 focus:outline-none focus:border-amber-600" required></select>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-amber-700 to-amber-600 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg text-sm">新增常用群組</button>
+                </form>
+                <div class="overflow-x-auto rounded-2xl border border-stone-200 bg-stone-50/50">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-stone-100 border-b border-stone-200 text-stone-500 text-xs">
+                                <th class="py-3 px-4 font-bold">群組名稱</th>
+                                <th class="py-3 px-4 font-bold">成員名單</th>
+                                <th class="py-3 px-4 font-bold text-right">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="groupTableBody" class="divide-y divide-stone-200/60"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- 👑 個人戰績 Modal (含氣勢狀態、風格標籤與宿敵與肥羊分析) -->
+    <!-- 👑 個人戰績 Modal -->
     <div id="playerModal" class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white border border-stone-200 rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl space-y-5 relative max-h-[90vh] overflow-y-auto">
             <button onclick="closePlayerModal()" class="absolute top-5 right-5 text-stone-400 font-bold text-lg">✕</button>
@@ -352,7 +414,6 @@
                 </div>
             </div>
 
-            <!-- 🎯 底部壓軸：剋星與肥羊榜 -->
             <div class="border-t border-stone-200 pt-4 space-y-2.5">
                 <h4 class="font-bold text-stone-700 text-xs flex items-center gap-1"><span>🎯</span> 宿敵與肥羊分析 (同桌對戰大數據)</h4>
                 <div id="modalNemesis" class="bg-rose-50 border border-rose-100 p-3 rounded-2xl text-xs text-rose-800 font-medium">⚡ 最大剋星：統計中...</div>
@@ -401,6 +462,7 @@
         let games = [];
         let friendsData = [];
         let locationsData = ["新北市板橋區", "花蓮縣花蓮市", "台北市"];
+        let groupsData = [];
 
         async function syncLocationsToCloud() {
             try {
@@ -410,6 +472,16 @@
                     body: JSON.stringify({ type: "UPDATE_LOCATIONS", locations: locationsData })
                 });
             } catch (error) { console.error('常用地點同步失敗:', error); }
+        }
+
+        async function syncGroupsToCloud() {
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST', mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: "UPDATE_GROUPS", groups: groupsData })
+                });
+            } catch (error) { console.error('群組同步失敗:', error); }
         }
 
         function renderQuickLocations() {
@@ -496,25 +568,18 @@
 
         function setLocation(loc) { document.getElementById('location').value = loc; }
 
-        // ⚡ 渲染常用 4 人組快捷按鈕
         function renderGroupButtons() {
             const container = document.getElementById('groupButtonsContainer');
             if (!container) return;
-            if (friendsData.length < 4) {
-                container.innerHTML = `<span class="text-[11px] text-stone-400">請先至牌友管理新增至少 4 位牌友</span>`;
+            if (groupsData.length === 0) {
+                container.innerHTML = `<span class="text-[11px] text-stone-400">尚無常用群組，請至上方「常用群組」分頁新增</span>`;
                 return;
             }
             let html = '';
-            const defaultGroups = [
-                { name: "宿舍班底", members: [friendsData[0]?.name, friendsData[1]?.name, friendsData[2]?.name, friendsData[3]?.name] },
-                { name: "固定好友團", members: friendsData.slice(0, 4).map(f => f.name) }
-            ];
-            defaultGroups.forEach(g => {
-                if (g.members.every(Boolean)) {
-                    html += `<button type="button" onclick='applyGroup(${JSON.stringify(g.members)})' class="text-[11px] bg-white hover:bg-amber-100 text-amber-900 px-2.5 py-1 rounded-xl border border-amber-300 font-bold transition-all shadow-sm">👥 ${g.name}</button>`;
-                }
+            groupsData.forEach(g => {
+                html += `<button type="button" onclick='applyGroup(${JSON.stringify(g.members)})' class="text-[11px] bg-white hover:bg-amber-100 text-amber-900 px-2.5 py-1 rounded-xl border border-amber-300 font-bold transition-all shadow-sm">👥 ${g.groupName}</button>`;
             });
-            container.innerHTML = html || `<span class="text-[11px] text-stone-400">尚無常用群組</span>`;
+            container.innerHTML = html;
         }
 
         function applyGroup(members) {
@@ -613,13 +678,26 @@
             updateMatchupDropdowns();
         }
 
+        function updateGroupMemberDropdowns() {
+            const gSelects = ['gMember1', 'gMember2', 'gMember3', 'gMember4'];
+            gSelects.forEach((id) => {
+                const select = document.getElementById(id);
+                if (!select) return;
+                let html = '<option value="">-- 選擇牌友 --</option>';
+                friendsData.forEach(f => {
+                    html += `<option value="${f.name}">${f.name} (${f.nickname})</option>`;
+                });
+                select.innerHTML = html;
+            });
+        }
+
         function updateMatchupDropdowns() {
             const p1Select = document.getElementById('matchupPlayer1');
             const p2Select = document.getElementById('matchupPlayer2');
             if (!p1Select || !p2Select) return;
             const currentP1 = p1Select.value;
             const currentP2 = p2Select.value;
-            let optionsHtml = '<option value="">-- 請選擇 --</option>';
+            let optionsHtml = '<option value="">-- 選擇 --</option>';
             friendsData.forEach(f => {
                 optionsHtml += `<option value="${f.name}">${f.name} (${f.nickname})</option>`;
             });
@@ -630,7 +708,7 @@
         }
 
         function switchTab(tab) {
-            ['Rank', 'Insights', 'Monthly', 'History', 'Friends'].forEach(t => {
+            ['Rank', 'Insights', 'Monthly', 'History', 'Friends', 'Groups'].forEach(t => {
                 const page = document.getElementById('page' + t);
                 const btn = document.getElementById('tab' + t);
                 if (page) page.classList.add('hidden');
@@ -642,10 +720,11 @@
             if (targetBtn) targetBtn.className = "px-3 py-2 text-xs font-bold rounded-xl transition-all bg-amber-700 text-white shadow-md";
 
             if (tab === 'rank') { updatePlayerSelects(); }
-            if (tab === 'insights') { renderLegends(); renderFeeStatistics(); updateMatchupDropdowns(); }
+            if (tab === 'insights') { renderLegends(); renderHistoryMonthlyChampions(); renderFeeStatistics(); updateMatchupDropdowns(); }
             if (tab === 'monthly') { renderMonthlyLeaderboard(); }
             if (tab === 'history') { renderHistoryTable(); }
             if (tab === 'friends') { renderFriendsTable(); }
+            if (tab === 'groups') { renderGroupsTable(); updateGroupMemberDropdowns(); }
         }
 
         async function loadData() {
@@ -663,16 +742,20 @@
                 if (data.locations && data.locations.length > 0) {
                     locationsData = data.locations;
                 }
+                groupsData = data.groups || [];
 
                 renderQuickLocations();
                 renderPlayerInputs();
                 renderLeaderboard();
                 renderFeeStatistics();
                 renderLegends();
+                renderHistoryMonthlyChampions();
                 updateMatchupDropdowns();
                 renderMonthlyLeaderboard();
                 renderHistoryTable();
                 renderFriendsTable();
+                renderGroupsTable();
+                updateGroupMemberDropdowns();
 
                 loading.style.display = 'none';
                 table.classList.remove('hidden');
@@ -746,7 +829,6 @@
             });
         }
 
-        // 🏛️ 渲染俱樂部洞察分頁與四大傳奇獎項（含你的專屬笑梗稱號）
         function renderLegends() {
             const grid = document.getElementById('legendsGrid');
             if (!grid) return;
@@ -823,6 +905,63 @@
                     <div class="text-lg font-black mt-1">${highScoreStr}</div>
                     <div class="text-[11px] opacity-80 mt-1">歷史單場最高得分紀錄</div>
                 </div>`;
+        }
+
+        // 🎖️ 渲染歷史月冠軍牆
+        function renderHistoryMonthlyChampions() {
+            const grid = document.getElementById('historyMonthlyChampionsGrid');
+            if (!grid) return;
+
+            let monthMap = {};
+            games.forEach(g => {
+                if (!g.timestamp || !g.scores) return;
+                const monthKey = g.timestamp.slice(0, 7);
+                if (!monthMap[monthKey]) monthMap[monthKey] = {};
+
+                Object.entries(g.scores).forEach(([fullName, score]) => {
+                    const pure = getPureName(fullName);
+                    if (!pure) return;
+                    monthMap[monthKey][pure] = (monthMap[monthKey][pure] || 0) + Number(score);
+                });
+            });
+
+            let champions = [];
+            Object.entries(monthMap).forEach(([month, playerScores]) => {
+                let topPure = null;
+                let maxScore = -999999;
+                Object.entries(playerScores).forEach(([pure, score]) => {
+                    if (score > maxScore) {
+                        maxScore = score;
+                        topPure = pure;
+                    }
+                });
+                if (topPure) {
+                    champions.push({ month, name: getLatestDisplayName(topPure), score: maxScore });
+                }
+            });
+
+            champions.sort((a, b) => b.month.localeCompare(a.month));
+
+            if (champions.length === 0) {
+                grid.innerHTML = `<span class="text-xs text-stone-400">尚無歷史月冠軍紀錄</span>`;
+                return;
+            }
+
+            let html = '';
+            champions.forEach(c => {
+                const sText = c.score > 0 ? `+${c.score}` : c.score;
+                html += `
+                    <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+                        <div>
+                            <div class="text-[11px] font-bold text-amber-800 tracking-wider">📅 ${c.month} 月冠軍</div>
+                            <div class="text-sm font-black text-stone-900 mt-0.5">${c.name}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm font-black text-amber-700">${sText} 分</div>
+                        </div>
+                    </div>`;
+            });
+            grid.innerHTML = html;
         }
 
         function renderFeeStatistics() {
@@ -1151,6 +1290,55 @@
                 renderFriendsTable();
                 updatePlayerSelects();
                 alert('綽號已更新！');
+            }
+        }
+
+        function renderGroupsTable() {
+            const tbody = document.getElementById('groupTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            if (groupsData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-8 text-stone-400">尚無常用群組</td></tr>`;
+                return;
+            }
+            groupsData.forEach((g, idx) => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-stone-100/80">
+                        <td class="py-3.5 px-4 font-bold text-stone-800">${g.groupName}</td>
+                        <td class="py-3.5 px-4 text-xs text-stone-600">${g.members.join('、')}</td>
+                        <td class="py-3.5 px-4 text-right"><button onclick="deleteGroup(${idx})" class="text-xs bg-rose-50 text-rose-700 px-3 py-1.5 rounded-xl border border-rose-200">刪除</button></td>
+                    </tr>`;
+            });
+        }
+
+        document.getElementById('groupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const groupName = document.getElementById('groupNameInput').value.trim();
+            const m1 = document.getElementById('gMember1').value;
+            const m2 = document.getElementById('gMember2').value;
+            const m3 = document.getElementById('gMember3').value;
+            const m4 = document.getElementById('gMember4').value;
+
+            if (!groupName) return;
+            if (new Set([m1, m2, m3, m4]).size !== 4) {
+                alert('⚠️ 4位成員不能重複！');
+                return;
+            }
+
+            groupsData.push({ groupName, members: [m1, m2, m3, m4] });
+            await syncGroupsToCloud();
+            document.getElementById('groupForm').reset();
+            renderGroupsTable();
+            renderGroupButtons();
+            alert(`成功新增常用群組：${groupName}`);
+        });
+
+        async function deleteGroup(index) {
+            if (confirm('確定要刪除這個常用群組嗎？')) {
+                groupsData.splice(index, 1);
+                await syncGroupsToCloud();
+                renderGroupsTable();
+                renderGroupButtons();
             }
         }
 
