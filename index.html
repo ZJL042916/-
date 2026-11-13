@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🀄 麻將即時戰績排行榜</title>
-    <!-- 引入 Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -19,46 +18,31 @@
 <body class="text-stone-800 min-h-screen p-4 md:p-8 font-sans selection:bg-amber-600 selection:text-white">
     <div class="max-w-5xl mx-auto space-y-6">
         
-        <!-- 頂部標題與分頁切換 -->
-        <header class="flex flex-col md:flex-row justify-between items-center gap-4 bg-white/80 border border-stone-200/80 p-5 md:p-6 rounded-3xl shadow-xl backdrop-blur-md">
+        <header class="flex flex-col md:flex-row justify-between items-center gap-4 bg-white/85 border border-stone-200/80 p-5 md:p-6 rounded-3xl shadow-xl backdrop-blur-md">
             <div class="flex items-center space-x-3.5">
                 <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-700 via-amber-600 to-yellow-600 flex items-center justify-center text-2xl text-white shadow-lg shadow-amber-900/10">
                     🀄
                 </div>
                 <div>
-                    <h1 class="text-xl md:text-2xl font-black text-stone-900 tracking-tight">
-                        麻將即時戰績排行榜
-                    </h1>
+                    <h1 class="text-xl md:text-2xl font-black text-stone-900 tracking-tight">麻將即時戰績排行榜</h1>
                     <p class="text-xs text-stone-500 font-medium">雲端多人連線同步系統</p>
                 </div>
             </div>
 
-            <!-- 分頁切換 Tabs -->
             <div class="flex flex-wrap justify-center bg-stone-200/70 border border-stone-300/60 rounded-2xl p-1.5 shadow-inner gap-1.5">
-                <button onclick="switchTab('rank')" id="tabRank" class="px-3 py-2 text-xs font-bold rounded-xl transition-all bg-amber-700 text-white shadow-md">
-                    🏆 總排行榜
-                </button>
-                <button onclick="switchTab('monthly')" id="tabMonthly" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">
-                    📅 月排行榜與積分冠軍
-                </button>
-                <button onclick="switchTab('history')" id="tabHistory" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">
-                    📜 牌局明細
-                </button>
-                <button onclick="switchTab('friends')" id="tabFriends" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">
-                    👥 牌友管理
-                </button>
+                <button onclick="switchTab('rank')" id="tabRank" class="px-3 py-2 text-xs font-bold rounded-xl transition-all bg-amber-700 text-white shadow-md">🏆 總排行榜</button>
+                <button onclick="switchTab('monthly')" id="tabMonthly" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">📅 月排行榜與積分冠軍</button>
+                <button onclick="switchTab('history')" id="tabHistory" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">📜 牌局明細</button>
+                <button onclick="switchTab('friends')" id="tabFriends" class="px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50">👥 牌友管理</button>
             </div>
         </header>
 
-        <!-- ==================== 分頁一：總戰績排行榜 ==================== -->
+        <!-- 總排行榜分頁 -->
         <div id="pageRank" class="space-y-6">
-            <!-- 常勝軍（綜合表現 MVP）展示區 -->
             <div id="mvpBanner" class="bg-gradient-to-r from-amber-50/90 via-white to-orange-50/90 border border-amber-200 rounded-3xl p-6 shadow-xl backdrop-blur-md flex items-center justify-between relative overflow-hidden hidden">
                 <div class="absolute -right-6 -bottom-6 text-9xl text-amber-900/5 pointer-events-none font-black select-none">MVP</div>
                 <div class="flex items-center space-x-4 relative z-10">
-                    <div class="w-14 h-14 rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center text-3xl shadow-inner">
-                        👑
-                    </div>
+                    <div class="w-14 h-14 rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center text-3xl shadow-inner">👑</div>
                     <div>
                         <div class="text-xs text-amber-800 font-bold tracking-widest uppercase">總榜常勝軍 (表現最佳 MVP)</div>
                         <div id="mvpName" class="text-xl md:text-2xl font-black text-stone-900 mt-0.5 tracking-wide">-</div>
@@ -71,15 +55,15 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- 左側：新增對局表單 -->
-                <div class="bg-white/80 border border-stone-200/80 rounded-3xl p-6 shadow-xl backdrop-blur-md md:col-span-1">
+                <!-- 左側：記錄新牌局 -->
+                <div class="bg-white/85 border border-stone-200/80 rounded-3xl p-6 shadow-xl backdrop-blur-md md:col-span-1">
                     <h2 class="text-base font-bold text-amber-800 mb-5 flex items-center gap-2">
                         <span class="p-1.5 bg-amber-100 rounded-xl border border-amber-200">📝</span> 記錄新牌局
                     </h2>
                     <form id="gameForm" class="space-y-4">
                         <div>
                             <label class="block text-xs font-semibold text-stone-600 mb-1.5">牌局日期</label>
-                            <input type="date" id="gameDate" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-stone-800 focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-600/20 transition-all shadow-inner" required>
+                            <input type="date" id="gameDate" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-stone-800 focus:outline-none focus:border-amber-600 shadow-inner" required>
                         </div>
                         <div>
                             <div class="flex justify-between items-center mb-1.5">
@@ -89,16 +73,13 @@
                                 </button>
                             </div>
                             <input type="text" id="location" value="新北市板橋區" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-stone-800 focus:outline-none focus:border-amber-600 shadow-inner mb-2" required>
-                            
-                            <!-- 動態常用地點快速按鈕列 -->
                             <div id="quickLocationContainer" class="flex flex-wrap gap-1.5"></div>
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-stone-600 mb-1.5">台費 (元)</label>
-                            <input type="number" id="tableFee" value="0" min="0" placeholder="例如: 200" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-amber-800 font-bold focus:outline-none focus:border-amber-600 shadow-inner" required>
+                            <input type="number" id="tableFee" value="0" min="0" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-amber-800 font-bold focus:outline-none focus:border-amber-600 shadow-inner" required>
                         </div>
                         
-                        <!-- 四位玩家記分區 -->
                         <div class="space-y-3 pt-1" id="playersInputContainer"></div>
 
                         <button type="submit" id="submitBtn" class="w-full mt-2 bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-800 hover:to-amber-700 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-amber-900/20 text-sm active:scale-[0.98]">
@@ -107,8 +88,8 @@
                     </form>
                 </div>
 
-                <!-- 右側：排行榜表格 -->
-                <div class="bg-white/80 border border-stone-200/80 rounded-3xl shadow-xl backdrop-blur-md md:col-span-2 flex flex-col overflow-hidden">
+                <!-- 右側：排行榜 -->
+                <div class="bg-white/85 border border-stone-200/80 rounded-3xl shadow-xl backdrop-blur-md md:col-span-2 flex flex-col overflow-hidden">
                     <div class="p-5 md:p-6 border-b border-stone-200 flex justify-between items-center bg-stone-50/50">
                         <h2 class="text-base font-bold text-amber-800 flex items-center gap-2">
                             <span class="p-1.5 bg-amber-100 rounded-xl border border-amber-200">🏆</span> 總累積戰績排行榜
@@ -139,29 +120,23 @@
             </div>
         </div>
 
-        <!-- ==================== 分頁二：月排行榜與歷史積分冠軍 ==================== -->
+        <!-- 月排行榜分頁 -->
         <div id="pageMonthly" class="space-y-6 hidden">
-            <div class="bg-white/80 border border-stone-200/80 rounded-3xl p-5 md:p-6 shadow-xl backdrop-blur-md flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="bg-white/85 border border-stone-200/80 rounded-3xl p-5 md:p-6 shadow-xl backdrop-blur-md flex flex-col md:flex-row justify-between items-center gap-4">
                 <div class="flex items-center gap-3.5">
-                    <div class="w-11 h-11 rounded-2xl bg-amber-100 border border-amber-200 flex items-center justify-center text-xl">
-                        📅
-                    </div>
+                    <div class="w-11 h-11 rounded-2xl bg-amber-100 border border-amber-200 flex items-center justify-center text-xl">📅</div>
                     <div>
                         <h2 class="text-base font-bold text-amber-800">月度戰績統計</h2>
                         <p class="text-xs text-stone-500">檢視指定月份的積分與表現排名</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-3">
-                    <input type="month" id="selectMonth" onchange="renderMonthlyLeaderboard()" class="bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-stone-800 focus:outline-none focus:border-amber-600 font-semibold shadow-inner">
-                </div>
+                <input type="month" id="selectMonth" onchange="renderMonthlyLeaderboard()" class="bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-stone-800 focus:outline-none focus:border-amber-600 font-semibold shadow-inner">
             </div>
 
-            <div class="bg-white/80 border border-stone-200/80 rounded-3xl shadow-xl backdrop-blur-md overflow-hidden">
+            <div class="bg-white/85 border border-stone-200/80 rounded-3xl shadow-xl backdrop-blur-md overflow-hidden">
                 <div id="monthMvpBanner" class="bg-gradient-to-r from-amber-50/80 via-white to-orange-50/80 border-b border-stone-200 p-5 md:p-6 flex items-center justify-between hidden">
                     <div class="flex items-center space-x-3.5">
-                        <div class="w-10 h-10 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-xl">
-                            🎖️
-                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-xl">🎖️</div>
                         <div>
                             <div class="text-xs text-amber-800 font-bold uppercase tracking-wider">本月最高積分 MVP (得分王)</div>
                             <div id="monthMvpName" class="text-lg font-bold text-stone-900 mt-0.5">-</div>
@@ -189,12 +164,9 @@
                 </div>
             </div>
 
-            <!-- 歷史月積分冠軍名人堂 -->
-            <div class="bg-white/80 border border-stone-200/80 rounded-3xl shadow-xl backdrop-blur-md overflow-hidden p-5 md:p-6 space-y-4">
+            <div class="bg-white/85 border border-stone-200/80 rounded-3xl shadow-xl backdrop-blur-md overflow-hidden p-5 md:p-6 space-y-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-xl">
-                        🏛️
-                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-xl">🏛️</div>
                     <div>
                         <h2 class="text-base font-bold text-amber-800">歷史月積分冠軍名人堂 (得分王)</h2>
                         <p class="text-xs text-stone-500">歷年各月份累積得分最高的常勝將軍總覽</p>
@@ -204,17 +176,12 @@
             </div>
         </div>
 
-        <!-- ==================== 分頁三：牌局明細與管理 ==================== -->
+        <!-- 牌局明細分頁 -->
         <div id="pageHistory" class="space-y-6 hidden">
-            <div class="bg-white/80 border border-stone-200/80 rounded-3xl shadow-xl backdrop-blur-md overflow-hidden p-5 md:p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <div>
-                        <h2 class="text-base font-bold text-amber-800 flex items-center gap-2">
-                            <span class="p-1.5 bg-amber-100 rounded-xl border border-amber-200">📜</span> 歷史牌局明細與管理
-                        </h2>
-                        <p class="text-xs text-stone-500 mt-0.5">檢視所有打牌紀錄，支援點擊編輯完整明細</p>
-                    </div>
-                </div>
+            <div class="bg-white/85 border border-stone-200/80 rounded-3xl shadow-xl backdrop-blur-md overflow-hidden p-5 md:p-6">
+                <h2 class="text-base font-bold text-amber-800 flex items-center gap-2 mb-4">
+                    <span class="p-1.5 bg-amber-100 rounded-xl border border-amber-200">📜</span> 歷史牌局明細與管理
+                </h2>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse text-sm">
                         <thead>
@@ -230,28 +197,24 @@
             </div>
         </div>
 
-        <!-- ==================== 分頁四：牌友與綽號管理 ==================== -->
+        <!-- 牌友管理分頁 -->
         <div id="pageFriends" class="space-y-6 hidden">
-            <div class="bg-white/80 border border-stone-200/80 rounded-3xl p-6 md:p-8 shadow-xl backdrop-blur-md max-w-xl mx-auto">
+            <div class="bg-white/85 border border-stone-200/80 rounded-3xl p-6 md:p-8 shadow-xl backdrop-blur-md max-w-xl mx-auto">
                 <h2 class="text-base font-bold text-amber-800 mb-5 flex items-center gap-2">
                     <span class="p-1.5 bg-amber-100 rounded-xl border border-amber-200">👥</span> 新增牌友與專屬綽號 (雲端同步)
                 </h2>
                 <form id="friendForm" class="space-y-4 mb-6">
                     <div>
                         <label class="block text-xs font-semibold text-stone-600 mb-1.5">牌友姓名</label>
-                        <input type="text" id="friendName" placeholder="例如：張嘉恩" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-stone-800 focus:outline-none focus:border-amber-600 shadow-inner transition-colors" required>
+                        <input type="text" id="friendName" placeholder="例如：張嘉恩" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-stone-800 focus:outline-none focus:border-amber-600 shadow-inner" required>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-stone-600 mb-1.5">專屬綽號</label>
-                        <input type="text" id="friendNickname" placeholder="例如：二頭肌" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-stone-800 focus:outline-none focus:border-amber-600 shadow-inner transition-colors" required>
+                        <input type="text" id="friendNickname" placeholder="例如：二頭肌" class="w-full bg-stone-50 border border-stone-300 rounded-2xl px-4 py-2.5 text-sm text-stone-800 focus:outline-none focus:border-amber-600 shadow-inner" required>
                     </div>
-                    <button type="submit" id="friendSubmitBtn" class="w-full bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-800 hover:to-amber-700 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-amber-900/20 text-sm active:scale-[0.98]">
-                        儲存牌友至雲端
-                    </button>
+                    <button type="submit" id="friendSubmitBtn" class="w-full bg-gradient-to-r from-amber-700 to-amber-600 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg text-sm">儲存牌友至雲端</button>
                 </form>
-
-                <h3 class="text-xs uppercase tracking-wider text-stone-500 font-bold mb-3">雲端現有牌友與綽號清單</h3>
-                <div class="overflow-x-auto rounded-2xl border border-stone-200 shadow-inner bg-stone-50/50">
+                <div class="overflow-x-auto rounded-2xl border border-stone-200 bg-stone-50/50">
                     <table class="w-full text-left border-collapse text-sm">
                         <thead>
                             <tr class="bg-stone-100 border-b border-stone-200 text-stone-500 text-xs">
@@ -265,132 +228,85 @@
                 </div>
             </div>
         </div>
-
     </div>
 
-    <!-- 個人戰績彈窗 (Modal) -->
+    <!-- 個人戰績 Modal -->
     <div id="playerModal" class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white border border-stone-200 rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl space-y-5 relative">
-            <button onclick="closePlayerModal()" class="absolute top-5 right-5 text-stone-400 hover:text-stone-700 text-xl font-bold">✕</button>
-            <div class="flex items-center space-x-3.5">
-                <div class="w-12 h-12 rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center text-2xl">🀄</div>
-                <div>
-                    <h3 id="modalPlayerName" class="text-xl font-black text-stone-900">-</h3>
-                    <p class="text-xs text-stone-500">個人對戰歷史與戰績總覽</p>
-                </div>
-            </div>
+            <button onclick="closePlayerModal()" class="absolute top-5 right-5 text-stone-400 font-bold">✕</button>
+            <h3 id="modalPlayerName" class="text-xl font-black text-stone-900">-</h3>
             <div class="grid grid-cols-3 gap-3">
                 <div class="bg-stone-50 border border-stone-200 rounded-2xl p-3 text-center">
                     <div class="text-[11px] text-stone-500 font-bold">總場次</div>
-                    <div id="modalTotalGames" class="text-lg font-black text-stone-800 mt-0.5">-</div>
+                    <div id="modalTotalGames" class="text-lg font-black text-stone-800">-</div>
                 </div>
                 <div class="bg-stone-50 border border-stone-200 rounded-2xl p-3 text-center">
                     <div class="text-[11px] text-stone-500 font-bold">勝率</div>
-                    <div id="modalWinRate" class="text-lg font-black text-amber-700 mt-0.5">-</div>
+                    <div id="modalWinRate" class="text-lg font-black text-amber-700">-</div>
                 </div>
                 <div class="bg-stone-50 border border-stone-200 rounded-2xl p-3 text-center">
                     <div class="text-[11px] text-stone-500 font-bold">累積得分</div>
-                    <div id="modalTotalScore" class="text-lg font-black mt-0.5">-</div>
+                    <div id="modalTotalScore" class="text-lg font-black">-</div>
                 </div>
             </div>
-            <div>
-                <h4 class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">最近對戰紀錄</h4>
-                <div id="modalHistoryList" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
-            </div>
+            <div id="modalHistoryList" class="space-y-2 max-h-48 overflow-y-auto"></div>
         </div>
     </div>
 
-    <!-- 歷史牌局進階編輯彈窗 (Modal) -->
-    <div id="editGameModal" class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white border border-stone-200 rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl space-y-4 relative">
-            <button onclick="closeEditModal()" class="absolute top-5 right-5 text-stone-400 hover:text-stone-700 text-xl font-bold">✕</button>
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-xl">✏️</div>
-                <div>
-                    <h3 class="text-lg font-black text-stone-900">修改歷史牌局明細</h3>
-                    <p class="text-xs text-stone-500">更新此局的日期、地點、台費與分數</p>
-                </div>
-            </div>
-            
-            <form id="editGameForm" class="space-y-3 pt-2">
-                <input type="hidden" id="editGameIndex">
-                <div>
-                    <label class="block text-xs font-semibold text-stone-600 mb-1">日期</label>
-                    <input type="date" id="editDate" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-800 focus:outline-none focus:border-amber-600 shadow-inner" required>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-stone-600 mb-1">地點</label>
-                    <input type="text" id="editLocation" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm text-stone-800 focus:outline-none focus:border-amber-600 shadow-inner" required>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-stone-600 mb-1">台費 (元)</label>
-                    <input type="number" id="editTableFee" min="0" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm font-bold text-amber-800 focus:outline-none focus:border-amber-600 shadow-inner" required>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-stone-600 mb-1">四人得分摘要說明</label>
-                    <div id="editScoresSummary" class="bg-stone-100 border border-stone-200 rounded-xl p-2.5 text-xs text-stone-700 space-y-1"></div>
-                </div>
-
-                <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="closeEditModal()" class="w-1/2 bg-stone-200 hover:bg-stone-300 text-stone-700 font-bold py-2.5 rounded-xl text-xs transition-all">取消</button>
-                    <button type="submit" id="editSubmitBtn" class="w-1/2 bg-amber-700 hover:bg-amber-800 text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow-md">儲存修改</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- 常用地點管理彈窗 (Modal) -->
+    <!-- 常用地點管理 Modal -->
     <div id="locationModal" class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white border border-stone-200 rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl space-y-5 relative">
-            <button onclick="closeLocationManager()" class="absolute top-5 right-5 text-stone-400 hover:text-stone-700 text-xl font-bold">✕</button>
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-xl">📍</div>
-                <div>
-                    <h3 class="text-lg font-black text-stone-900">管理常用地點</h3>
-                    <p class="text-xs text-stone-500">新增或刪除快速選單中的常用地點</p>
-                </div>
-            </div>
-
+            <button onclick="closeLocationManager()" class="absolute top-5 right-5 text-stone-400 font-bold">✕</button>
+            <h3 class="text-lg font-black text-stone-900">管理雲端常用地點</h3>
             <form id="addLocationForm" class="flex gap-2">
-                <input type="text" id="newLocationInput" placeholder="例如：新北市板橋區民生路" class="flex-1 bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-600 shadow-inner" required>
-                <button type="submit" class="bg-amber-700 hover:bg-amber-800 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all shadow-sm">新增</button>
+                <input type="text" id="newLocationInput" placeholder="例如：新北市板橋區民生路" class="flex-1 bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-600" required>
+                <button type="submit" class="bg-amber-700 text-white font-bold px-4 py-2 rounded-xl text-xs">新增</button>
             </form>
-
-            <div>
-                <h4 class="text-xs font-bold text-stone-500 uppercase tracking-wider mb-2">現有常用地點清單</h4>
-                <div id="locationListContainer" class="space-y-2 max-h-48 overflow-y-auto pr-1"></div>
-            </div>
+            <div id="locationListContainer" class="space-y-2 max-h-48 overflow-y-auto"></div>
         </div>
     </div>
 
-    <!-- JavaScript 邏輯 -->
+    <!-- 歷史牌局編輯 Modal -->
+    <div id="editGameModal" class="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white border border-stone-200 rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl space-y-4 relative">
+            <button onclick="closeEditModal()" class="absolute top-5 right-5 text-stone-400 font-bold">✕</button>
+            <h3 class="text-lg font-black text-stone-900">修改歷史牌局明細</h3>
+            <form id="editGameForm" class="space-y-3">
+                <input type="hidden" id="editGameIndex">
+                <input type="date" id="editDate" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm" required>
+                <input type="text" id="editLocation" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm" required>
+                <input type="number" id="editTableFee" min="0" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm font-bold" required>
+                <div id="editScoresSummary" class="bg-stone-100 rounded-xl p-2.5 text-xs"></div>
+                <button type="submit" id="editSubmitBtn" class="w-full bg-amber-700 text-white font-bold py-2.5 rounded-xl text-xs">儲存修改</button>
+            </form>
+        </div>
+    </div>
+
     <script>
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz3c7X_Amn2wfe02Esonpr6YSDHnrldCdnh2fjq_AZyIgteFi--nO5XUYHwHCjVt4B9/exec";
 
         let games = [];
         let friendsData = [];
-        let historicalChampions = [];
+        let locationsData = ["新北市板橋區", "花蓮縣花蓮市", "台北市"];
 
-        let defaultLocations = ["新北市板橋區", "花蓮縣花蓮市", "台北市"];
-        function getSavedLocations() {
-            const saved = localStorage.getItem('mahjong_saved_locations');
-            if (saved) {
-                try { return JSON.parse(saved); } catch (e) { return defaultLocations; }
+        async function syncLocationsToCloud() {
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: "UPDATE_LOCATIONS", locations: locationsData })
+                });
+            } catch (error) {
+                console.error('常用地點同步失敗:', error);
             }
-            return defaultLocations;
-        }
-
-        function saveLocations(locs) {
-            localStorage.setItem('mahjong_saved_locations', JSON.stringify(locs));
-            renderQuickLocations();
         }
 
         function renderQuickLocations() {
             const container = document.getElementById('quickLocationContainer');
             if (!container) return;
-            const locs = getSavedLocations();
             let html = '';
-            locs.forEach(loc => {
+            locationsData.forEach(loc => {
                 html += `<button type="button" onclick="setLocation('${loc}')" class="text-[11px] bg-stone-100 hover:bg-amber-100 text-stone-700 hover:text-amber-800 px-2 py-1 rounded-lg border border-stone-200 transition-all font-semibold">${loc}</button>`;
             });
             container.innerHTML = html;
@@ -408,44 +324,43 @@
         function renderLocationManagerList() {
             const container = document.getElementById('locationListContainer');
             if (!container) return;
-            const locs = getSavedLocations();
             let html = '';
-            if (locs.length === 0) {
-                html = `<div class="text-xs text-stone-400 text-center py-4">目前尚無常用地點</div>`;
-            } else {
-                locs.forEach((loc, idx) => {
-                    html += `
-                        <div class="flex justify-between items-center bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs">
-                            <span class="font-bold text-stone-800">${loc}</span>
-                            <button type="button" onclick="deleteLocation(${idx})" class="text-rose-600 hover:text-rose-800 font-semibold px-2 py-1 rounded-lg hover:bg-rose-50 transition-all">刪除</button>
-                        </div>
-                    `;
-                });
-            }
+            locationsData.forEach((loc, idx) => {
+                html += `
+                    <div class="flex justify-between items-center bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs">
+                        <span class="font-bold text-stone-800">${loc}</span>
+                        <button type="button" onclick="deleteLocation(${idx})" class="text-rose-600 font-semibold px-2 py-1 rounded-lg hover:bg-rose-50">刪除</button>
+                    </div>
+                `;
+            });
             container.innerHTML = html;
         }
 
-        document.getElementById('addLocationForm').addEventListener('submit', (e) => {
+        document.getElementById('addLocationForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const input = document.getElementById('newLocationInput');
             const val = input.value.trim();
             if (!val) return;
-
-            let locs = getSavedLocations();
-            if (locs.includes(val)) {
+            if (locationsData.includes(val)) {
                 alert('⚠️ 此地點已經在常用清單中了！');
                 return;
             }
-            locs.push(val);
-            saveLocations(locs);
-            input.value = '';
+            locationsData.push(val);
+            await syncLocationsToCloud();
+            renderQuickLocations();
             renderLocationManagerList();
+            input.value = '';
+            alert('常用地點已新增並同步至雲端！');
         });
 
-        function deleteLocation(index) {
-            let locs = getSavedLocations();
-            locs.splice(index, 1);
-            saveLocations(locs);
+        async function deleteLocation(index) {
+            if (locationsData.length <= 1) {
+                alert('⚠️ 至少需要保留一個常用地點！');
+                return;
+            }
+            locationsData.splice(index, 1);
+            await syncLocationsToCloud();
+            renderQuickLocations();
             renderLocationManagerList();
         }
 
@@ -456,16 +371,12 @@
 
         function getLatestDisplayName(pureName) {
             const friend = friendsData.find(f => f.name === pureName);
-            if (friend) {
-                return `${friend.name} (${friend.nickname})`;
-            }
+            if (friend) return `${friend.name} (${friend.nickname})`;
             for (let i = games.length - 1; i >= 0; i--) {
                 const g = games[i];
                 if (g.scores) {
                     for (const fullKey of Object.keys(g.scores)) {
-                        if (getPureName(fullKey) === pureName) {
-                            return fullKey;
-                        }
+                        if (getPureName(fullKey) === pureName) return fullKey;
                     }
                 }
             }
@@ -476,14 +387,10 @@
             const today = new Date().toISOString().split('T')[0];
             const dateInput = document.getElementById('gameDate');
             if (dateInput && !dateInput.value) dateInput.value = today;
-
             const monthInput = document.getElementById('selectMonth');
-            if (monthInput && !monthInput.value) {
-                monthInput.value = today.slice(0, 7);
-            }
+            if (monthInput && !monthInput.value) monthInput.value = today.slice(0, 7);
         }
         setDefaultDates();
-        renderQuickLocations();
 
         function setLocation(loc) {
             document.getElementById('location').value = loc;
@@ -492,14 +399,12 @@
         function renderPlayerInputs() {
             const container = document.getElementById('playersInputContainer');
             if (!container) return;
-            
             const defaults = [
                 { defaultSign: 'win', defaultVal: '500' },
                 { defaultSign: 'lose', defaultVal: '100' },
                 { defaultSign: 'lose', defaultVal: '200' },
                 { defaultSign: 'lose', defaultVal: '200' }
             ];
-
             let html = '';
             for (let i = 1; i <= 4; i++) {
                 const pos = ['東', '南', '西', '北'][i-1];
@@ -533,15 +438,14 @@
             const loseBtn = document.getElementById(`p${playerIndex}LoseBtn`);
             const signInput = document.getElementById(`p${playerIndex}Sign`);
             const scoreInput = document.getElementById(`p${playerIndex}Score`);
-
             signInput.value = sign;
             if (sign === 'win') {
-                winBtn.className = "px-2 py-0.5 rounded-md transition-all bg-emerald-700 text-white shadow-sm";
-                loseBtn.className = "px-2 py-0.5 rounded-md transition-all text-stone-600 hover:text-stone-900";
+                winBtn.className = "px-2 py-0.5 rounded-md bg-emerald-700 text-white shadow-sm";
+                loseBtn.className = "px-2 py-0.5 rounded-md text-stone-600";
                 scoreInput.className = "w-full bg-white border border-stone-300 rounded-xl px-2.5 py-2 text-xs font-black shadow-inner text-center text-emerald-700";
             } else {
-                winBtn.className = "px-2 py-0.5 rounded-md transition-all text-stone-600 hover:text-stone-900";
-                loseBtn.className = "px-2 py-0.5 rounded-md transition-all bg-rose-700 text-white shadow-sm";
+                winBtn.className = "px-2 py-0.5 rounded-md text-stone-600";
+                loseBtn.className = "px-2 py-0.5 rounded-md bg-rose-700 text-white shadow-sm";
                 scoreInput.className = "w-full bg-white border border-stone-300 rounded-xl px-2.5 py-2 text-xs font-black shadow-inner text-center text-rose-700";
             }
         }
@@ -553,75 +457,30 @@
                 if (!select) return;
                 const currentVal = select.value;
                 select.innerHTML = '';
-                
                 if (friendsData.length === 0) {
-                    const opt = document.createElement('option');
-                    opt.value = "";
-                    opt.innerText = "請先至「牌友管理」新增";
-                    select.appendChild(opt);
+                    select.innerHTML = `<option value="">請先至「牌友管理」新增</option>`;
                     return;
                 }
-
                 friendsData.forEach((f) => {
                     const display = `${f.name} (${f.nickname})`;
-                    const opt = document.createElement('option');
-                    opt.value = display;
-                    opt.innerText = display;
-                    select.appendChild(opt);
+                    select.innerHTML += `<option value="${display}">${display}</option>`;
                 });
-                if (currentVal) {
-                    select.value = currentVal;
-                } else if (friendsData[index]) {
-                    const defaultDisplay = `${friendsData[index].name} (${friendsData[index].nickname})`;
-                    select.value = defaultDisplay;
-                }
+                if (currentVal) select.value = currentVal;
+                else if (friendsData[index]) select.value = `${friendsData[index].name} (${friendsData[index].nickname})`;
             });
         }
 
         function switchTab(tab) {
-            const pageRank = document.getElementById('pageRank');
-            const pageMonthly = document.getElementById('pageMonthly');
-            const pageHistory = document.getElementById('pageHistory');
-            const pageFriends = document.getElementById('pageFriends');
-            
-            const tabRank = document.getElementById('tabRank');
-            const tabMonthly = document.getElementById('tabMonthly');
-            const tabHistory = document.getElementById('tabHistory');
-            const tabFriends = document.getElementById('tabFriends');
-
-            if (!pageRank || !pageMonthly || !pageHistory || !pageFriends) return;
-
-            pageRank.classList.add('hidden');
-            pageMonthly.classList.add('hidden');
-            pageHistory.classList.add('hidden');
-            pageFriends.classList.add('hidden');
-
-            const inactiveClass = "px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50";
-            if(tabRank) tabRank.className = inactiveClass;
-            if(tabMonthly) tabMonthly.className = inactiveClass;
-            if(tabHistory) tabHistory.className = inactiveClass;
-            if(tabFriends) tabFriends.className = inactiveClass;
-
-            const activeClass = "px-3 py-2 text-xs font-bold rounded-xl transition-all bg-amber-700 text-white shadow-md";
-
-            if (tab === 'rank') {
-                pageRank.classList.remove('hidden');
-                if(tabRank) tabRank.className = activeClass;
-                updatePlayerSelects();
-            } else if (tab === 'monthly') {
-                pageMonthly.classList.remove('hidden');
-                if(tabMonthly) tabMonthly.className = activeClass;
-                renderMonthlyLeaderboard();
-                renderHistoricalChampions();
-            } else if (tab === 'history') {
-                pageHistory.classList.remove('hidden');
-                if(tabHistory) tabHistory.className = activeClass;
-                renderHistoryTable();
-            } else {
-                pageFriends.classList.remove('hidden');
-                if(tabFriends) tabFriends.className = activeClass;
-                renderFriendsTable();
-            }
+            ['Rank', 'Monthly', 'History', 'Friends'].forEach(t => {
+                document.getElementById('page' + t).classList.add('hidden');
+                document.getElementById('tab' + t).className = "px-3 py-2 text-xs font-bold rounded-xl transition-all text-stone-600 hover:text-stone-900 hover:bg-stone-300/50";
+            });
+            document.getElementById('page' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.remove('hidden');
+            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).className = "px-3 py-2 text-xs font-bold rounded-xl transition-all bg-amber-700 text-white shadow-md";
+            if (tab === 'rank') updatePlayerSelects();
+            if (tab === 'monthly') { renderMonthlyLeaderboard(); renderHistoricalChampions(); }
+            if (tab === 'history') renderHistoryTable();
+            if (tab === 'friends') renderFriendsTable();
         }
 
         async function loadData() {
@@ -636,7 +495,11 @@
                 const data = await response.json();
                 games = data.games || [];
                 friendsData = data.friends || [];
+                if (data.locations && data.locations.length > 0) {
+                    locationsData = data.locations;
+                }
 
+                renderQuickLocations();
                 renderPlayerInputs();
                 renderLeaderboard();
                 renderMonthlyLeaderboard();
@@ -648,10 +511,7 @@
                 table.classList.remove('hidden');
             } catch (error) {
                 console.error('讀取雲端資料失敗:', error);
-                loading.innerHTML = `
-                    <div class="text-rose-600 font-semibold mb-2">⚠️ 無法順利連接至 Google 雲端</div>
-                    <button onclick="loadData()" class="px-4 py-2 bg-amber-700 text-white text-xs font-bold rounded-xl shadow">重新嘗試載入</button>
-                `;
+                loading.innerHTML = `<div class="text-rose-600 font-semibold mb-2">⚠️ 無法順利連接至 Google 雲端</div><button onclick="loadData()" class="px-4 py-2 bg-amber-700 text-white text-xs rounded-xl">重新嘗試載入</button>`;
             }
         }
 
@@ -669,14 +529,9 @@
                 });
             });
 
-            const priorMean = 0.5;
-            const m = 2;
-
             const sorted = Object.entries(stats).sort(([,a], [,b]) => {
                 if (b.totalScore !== a.totalScore) return b.totalScore - a.totalScore;
-                const bayesianA = (a.wins + m * priorMean) / (a.totalGames + m);
-                const bayesianB = (b.wins + m * priorMean) / (b.totalGames + m);
-                return bayesianB - bayesianA;
+                return ((b.wins+1)/(b.totalGames+2)) - ((a.wins+1)/(a.totalGames+2));
             });
 
             let mvp = null;
@@ -684,31 +539,26 @@
             Object.entries(stats).forEach(([pureName, data]) => {
                 if (data.totalGames >= 2 && data.totalScore > highestScore) {
                     highestScore = data.totalScore;
-                    const rawRate = data.totalGames ? (data.wins / data.totalGames) : 0;
-                    mvp = { name: getLatestDisplayName(pureName), rate: Math.round(rawRate * 100), totalGames: data.totalGames };
+                    mvp = { name: getLatestDisplayName(pureName), rate: Math.round((data.wins/data.totalGames)*100), totalGames: data.totalGames };
                 }
             });
             if (!mvp && sorted.length > 0) {
                 const [topName, topData] = sorted[0];
-                const rawRate = topData.totalGames ? (topData.wins / topData.totalGames) : 0;
-                mvp = { name: getLatestDisplayName(topName), rate: Math.round(rawRate * 100), totalGames: topData.totalGames };
+                mvp = { name: getLatestDisplayName(topName), rate: Math.round((topData.wins/topData.totalGames)*100), totalGames: topData.totalGames };
             }
 
-            const mvpBanner = document.getElementById('mvpBanner');
-            if (mvpBanner && mvp && mvp.totalGames >= 1) {
+            const banner = document.getElementById('mvpBanner');
+            if (banner && mvp) {
                 document.getElementById('mvpName').innerText = mvp.name;
                 document.getElementById('mvpRate').innerText = `${mvp.rate}% (場次: ${mvp.totalGames})`;
-                mvpBanner.classList.remove('hidden');
-            } else if (mvpBanner) {
-                mvpBanner.classList.add('hidden');
+                banner.classList.remove('hidden');
             }
 
             const tbody = document.getElementById('leaderboardBody');
             if (!tbody) return;
             tbody.innerHTML = '';
-
             if (sorted.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-stone-400 font-medium">目前尚無戰績資料，快去新增一局吧！</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-stone-400">目前尚無戰績資料</td></tr>`;
                 return;
             }
 
@@ -717,12 +567,11 @@
                 const scoreClass = data.totalScore >= 0 ? 'text-emerald-700 font-bold' : 'text-rose-700 font-bold';
                 const scoreText = data.totalScore > 0 ? `+${data.totalScore}` : data.totalScore;
                 const rankBadge = idx === 0 ? 'text-amber-600 font-black' : idx === 1 ? 'text-stone-500 font-bold' : idx === 2 ? 'text-amber-800 font-bold' : 'text-stone-400';
-                const displayName = getLatestDisplayName(pureName);
-
+                
                 tbody.innerHTML += `
                     <tr class="hover:bg-stone-50/80 transition-colors cursor-pointer" onclick="openPlayerModal('${pureName}')">
                         <td class="py-4 px-4 font-semibold ${rankBadge}">#${idx + 1}</td>
-                        <td class="py-4 px-4 font-semibold text-amber-800 underline decoration-amber-300 underline-offset-4">${displayName}</td>
+                        <td class="py-4 px-4 font-semibold text-amber-800 underline decoration-amber-300">${getLatestDisplayName(pureName)}</td>
                         <td class="py-4 px-4 text-center text-stone-600">${data.totalGames}</td>
                         <td class="py-4 px-4 text-center text-stone-600">${winRate}%</td>
                         <td class="py-4 px-4 text-right ${scoreClass}">${scoreText}</td>
@@ -732,77 +581,39 @@
         }
 
         function openPlayerModal(pureName) {
-            const modal = document.getElementById('playerModal');
             document.getElementById('modalPlayerName').innerText = getLatestDisplayName(pureName);
-
-            let totalGames = 0;
-            let totalScore = 0;
-            let wins = 0;
-            let playerHistory = [];
-
+            let totalGames = 0, totalScore = 0, wins = 0, historyHtml = '';
             games.forEach(g => {
                 if (g.scores) {
                     Object.entries(g.scores).forEach(([fullName, scoreVal]) => {
                         if (getPureName(fullName) === pureName) {
                             const score = Number(scoreVal);
-                            totalGames++;
-                            totalScore += score;
-                            if (score > 0) wins++;
-                            playerHistory.push({
-                                date: g.timestamp,
-                                location: g.location,
-                                score: score
-                            });
+                            totalGames++; totalScore += score; if (score > 0) wins++;
+                            const sClass = score >= 0 ? 'text-emerald-700' : 'text-rose-700';
+                            const sText = score > 0 ? `+${score}` : score;
+                            historyHtml += `<div class="flex justify-between items-center bg-stone-50 border border-stone-200/60 rounded-xl px-3 py-2 text-xs"><div><div class="font-bold">${g.timestamp}</div><div class="text-[10px] text-stone-400">${g.location}</div></div><div class="font-black ${sClass}">${sText}</div></div>`;
                         }
                     });
                 }
             });
-
-            const winRate = totalGames > 0 ? Math.round((wins / totalGames) * 100) : 0;
             document.getElementById('modalTotalGames').innerText = totalGames;
-            document.getElementById('modalWinRate').innerText = `${winRate}%`;
-            
-            const scoreElem = document.getElementById('modalTotalScore');
-            scoreElem.innerText = totalScore > 0 ? `+${totalScore}` : totalScore;
-            scoreElem.className = `text-lg font-black mt-0.5 ${totalScore >= 0 ? 'text-emerald-700' : 'text-rose-700'}`;
-
-            const historyList = document.getElementById('modalHistoryList');
-            historyList.innerHTML = '';
-            if (playerHistory.length === 0) {
-                historyList.innerHTML = `<div class="text-xs text-stone-400 text-center py-4">尚無對戰紀錄</div>`;
-            } else {
-                playerHistory.reverse().forEach(h => {
-                    const sClass = h.score >= 0 ? 'text-emerald-700' : 'text-rose-700';
-                    const sText = h.score > 0 ? `+${h.score}` : h.score;
-                    historyList.innerHTML += `
-                        <div class="flex justify-between items-center bg-stone-50 border border-stone-200/60 rounded-xl px-3 py-2 text-xs">
-                            <div>
-                                <div class="font-bold text-stone-800">${h.date}</div>
-                                <div class="text-[10px] text-stone-400">${h.location}</div>
-                            </div>
-                            <div class="font-black ${sClass}">${sText}</div>
-                        </div>
-                    `;
-                });
-            }
-
-            modal.classList.remove('hidden');
+            document.getElementById('modalWinRate').innerText = `${totalGames > 0 ? Math.round((wins/totalGames)*100) : 0}%`;
+            const sElem = document.getElementById('modalTotalScore');
+            sElem.innerText = totalScore > 0 ? `+${totalScore}` : totalScore;
+            sElem.className = `text-lg font-black ${totalScore >= 0 ? 'text-emerald-700' : 'text-rose-700'}`;
+            document.getElementById('modalHistoryList').innerHTML = historyHtml || `<div class="text-xs text-stone-400 text-center py-4">尚無對戰紀錄</div>`;
+            document.getElementById('playerModal').classList.remove('hidden');
         }
 
-        function closePlayerModal() {
-            document.getElementById('playerModal').classList.add('hidden');
-        }
+        function closePlayerModal() { document.getElementById('playerModal').classList.add('hidden'); }
 
         function renderMonthlyLeaderboard() {
             const monthInput = document.getElementById('selectMonth');
-            if (!monthInput) return;
+            if (!monthInput || !monthInput.value) return;
             const selectedMonth = monthInput.value;
-            if (!selectedMonth) return;
-
             const stats = {};
             games.forEach(g => {
-                if (!g.timestamp || !g.scores) return;
-                if (g.timestamp.startsWith(selectedMonth)) {
+                if (g.timestamp && g.timestamp.startsWith(selectedMonth) && g.scores) {
                     Object.entries(g.scores).forEach(([fullName, score]) => {
                         const pureName = getPureName(fullName);
                         if (!pureName) return;
@@ -813,131 +624,61 @@
                     });
                 }
             });
-
             const sorted = Object.entries(stats).sort(([,a], [,b]) => b.totalScore - a.totalScore);
-
-            let monthMvp = null;
-            if (sorted.length > 0) {
-                const [topName, topData] = sorted[0];
-                monthMvp = { name: getLatestDisplayName(topName), score: topData.totalScore > 0 ? `+${topData.totalScore}` : topData.totalScore };
+            const banner = document.getElementById('monthMvpBanner');
+            if (banner && sorted.length > 0) {
+                document.getElementById('monthMvpName').innerText = getLatestDisplayName(sorted[0][0]);
+                document.getElementById('monthMvpScore').innerText = sorted[0][1].totalScore > 0 ? `+${sorted[0][1].totalScore}` : sorted[0][1].totalScore;
+                banner.classList.remove('hidden');
             }
-
-            const monthMvpBanner = document.getElementById('monthMvpBanner');
-            if (monthMvpBanner && monthMvp) {
-                document.getElementById('monthMvpName').innerText = monthMvp.name;
-                document.getElementById('monthMvpScore').innerText = monthMvp.score;
-                monthMvpBanner.classList.remove('hidden');
-            } else if (monthMvpBanner) {
-                monthMvpBanner.classList.add('hidden');
-            }
-
             const tbody = document.getElementById('monthlyLeaderboardBody');
             if (!tbody) return;
             tbody.innerHTML = '';
-
             if (sorted.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-stone-400 font-medium">${selectedMonth} 無任何牌局記錄</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-10 text-stone-400">${selectedMonth} 無牌局記錄</td></tr>`;
                 return;
             }
-
             sorted.forEach(([pureName, data], idx) => {
-                const winRate = data.totalGames ? Math.round((data.wins / data.totalGames) * 100) : 0;
-                const scoreClass = data.totalScore >= 0 ? 'text-emerald-700 font-bold' : 'text-rose-700 font-bold';
-                const scoreText = data.totalScore > 0 ? `+${data.totalScore}` : data.totalScore;
-                const rankBadge = idx === 0 ? 'text-amber-600 font-black' : idx === 1 ? 'text-stone-500 font-bold' : idx === 2 ? 'text-amber-800 font-bold' : 'text-stone-400';
-                const displayName = getLatestDisplayName(pureName);
-
+                const sText = data.totalScore > 0 ? `+${data.totalScore}` : data.totalScore;
                 tbody.innerHTML += `
-                    <tr class="hover:bg-stone-50/80 transition-colors">
-                        <td class="py-4 px-4 font-semibold ${rankBadge}">#${idx + 1}</td>
-                        <td class="py-4 px-4 font-semibold text-stone-900">${displayName}</td>
-                        <td class="py-4 px-4 text-center text-stone-600">${data.totalGames}</td>
-                        <td class="py-4 px-4 text-center text-stone-600">${winRate}%</td>
-                        <td class="py-4 px-4 text-right ${scoreClass}">${scoreText}</td>
-                    </tr>
-                `;
+                    <tr class="hover:bg-stone-50/80">
+                        <td class="py-4 px-4 font-semibold">#${idx + 1}</td>
+                        <td class="py-4 px-4 font-semibold">${getLatestDisplayName(pureName)}</td>
+                        <td class="py-4 px-4 text-center">${data.totalGames}</td>
+                        <td class="py-4 px-4 text-center">${Math.round((data.wins/data.totalGames)*100)}%</td>
+                        <td class="py-4 px-4 text-right font-bold ${data.totalScore >= 0 ? 'text-emerald-700' : 'text-rose-700'}">${sText}</td>
+                    </tr>`;
             });
         }
 
         function renderHistoricalChampions() {
             const grid = document.getElementById('historicalChampionsGrid');
             if (!grid) return;
-            grid.innerHTML = '';
-
-            const monthlyChampions = {};
+            const champions = {};
             games.forEach(g => {
                 if (!g.timestamp || !g.scores) return;
-                const monthKey = g.timestamp.slice(0, 7);
-                if (monthKey.length === 7) {
-                    if (!monthlyChampions[monthKey]) monthlyChampions[monthKey] = {};
-                    Object.entries(g.scores).forEach(([fullName, score]) => {
-                        const pureName = getPureName(fullName);
-                        if (!pureName) return;
-                        if (!monthlyChampions[monthKey][pureName]) {
-                            monthlyChampions[monthKey][pureName] = { totalScore: 0, totalGames: 0, wins: 0 };
-                        }
-                        monthlyChampions[monthKey][pureName].totalScore += Number(score);
-                        monthlyChampions[monthKey][pureName].totalGames += 1;
-                        if (Number(score) > 0) monthlyChampions[monthKey][pureName].wins += 1;
-                    });
-                }
-            });
-
-            const calculatedChampions = [];
-            Object.entries(monthlyChampions).forEach(([month, players]) => {
-                let bestPlayer = null;
-                let maxScore = -999999;
-                Object.entries(players).forEach(([pureName, data]) => {
-                    if (data.totalScore > maxScore) {
-                        maxScore = data.totalScore;
-                        const winRate = data.totalGames ? Math.round((data.wins / data.totalGames) * 100) : 0;
-                        bestPlayer = {
-                            month: month,
-                            name: getLatestDisplayName(pureName),
-                            totalGames: data.totalGames,
-                            winRate: winRate,
-                            totalScore: data.totalScore
-                        };
-                    }
+                const m = g.timestamp.slice(0, 7);
+                if (!champions[m]) champions[m] = {};
+                Object.entries(g.scores).forEach(([fullName, score]) => {
+                    const pure = getPureName(fullName);
+                    if (!champions[m][pure]) champions[m][pure] = { totalScore: 0, totalGames: 0, wins: 0 };
+                    champions[m][pure].totalScore += Number(score);
+                    champions[m][pure].totalGames += 1;
+                    if (Number(score) > 0) champions[m][pure].wins += 1;
                 });
-                if (bestPlayer) {
-                    calculatedChampions.push(bestPlayer);
+            });
+            let html = '';
+            Object.entries(champions).sort().reverse().forEach(([m, players]) => {
+                let best = null, maxS = -999999;
+                Object.entries(players).forEach(([pure, d]) => {
+                    if (d.totalScore > maxS) { maxS = d.totalScore; best = { name: getLatestDisplayName(pure), ...d }; }
+                });
+                if (best) {
+                    const sText = best.totalScore > 0 ? `+${best.totalScore}` : best.totalScore;
+                    html += `<div class="bg-gradient-to-br from-amber-50 to-white border border-amber-200 rounded-2xl p-4 flex justify-between items-center"><div><div class="text-xs font-bold text-amber-800">🎖️ ${m.replace('-','年')}月 積分冠軍</div><div class="text-base font-black">${best.name}</div><div class="text-[11px] text-stone-500">場次: ${best.totalGames} | 勝率: ${Math.round((best.wins/best.totalGames)*100)}%</div></div><div class="text-right font-black ${best.totalScore >= 0 ? 'text-emerald-700' : 'text-rose-700'}">${sText}</div></div>`;
                 }
             });
-
-            calculatedChampions.sort((a, b) => b.month.localeCompare(a.month));
-
-            if (calculatedChampions.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center py-8 text-stone-400 text-xs font-medium">尚無歷史月冠軍資料</div>`;
-                return;
-            }
-
-            calculatedChampions.forEach(c => {
-                const scoreClass = c.totalScore >= 0 ? 'text-emerald-700' : 'text-rose-700';
-                const scoreText = c.totalScore > 0 ? `+${c.totalScore}` : c.totalScore;
-                
-                let monthDisplay = c.month;
-                if (c.month && c.month.includes('-')) {
-                    const parts = c.month.split('-');
-                    monthDisplay = `${parts[0]}年${parts[1]}月`;
-                }
-
-                grid.innerHTML += `
-                    <div class="bg-gradient-to-br from-amber-50/80 via-white to-stone-50 border border-amber-200/80 rounded-2xl p-4 shadow-sm flex items-center justify-between">
-                        <div class="space-y-1">
-                            <div class="text-xs font-black text-amber-800 tracking-wider flex items-center gap-1">
-                                <span>🎖️</span> ${monthDisplay} 積分冠軍
-                            </div>
-                            <div class="text-base font-black text-stone-900">${c.name}</div>
-                            <div class="text-[11px] text-stone-500">場次: ${c.totalGames} | 勝率: <span class="font-bold text-amber-700">${c.winRate}%</span></div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-sm font-black ${scoreClass}">${scoreText}</div>
-                            <div class="text-[10px] text-stone-400 font-semibold">總積分</div>
-                        </div>
-                    </div>
-                `;
-            });
+            grid.innerHTML = html || `<div class="col-span-full text-center py-8 text-stone-400">尚無歷史月冠軍</div>`;
         }
 
         function renderHistoryTable() {
@@ -945,34 +686,24 @@
             if (!hTable) return;
             hTable.innerHTML = '';
             if (games.length === 0) {
-                hTable.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-stone-400 font-medium">目前尚無歷史牌局記錄</td></tr>`;
+                hTable.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-stone-400">尚無歷史牌局</td></tr>`;
                 return;
             }
             games.forEach((g, idx) => {
                 let scoresHtml = '';
                 if (g.scores) {
                     Object.entries(g.scores).forEach(([fullName, pScore]) => {
-                        const displayName = getLatestDisplayName(getPureName(fullName));
-                        const sClass = Number(pScore) >= 0 ? 'text-emerald-700' : 'text-rose-700';
+                        const disp = getLatestDisplayName(getPureName(fullName));
                         const sText = Number(pScore) > 0 ? `+${pScore}` : pScore;
-                        scoresHtml += `<span class="inline-block bg-stone-100 border border-stone-200 px-2 py-1 rounded-lg mr-2 mb-1 text-xs"><strong class="text-stone-800">${displayName}:</strong> <span class="${sClass} font-bold">${sText}</span></span>`;
+                        scoresHtml += `<span class="inline-block bg-stone-100 border border-stone-200 px-2 py-1 rounded-lg mr-2 mb-1 text-xs"><strong>${disp}:</strong> <span class="${Number(pScore)>=0?'text-emerald-700':'text-rose-700'} font-bold">${sText}</span></span>`;
                     });
                 }
-                const feeText = g.tableFee ? `<div class="text-[11px] text-amber-800 font-semibold mt-0.5">台費: $${g.tableFee}</div>` : '';
                 hTable.innerHTML += `
-                    <tr class="hover:bg-stone-50/80 transition-colors">
-                        <td class="py-3.5 px-4">
-                            <div class="font-bold text-stone-900">${g.timestamp}</div>
-                            <div class="text-xs text-stone-500">${g.location}</div>
-                            ${feeText}
-                        </td>
+                    <tr class="hover:bg-stone-50/80">
+                        <td class="py-3.5 px-4"><div class="font-bold">${g.timestamp}</div><div class="text-xs text-stone-500">${g.location}</div>${g.tableFee?`$${g.tableFee}`:''}</td>
                         <td class="py-3.5 px-4">${scoresHtml}</td>
-                        <td class="py-3.5 px-4 text-right">
-                            <button onclick="openEditModal(${idx})" class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 px-3 py-1.5 rounded-xl border border-amber-200 transition-all font-semibold mr-1">修改</button>
-                            <button onclick="deleteGame(${idx})" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-1.5 rounded-xl border border-rose-200 transition-all font-semibold">刪除</button>
-                        </td>
-                    </tr>
-                `;
+                        <td class="py-3.5 px-4 text-right"><button onclick="openEditModal(${idx})" class="text-xs bg-amber-50 text-amber-800 px-3 py-1.5 rounded-xl border border-amber-200 mr-1">修改</button><button onclick="deleteGame(${idx})" class="text-xs bg-rose-50 text-rose-700 px-3 py-1.5 rounded-xl border border-rose-200">刪除</button></td>
+                    </tr>`;
             });
         }
 
@@ -982,52 +713,32 @@
             document.getElementById('editDate').value = g.timestamp;
             document.getElementById('editLocation').value = g.location;
             document.getElementById('editTableFee').value = g.tableFee || 0;
-
-            const summaryContainer = document.getElementById('editScoresSummary');
-            let summaryHtml = '';
+            let summary = '';
             if (g.scores) {
                 Object.entries(g.scores).forEach(([fullName, score]) => {
-                    const displayName = getLatestDisplayName(getPureName(fullName));
-                    const sText = Number(score) > 0 ? `+${score}` : score;
-                    summaryHtml += `<div>• <strong>${displayName}</strong>: ${sText} 分</div>`;
+                    summary += `<div>• ${getLatestDisplayName(getPureName(fullName))}: ${Number(score)>0?'+':''}${score} 分</div>`;
                 });
             }
-            summaryContainer.innerHTML = summaryHtml;
+            document.getElementById('editScoresSummary').innerHTML = summary;
             document.getElementById('editGameModal').classList.remove('hidden');
         }
 
-        function closeEditModal() {
-            document.getElementById('editGameModal').classList.add('hidden');
-        }
+        function closeEditModal() { document.getElementById('editGameModal').classList.add('hidden'); }
 
         document.getElementById('editGameForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const index = Number(document.getElementById('editGameIndex').value);
-            const newDate = document.getElementById('editDate').value;
-            const newLoc = document.getElementById('editLocation').value.trim();
-            const newFee = document.getElementById('editTableFee').value;
-
-            if (games[index]) {
-                games[index].timestamp = newDate;
-                games[index].location = newLoc;
-                games[index].tableFee = newFee;
-
-                const btn = document.getElementById('editSubmitBtn');
-                btn.innerText = '儲存中...';
-                btn.disabled = true;
-
-                await syncGamesToCloud();
-                closeEditModal();
-                loadData();
-
-                btn.innerText = '儲存修改';
-                btn.disabled = false;
-                alert('牌局明細已成功更新！');
-            }
+            const idx = Number(document.getElementById('editGameIndex').value);
+            games[idx].timestamp = document.getElementById('editDate').value;
+            games[idx].location = document.getElementById('editLocation').value.trim();
+            games[idx].tableFee = document.getElementById('editTableFee').value;
+            await syncGamesToCloud();
+            closeEditModal();
+            loadData();
+            alert('牌局明細已更新！');
         });
 
         async function deleteGame(index) {
-            if (confirm('確定要刪除這筆歷史牌局記錄嗎？此動作將同步更新雲端。')) {
+            if (confirm('確定要刪除這筆歷史牌局嗎？')) {
                 games.splice(index, 1);
                 await syncGamesToCloud();
                 loadData();
@@ -1037,15 +748,11 @@
         async function syncGamesToCloud() {
             try {
                 await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
+                    method: 'POST', mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ type: "UPDATE_GAMES", games: games })
                 });
-            } catch (error) {
-                console.error('同步失敗:', error);
-                alert('雲端同步失敗，請稍後再試。');
-            }
+            } catch (error) { console.error('同步失敗:', error); }
         }
 
         function renderFriendsTable() {
@@ -1053,162 +760,98 @@
             if (!fTable) return;
             fTable.innerHTML = '';
             if (friendsData.length === 0) {
-                fTable.innerHTML = `<tr><td colspan="3" class="text-center py-8 text-stone-400 font-medium">目前尚無牌友資料，請在上方新增</td></tr>`;
+                fTable.innerHTML = `<tr><td colspan="3" class="text-center py-8 text-stone-400">尚無牌友</td></tr>`;
                 return;
             }
             friendsData.forEach((f, idx) => {
-                fTable.innerHTML += `
-                    <tr class="hover:bg-stone-100/80 transition-colors">
-                        <td class="py-3.5 px-4 font-semibold text-stone-900">
-                            ${f.name}
-                            <div class="text-[10px] text-stone-400 font-normal">更新: ${f.updatedAt || '初次建立'}</div>
-                        </td>
-                        <td class="py-3.5 px-4 text-amber-700 font-semibold">${f.nickname}</td>
-                        <td class="py-3.5 px-4 text-right">
-                            <button onclick="editFriend(${idx})" class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 px-3 py-1.5 rounded-xl border border-amber-200 transition-all font-semibold">修改</button>
-                        </td>
-                    </tr>
-                `;
+                fTable.innerHTML += `<tr class="hover:bg-stone-100/80"><td class="py-3.5 px-4 font-semibold">${f.name}<div class="text-[10px] text-stone-400">${f.updatedAt||''}</div></td><td class="py-3.5 px-4 text-amber-700 font-semibold">${f.nickname}</td><td class="py-3.5 px-4 text-right"><button onclick="editFriend(${idx})" class="text-xs bg-amber-50 text-amber-800 px-3 py-1.5 rounded-xl border border-amber-200">修改</button></td></tr>`;
             });
         }
 
         async function syncFriendsToCloud() {
             try {
                 await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
+                    method: 'POST', mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ type: "UPDATE_FRIENDS", friends: friendsData })
                 });
-            } catch (error) {
-                console.error('牌友名單同步雲端失敗:', error);
-            }
+            } catch (error) { console.error('牌友同步失敗:', error); }
         }
 
         document.getElementById('friendForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const nameInput = document.getElementById('friendName');
-            const nicknameInput = document.getElementById('friendNickname');
-            if(!nameInput || !nicknameInput) return;
-
-            const name = nameInput.value.trim();
-            const nickname = nicknameInput.value.trim();
-            
-            const exists = friendsData.some(f => f.name === name);
-            if (exists) {
-                alert(`⚠️ 防呆提示：牌友「${name}」已經存在清單中囉！若要修改綽號請點擊下方清單的環節。`);
+            const name = document.getElementById('friendName').value.trim();
+            const nickname = document.getElementById('friendNickname').value.trim();
+            if (friendsData.some(f => f.name === name)) {
+                alert(`⚠️ 牌友「${name}」已存在！`);
                 return;
             }
-
             if (name && nickname) {
-                const btn = document.getElementById('friendSubmitBtn');
-                btn.innerText = '正在同步至雲端...';
-                btn.disabled = true;
-
-                const nowStr = new Date().toLocaleString('zh-TW', { hour12: false });
-                friendsData.push({ name, nickname, updatedAt: nowStr });
+                friendsData.push({ name, nickname, updatedAt: new Date().toLocaleString('zh-TW', { hour12: false }) });
                 await syncFriendsToCloud();
-
-                nameInput.value = '';
-                nicknameInput.value = '';
+                document.getElementById('friendForm').reset();
                 renderFriendsTable();
                 updatePlayerSelects();
-                
-                btn.innerText = '儲存牌友至雲端';
-                btn.disabled = false;
-                alert(`成功新增並同步牌友：${name} (${nickname})`);
+                alert(`成功新增牌友：${name} (${nickname})`);
             }
         });
 
         async function editFriend(index) {
             const f = friendsData[index];
-            const newNickname = prompt(`請輸入「${f.name}」的新綽號：`, f.nickname);
-            if (newNickname !== null) {
-                const trimmed = newNickname.trim();
-                if (trimmed) {
-                    f.nickname = trimmed;
-                    f.updatedAt = new Date().toLocaleString('zh-TW', { hour12: false });
-                    await syncFriendsToCloud();
-                    renderFriendsTable();
-                    updatePlayerSelects();
-                    alert(`已成功更新「${f.name}」的綽號與修改時間！`);
-                } else {
-                    alert('綽號不能為空！');
-                }
+            const newN = prompt(`請輸入「${f.name}」的新綽號：`, f.nickname);
+            if (newN !== null && newN.trim()) {
+                f.nickname = newN.trim();
+                f.updatedAt = new Date().toLocaleString('zh-TW', { hour12: false });
+                await syncFriendsToCloud();
+                renderFriendsTable();
+                updatePlayerSelects();
+                alert('綽號已更新！');
             }
         }
 
         document.getElementById('gameForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
             if (friendsData.length < 4) {
-                alert('⚠️ 系統提示：牌友名單至少需要有 4 位才能記錄牌局，請先至「牌友管理」新增！');
+                alert('⚠️ 牌友至少需要 4 位！');
                 return;
             }
-
-            const p1Name = document.getElementById('p1Name').value;
-            const p2Name = document.getElementById('p2Name').value;
-            const p3Name = document.getElementById('p3Name').value;
-            const p4Name = document.getElementById('p4Name').value;
-
-            const purePlayers = [getPureName(p1Name), getPureName(p2Name), getPureName(p3Name), getPureName(p4Name)];
-            if (new Set(purePlayers).size !== purePlayers.length) {
-                alert('⚠️ 記分防呆：四位玩家不能有重複的人選，請重新選擇！');
+            const p1N = document.getElementById('p1Name').value;
+            const p2N = document.getElementById('p2Name').value;
+            const p3N = document.getElementById('p3N').value;
+            const p4N = document.getElementById('p4N').value;
+            if (new Set([getPureName(p1N), getPureName(p2N), getPureName(p3N), getPureName(p4N)]).size !== 4) {
+                alert('⚠️ 四位玩家不能重複！');
                 return;
             }
-
-            const getScoreWithSign = (i) => {
-                const val = Number(document.getElementById(`p${i}Score`).value) || 0;
-                const sign = document.getElementById(`p${i}Sign`).value;
-                return sign === 'win' ? val : -val;
-            };
-
-            const p1Score = getScoreWithSign(1);
-            const p2Score = getScoreWithSign(2);
-            const p3Score = getScoreWithSign(3);
-            const p4Score = getScoreWithSign(4);
-
-            const totalScoreSum = p1Score + p2Score + p3Score + p4Score;
-            if (totalScoreSum !== 0) {
-                alert(`⚠️ 記分防呆警告：四位玩家的總得分相加必須為 0（目前總和為 ${totalScoreSum > 0 ? '+' + totalScoreSum : totalScoreSum}）！\n請檢查贏家與輸家的分數和切換是否正確。`);
+            const getScore = (i) => (Number(document.getElementById(`p${i}Score`).value) || 0) * (document.getElementById(`p${i}Sign`).value === 'win' ? 1 : -1);
+            const p1S = getScore(1), p2S = getScore(2), p3S = getScore(3), p4S = getScore(4);
+            if (p1S + p2S + p3S + p4S !== 0) {
+                alert(`⚠️ 四人總得分相加必須為 0（目前總和：${p1S+p2S+p3S+p4S}）！`);
                 return;
             }
-
             const btn = document.getElementById('submitBtn');
-            btn.innerText = '正在上傳至雲端...';
-            btn.disabled = true;
-
-            const newGame = {
-                timestamp: document.getElementById('gameDate').value,
-                location: document.getElementById('location').value,
-                tableFee: document.getElementById('tableFee').value || "0",
-                p1Name: p1Name, p1Score: p1Score,
-                p2Name: p2Name, p2Score: p2Score,
-                p3Name: p3Name, p3Score: p3Score,
-                p4Name: p4Name, p4Score: p4Score,
-            };
-
+            btn.innerText = '上傳中...'; btn.disabled = true;
             try {
                 await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
+                    method: 'POST', mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newGame)
+                    body: JSON.stringify({
+                        type: "GAME_ADDED",
+                        timestamp: document.getElementById('gameDate').value,
+                        location: document.getElementById('location').value,
+                        tableFee: document.getElementById('tableFee').value || "0",
+                        p1Name: p1N, p1Score: p1S, p2Name: p2N, p2Score: p2S,
+                        p3Name: p3N, p3Score: p3S, p4Name: p4N, p4Score: p4S
+                    })
                 });
-
-                alert('戰績與台費已成功同步至 Google 雲端！');
+                alert('戰績已儲存至雲端！');
                 document.getElementById('gameForm').reset();
                 setDefaultDates();
                 renderQuickLocations();
                 renderPlayerInputs();
                 setTimeout(loadData, 1500);
-            } catch (error) {
-                console.error('上傳失敗:', error);
-                alert('上傳失敗請稍後再試。');
-            } finally {
-                btn.innerText = '新增戰績並存入雲端';
-                btn.disabled = false;
-            }
+            } catch (err) { alert('上傳失敗'); }
+            finally { btn.innerText = '新增戰績並存入雲端'; btn.disabled = false; }
         });
 
         loadData();
