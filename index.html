@@ -446,7 +446,7 @@
             <button onclick="closeEditModal()" class="absolute top-5 right-5 text-stone-400 font-bold">✕</button>
             <h3 class="text-lg font-black text-stone-900">修改歷史牌局明細</h3>
             <form id="editGameForm" class="space-y-3">
-                <input type="hidden" id="editGameIndex">
+                <input type="hidden" id="editGameId">
                 <input type="date" id="editDate" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm" required>
                 <input type="text" id="editLocation" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm" required>
                 <input type="number" id="editTableFee" min="0" class="w-full bg-stone-50 border border-stone-300 rounded-xl px-3 py-2 text-sm font-bold" required>
@@ -1174,7 +1174,7 @@
             }
             const sortedGames = [...games].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             sortedGames.forEach((g) => {
-                const realIdx = games.indexOf(g);
+                const gameId = g.gameId;
                 let scoresHtml = '';
                 if (g.scores) {
                     Object.entries(g.scores).forEach(([fullName, pScore]) => {
@@ -1187,14 +1187,15 @@
                     <tr class="hover:bg-stone-50/80">
                         <td class="py-3.5 px-4"><div class="font-bold">${g.timestamp}</div><div class="text-xs text-stone-500">${g.location}</div>${g.tableFee?`$${g.tableFee}`:''}</td>
                         <td class="py-3.5 px-4">${scoresHtml}</td>
-                        <td class="py-3.5 px-4 text-right"><button onclick="openEditModal(${realIdx})" class="text-xs bg-amber-50 text-amber-800 px-3 py-1.5 rounded-xl border border-amber-200 mr-1">修改</button><button onclick="deleteGame(${realIdx})" class="text-xs bg-rose-50 text-rose-700 px-3 py-1.5 rounded-xl border border-rose-200">刪除</button></td>
+                        <td class="py-3.5 px-4 text-right"><button onclick="openEditModal('${gameId}')" class="text-xs bg-amber-50 text-amber-800 px-3 py-1.5 rounded-xl border border-amber-200 mr-1">修改</button><button onclick="deleteGame('${gameId}')" class="text-xs bg-rose-50 text-rose-700 px-3 py-1.5 rounded-xl border border-rose-200">刪除</button></td>
                     </tr>`;
             });
         }
 
-        function openEditModal(index) {
-            const g = games[index];
-            document.getElementById('editGameIndex').value = index;
+        function openEditModal(gameId) {
+            const g = games.find(item => item.gameId === gameId);
+            if (!g) return;
+            document.getElementById('editGameId').value = g.gameId;
             document.getElementById('editDate').value = g.timestamp;
             document.getElementById('editLocation').value = g.location;
             document.getElementById('editTableFee').value = g.tableFee || 0;
@@ -1212,32 +1213,47 @@
 
         document.getElementById('editGameForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const idx = Number(document.getElementById('editGameIndex').value);
-            games[idx].timestamp = document.getElementById('editDate').value;
-            games[idx].location = document.getElementById('editLocation').value.trim();
-            games[idx].tableFee = document.getElementById('editTableFee').value;
-            await syncGamesToCloud();
-            closeEditModal();
-            loadData();
-            alert('牌局明細已更新！');
-        });
+            const gameId = document.getElementById('editGameId').value;
+            const newDate = document.getElementById('editDate').value;
+            const newLocation = document.getElementById('editLocation').value.trim();
+            const newTableFee = document.getElementById('editTableFee').value;
 
-        async function deleteGame(index) {
-            if (confirm('確定要刪除這筆歷史牌局嗎？')) {
-                games.splice(index, 1);
-                await syncGamesToCloud();
-                loadData();
-            }
-        }
-
-        async function syncGamesToCloud() {
             try {
                 await fetch(WEB_APP_URL, {
                     method: 'POST', mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: "UPDATE_GAMES", games: games })
+                    body: JSON.stringify({
+                        type: "UPDATE_SINGLE_GAME",
+                        gameId: gameId,
+                        timestamp: newDate,
+                        location: newLocation,
+                        tableFee: newTableFee
+                    })
                 });
-            } catch (error) { console.error('同步失敗:', error); }
+                alert('牌局明細已成功更新！');
+                closeEditModal();
+                setTimeout(loadData, 1500);
+            } catch (error) {
+                console.error('更新失敗:', error);
+                alert('更新失敗，請檢查網路連線');
+            }
+        });
+
+        async function deleteGame(gameId) {
+            if (confirm('確定要刪除這筆歷史牌局嗎？')) {
+                try {
+                    await fetch(WEB_APP_URL, {
+                        method: 'POST', mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: "DELETE_GAME", gameId: gameId })
+                    });
+                    alert('牌局已刪除！');
+                    setTimeout(loadData, 1500);
+                } catch (error) {
+                    console.error('刪除失敗:', error);
+                    alert('刪除失敗');
+                }
+            }
         }
 
         function renderFriendsTable() {
@@ -1361,11 +1377,13 @@
             const btn = document.getElementById('submitBtn');
             btn.innerText = '上傳中...'; btn.disabled = true;
             try {
+                const uniqueGameId = 'game_' + Date.now() + '_' + Math.random().toString(36.substring(2, 7));
                 await fetch(WEB_APP_URL, {
                     method: 'POST', mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         type: "GAME_ADDED",
+                        gameId: uniqueGameId,
                         timestamp: document.getElementById('gameDate').value,
                         location: document.getElementById('location').value,
                         tableFee: document.getElementById('tableFee').value || "0",
